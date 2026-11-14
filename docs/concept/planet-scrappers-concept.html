@@ -1,0 +1,704 @@
+<title>Planet Scrappers Concept Bible</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a single salvage-manifest column (max 1120px) — each section is a "work order" with a stencil header, art panels framed like inspection plates */
+:root{
+  --bg:#E6EAED; --panel:#F5F7F8; --panel-2:#D9E0E5; --fg:#192027; --muted:#53606B; --line:#BEC8D0;
+  --rust:#CF5318; --rust-ink:#A9400C; --teal:#127A73; --hazard:#D9A200; --glow:#1A86C7;
+  --stage:#DCE3E8; --map-ground:#CDD0D4; --map-road:#F5F7F8; --map-cliff:#8E9399; --map-lock:#7A8791;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161A; --panel:#1A2026; --panel-2:#232B32; --fg:#E6EBEE; --muted:#93A0AA; --line:#2F3942;
+  --rust:#F07A3A; --rust-ink:#F69A64; --teal:#3CC1B6; --hazard:#F4C430; --glow:#57C7FF;
+  --stage:#1F262D; --map-ground:#393D43; --map-road:#5A6068; --map-cliff:#1E2125; --map-lock:#56626C;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161A; --panel:#1A2026; --panel-2:#232B32; --fg:#E6EBEE; --muted:#93A0AA; --line:#2F3942;
+  --rust:#F07A3A; --rust-ink:#F69A64; --teal:#3CC1B6; --hazard:#F4C430; --glow:#57C7FF;
+  --stage:#1F262D; --map-ground:#393D43; --map-road:#5A6068; --map-cliff:#1E2125; --map-lock:#56626C;
+  color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15.5px;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.02em;line-height:1.02;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.6rem,6vw,4rem);font-weight:800}
+h2{font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:800}
+h3{font-size:1.35rem;font-weight:800}
+p{margin:0}
+.mono{font-family:var(--f-mono)}
+.label{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:var(--rust-ink)}
+:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:32px;align-items:center;padding-block:12px 36px;border-bottom:2px solid var(--fg)}
+.hero-text{display:grid;gap:16px;min-width:0}
+.tagline{font-family:var(--f-display);font-weight:600;font-size:1.45rem;text-transform:uppercase;letter-spacing:.06em;color:var(--rust-ink)}
+.stamp{display:inline-flex;gap:10px;align-items:center;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid var(--rust);color:var(--rust-ink);padding:4px 10px;width:max-content;max-width:100%}
+.stamp i{width:8px;height:8px;background:var(--hazard);display:inline-block;border-radius:50%}
+.lede{max-width:56ch}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin-top:4px}
+.facts div{display:grid;gap:0;border-top:1px solid var(--line);padding-top:6px}
+.facts b{font-weight:600;font-size:.95rem}
+.scene{width:100%;max-width:100%;border-radius:6px;display:block;box-shadow:0 0 0 1px var(--line)}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;padding-block:14px;border-bottom:1px solid var(--line);font-family:var(--f-mono);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+nav.toc a{color:var(--muted);text-decoration:none}
+nav.toc a:hover{color:var(--rust-ink)}
+
+section{padding-block:48px 8px;display:grid;gap:22px}
+.sec-head{display:grid;gap:8px;max-width:72ch}
+.sec-head .label{color:var(--rust-ink)}
+
+/* Loop */
+.loop{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:1.5px solid var(--fg)}
+.loop div{padding:14px 14px 16px;display:grid;gap:6px;align-content:start;border-right:1px solid var(--line);position:relative;min-width:0}
+.loop div:last-child{border-right:0}
+.loop b{font-family:var(--f-display);font-size:1.3rem;text-transform:uppercase;font-weight:800}
+.loop small{color:var(--muted);font-size:.86rem;line-height:1.45}
+.loop .n{font-family:var(--f-mono);font-size:.7rem;color:var(--rust-ink)}
+.loop .later{background:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--hazard) 14%,transparent) 8px 16px)}
+
+/* Art direction */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+.pillars{display:grid;gap:14px}
+.pillars div{display:grid;gap:2px;border-left:3px solid var(--rust);padding-left:12px}
+.pillars b{font-weight:600}
+.swatches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.sw{display:grid;gap:6px;font-size:.82rem;min-width:0}
+.sw span{display:block;height:58px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.sw b{font-weight:600;font-size:.86rem}
+.sw code{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.callout{border:1.5px dashed var(--rust);padding:14px 16px;display:grid;gap:6px;background:color-mix(in srgb,var(--rust) 6%,var(--panel))}
+.callout b{font-weight:600}
+
+/* Characters */
+.chars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.char{background:var(--panel);border:1px solid var(--line);display:grid;grid-template-columns:230px minmax(0,1fr);min-width:0}
+.char .art{background:var(--stage);display:grid;place-items:end center;padding-top:10px;border-right:1px solid var(--line);position:relative}
+.char .art svg{width:180px;height:234px;display:block}
+.char .art .tag{position:absolute;top:8px;left:10px;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;color:var(--muted)}
+.char .info{padding:16px 18px;display:grid;gap:10px;align-content:start;min-width:0}
+.char .role{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--rust-ink)}
+.char ul{margin:0;padding-left:18px;font-size:.9rem;display:grid;gap:2px}
+.quote{font-size:.9rem;border-top:1px solid var(--line);padding-top:8px;font-style:italic;color:var(--muted)}
+.quote b{font-style:normal;color:var(--fg);font-weight:600}
+
+/* Map */
+.mapwrap{background:var(--panel);border:1px solid var(--line);padding:14px;display:grid;gap:12px}
+.mapscroll{overflow-x:auto}
+.mapscroll svg{width:100%;min-width:620px;height:auto;display:block}
+.m-cliff{fill:var(--map-cliff)}
+.m-ground{fill:var(--map-ground)}
+.m-road{fill:none;stroke:var(--map-road);stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
+.m-zone{fill:var(--panel);stroke:var(--fg);stroke-width:1.5}
+.m-zone-dash{fill:none;stroke:var(--fg);stroke-width:1.2;stroke-dasharray:5 4}
+.m-lock{fill:var(--map-lock);opacity:.55}
+.m-text{fill:var(--fg);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em}
+.m-title{fill:var(--fg);font-family:var(--f-display);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.03em}
+.m-muted{fill:var(--muted);font-family:var(--f-mono);font-size:9.5px}
+.m-t1{fill:var(--rust)} .m-t2{fill:var(--teal)} .m-t3{fill:var(--map-lock)}
+.m-star{fill:var(--hazard);stroke:var(--fg);stroke-width:1}
+.m-line{stroke:var(--fg);stroke-width:1.5}
+.facilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.facilities div{display:grid;gap:2px;font-size:.9rem;border-top:2px solid var(--fg);padding-top:8px}
+.facilities b{font-weight:600}
+
+/* Tables */
+.tscroll{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:720px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.82rem}
+.tier{display:inline-block;font-family:var(--f-mono);font-size:.7rem;padding:1px 7px;border-radius:3px;color:#fff;font-weight:600}
+.t1{background:#B4521F}.t2{background:#127A73}.t3{background:#3C6E9E}.t4{background:#7A4FB8}.t5{background:#4A535C}
+.bar{height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:var(--rust)}
+.mix{display:flex;flex-wrap:wrap;gap:4px 10px;font-family:var(--f-mono);font-size:.78rem}
+.mix span{white-space:nowrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:0}
+.d-iron{background:#8E979E}.d-cu{background:#C8743A}.d-el{background:#2FA36B}.d-ra{background:#9B7BFF}
+.proto{font-family:var(--f-mono);font-size:.68rem;color:var(--rust-ink);text-transform:uppercase;letter-spacing:.06em}
+
+/* Resources */
+.res{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.res div{background:var(--panel);border:1px solid var(--line);padding:14px;display:grid;gap:6px;min-width:0}
+.res svg{width:44px;height:44px}
+.res b{font-weight:600}
+.res .price{font-family:var(--f-mono);font-size:1.15rem;font-variant-numeric:tabular-nums}
+.res small{color:var(--muted);font-size:.84rem;line-height:1.4}
+
+/* Zones */
+.zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.zone{background:var(--panel);border:1px solid var(--line);display:grid;grid-template-rows:auto 1fr;min-width:0}
+.zone svg{width:100%;height:120px;display:block}
+.zone .body{padding:14px 16px;display:grid;gap:8px;align-content:start}
+.zone .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.zone p{font-size:.92rem}
+
+/* HUD mockup */
+.hud{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:6px;overflow:hidden;background:linear-gradient(180deg,#04060C 0%,#0E1322 47%,#A3A6AB 48%,#6A6D72 100%);color:#EEF2F4;font-family:var(--f-mono);font-size:clamp(8px,1.25vw,13px);box-shadow:0 0 0 1px var(--line)}
+.hud .scenebg{position:absolute;inset:0;width:100%;height:100%}
+.hud .p{position:absolute;background:rgba(14,18,22,.62);border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:.6em .8em;display:grid;gap:.35em;backdrop-filter:blur(2px)}
+.hud .vit{top:3%;left:2.5%;width:26%}
+.hud .vrow{display:grid;grid-template-columns:4.2em 1fr 2.8em;gap:.5em;align-items:center}
+.hud .hb{height:.65em;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+.hud .hb i{display:block;height:100%}
+.hud .cred{top:3%;right:2.5%;text-align:right}
+.hud .cred b{font-family:var(--f-display);font-size:2em;font-weight:800;letter-spacing:.02em;color:#F4C430;line-height:1}
+.hud .mis{top:22%;left:2.5%;width:25%}
+.hud .mis b{color:#F07A3A;font-weight:600}
+.hud .tgt{top:31%;left:50%;transform:translateX(-50%);text-align:center;width:24%}
+.hud .tgt .hb i{background:#F07A3A}
+.hud .xhair{position:absolute;top:50%;left:50%;width:1.6em;height:1.6em;transform:translate(-50%,-50%);border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.hud .prompt{position:absolute;top:58%;left:50%;transform:translateX(-50%);background:rgba(14,18,22,.7);padding:.3em .7em;border-radius:3px;white-space:nowrap}
+.hud .prompt kbd{border:1px solid #fff;border-radius:3px;padding:0 .35em;margin-right:.4em;font-family:inherit}
+.hud .tools{bottom:3.5%;left:50%;transform:translateX(-50%);display:flex;gap:.4em;padding:.4em}
+.hud .slot{width:3.6em;height:3.6em;border:1px solid rgba(255,255,255,.2);border-radius:3px;display:grid;place-items:center;font-size:.8em;text-align:center;line-height:1.1;position:relative}
+.hud .slot.on{border-color:#F07A3A;background:rgba(240,122,58,.18)}
+.hud .slot sup{position:absolute;top:.2em;left:.35em;opacity:.6}
+.hud .bag{bottom:3.5%;right:2.5%;width:20%}
+.hud .bot{bottom:20%;left:2.5%;max-width:30%;border-color:#57C7FF}
+.hud .bot b{color:#57C7FF}
+.uinotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;font-size:.9rem}
+.uinotes div{display:grid;gap:4px}
+.uinotes b{font-weight:600}
+
+/* Plan */
+.weeks{display:grid;gap:0;border:1.5px solid var(--fg)}
+.week{display:grid;grid-template-columns:120px minmax(0,1fr) minmax(0,.9fr);gap:18px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.week:last-child{border-bottom:0}
+.week .wk{display:grid;gap:2px;align-content:start}
+.week .wk b{font-family:var(--f-display);font-size:1.5rem;font-weight:800;text-transform:uppercase;line-height:1}
+.week ul{margin:0;padding-left:18px;font-size:.9rem;display:grid;gap:2px}
+.week .review{font-size:.88rem;border-left:3px solid var(--teal);padding-left:12px;display:grid;gap:2px;align-content:start}
+.week .review b{font-weight:600}
+
+/* Approval */
+.approve{display:grid;gap:0;border:1px solid var(--line);background:var(--panel)}
+.approve label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.approve label:last-child{border-bottom:0}
+.approve input{width:18px;height:18px;margin-top:3px;accent-color:var(--rust)}
+.approve b{font-weight:600}
+.approve span{display:grid;gap:2px}
+.approve small{color:var(--muted);font-size:.86rem}
+.progress{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+
+footer{margin-top:48px;padding-top:16px;border-top:2px solid var(--fg);display:grid;gap:6px;font-size:.85rem;color:var(--muted)}
+
+
+/* Reference plates: white in both themes because the reference renders are shot on white */
+.envrefs{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+.envrefs figure{margin:0;display:grid;gap:8px;align-content:start;min-width:0}
+.envrefs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;display:block;box-shadow:0 0 0 1px var(--line)}
+.envrefs figcaption{font-size:.88rem;color:var(--muted)}
+.envrefs figcaption b{color:var(--fg);font-weight:600}
+@media (max-width:560px){.envrefs{grid-template-columns:minmax(0,1fr)}}
+.lineup{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:#0B0E17 url(refs/moon-horizon.jpg) center/cover;padding:8px;border-radius:6px;box-shadow:0 0 0 1px var(--line)}
+.lineup figure{margin:0;background:#FFFFFF;border-radius:4px;overflow:hidden;display:grid;grid-template-rows:auto auto;min-width:0}
+.lineup img{width:100%;aspect-ratio:3/4;object-fit:contain;display:block}
+.lineup img.cover{object-fit:cover}
+.lineup figcaption{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#3A434B;padding:6px 8px;border-top:1px solid #E1E5E8}
+.char .art img{width:100%;height:100%;min-height:300px;object-fit:contain;display:block;background:#FFFFFF}
+.char .art img.cover{object-fit:cover}
+.char .art{background:#FFFFFF;padding:0;place-items:stretch}
+.char .art .tag{background:rgba(255,255,255,.85);color:#3A434B;padding:1px 6px;border-radius:2px;z-index:1}
+.change{font-size:.88rem;display:grid;gap:3px;background:color-mix(in srgb,var(--teal) 8%,var(--panel));border-left:3px solid var(--teal);padding:8px 10px}
+.change b{font-weight:600;color:var(--teal)}
+.notes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.notes{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.lineup{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .loop{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .loop div:nth-child(3){border-right:0}
+  .loop div:nth-child(-n+3){border-bottom:1px solid var(--line)}
+  .two,.chars,.zones{grid-template-columns:minmax(0,1fr)}
+  .res{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facilities,.uinotes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .week{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .loop{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .loop div{border-right:0;border-bottom:1px solid var(--line)}
+  .char{grid-template-columns:minmax(0,1fr)}
+  .char .art{border-right:0;border-bottom:1px solid var(--line)}
+  .swatches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facilities,.uinotes,.res,.facts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .bob{animation:bob 3.2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-6px)}}
+}
+</style>
+
+<!-- Resource icon symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- resource icons -->
+    <symbol id="r-iron" viewBox="0 0 44 44"><polygon points="6,30 12,16 32,16 38,30" fill="#8E979E"/><polygon points="12,16 32,16 30,12 14,12" fill="#B8C0C6"/><polygon points="6,30 38,30 38,34 6,34" fill="#6B7379"/></symbol>
+    <symbol id="r-cu" viewBox="0 0 44 44"><circle cx="22" cy="22" r="14" fill="none" stroke="#C8743A" stroke-width="5"/><circle cx="22" cy="22" r="7" fill="none" stroke="#E39A62" stroke-width="4"/><rect x="33" y="20" width="9" height="4" rx="2" fill="#C8743A"/></symbol>
+    <symbol id="r-el" viewBox="0 0 44 44"><rect x="10" y="10" width="24" height="24" rx="3" fill="#2FA36B"/><rect x="16" y="16" width="12" height="12" rx="1" fill="#1D2B24"/><g fill="#C9D1D6"><rect x="13" y="5" width="3" height="5"/><rect x="20.5" y="5" width="3" height="5"/><rect x="28" y="5" width="3" height="5"/><rect x="13" y="34" width="3" height="5"/><rect x="20.5" y="34" width="3" height="5"/><rect x="28" y="34" width="3" height="5"/></g></symbol>
+    <symbol id="r-ra" viewBox="0 0 44 44"><polygon points="22,4 34,16 28,38 16,38 10,16" fill="#9B7BFF"/><polygon points="22,4 28,16 22,38 16,16" fill="#C4B2FF"/><path d="M36 6 v8 M32 10 h8" stroke="#F4C430" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="hero-text">
+    <span class="stamp"><i></i>Concept v0.3 · Awaiting approval</span>
+    <h1>Planet Scrappers</h1>
+    <p class="tagline">Nothing lasts. Everything has value.</p>
+    <p class="lede">Humanity mined planet <b>Kessler-9</b> until its air plant failed, then left. The atmosphere leaked away, leaving a grey, cratered world covered in rusting factories, trucks, robots and starships, with the blue homeworld <b>Halcyon</b> hanging in the black sky. A salvage company called <b>OmniSalvage Ltd.</b> bought the whole planet for one credit, and you are its newest and cheapest employee. Take everything apart, sell it by the kilo, and build the biggest scrap operation in the sector.</p>
+    <div class="facts">
+      <div><span class="label">Genre</span><b>Co-op salvage sim · tycoon</b></div>
+      <div><span class="label">Platform</span><b>Windows PC · Steam</b></div>
+      <div><span class="label">Engine</span><b>Unity 6 LTS · URP · C#</b></div>
+      <div><span class="label">Players</span><b>1 now · 1–4 co-op later</b></div>
+    </div>
+  </div>
+
+  <div class="lineup" role="group" aria-label="Crew reference line-up">
+    <figure><img src="refs/rookie.png" alt="Rookie Scrapper reference: orange suit and helmet, black visor, mechanical salvage arm"><figcaption>Rookie Scrapper</figcaption></figure>
+    <figure><img src="refs/scrap-bot.png" alt="SCRAP-BOT reference: white and yellow floating robot with a screen face and cyan eyes"><figcaption>SCRAP-BOT</figcaption></figure>
+    <figure><img src="refs/nova.png" alt="Engineer Nova reference: red hair, orange armoured suit, grey gloves and boots"><figcaption>Engineer Nova</figcaption></figure>
+    <figure><img class="cover" src="refs/captain-bolt.jpg" alt="Captain Bolt reference: round-faced man in an orange coverall with teal pockets, tool belt and one yellow robotic hand"><figcaption>Captain Bolt</figcaption></figure>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#loop">Core loop</a><a href="#art">Art direction</a><a href="#cast">Characters</a><a href="#rust-valley">Rust Valley</a><a href="#zones">Future zones</a><a href="#economy">Economy</a><a href="#missions">Missions</a><a href="#ui">UI &amp; HUD</a><a href="#sound">Sound</a><a href="#plan">Prototype plan</a><a href="#approve">Approval</a>
+</nav>
+
+<section id="loop">
+  <div class="sec-head">
+    <span class="label">Work order 01</span>
+    <h2>The core loop</h2>
+    <p>Every system serves one cycle. The prototype proves the first four steps feel good. Expand and Automate are designed now but built later.</p>
+  </div>
+  <div class="loop">
+    <div><span class="n">01</span><b>Dismantle</b><small>Hit objects with your tool. Panels dent, bolts fly, the frame gives way.</small></div>
+    <div><span class="n">02</span><b>Collect</b><small>Scrap pops out and is pulled into your backpack by a short-range magnet.</small></div>
+    <div><span class="n">03</span><b>Sell</b><small>Tip your backpack into the Recycling Depot hopper and watch credits count up.</small></div>
+    <div><span class="n">04</span><b>Upgrade</b><small>Buy a stronger tool or a bigger backpack from Engineer Nova.</small></div>
+    <div class="later"><span class="n">05 · later</span><b>Expand</b><small>Unlock new zones with bigger, richer salvage.</small></div>
+    <div class="later"><span class="n">06 · later</span><b>Automate</b><small>Conveyors, crushers and robots do the work while you go bigger.</small></div>
+  </div>
+</section>
+
+<section id="art">
+  <div class="sec-head">
+    <span class="label">Work order 02</span>
+    <h2>Art direction</h2>
+    <p>Stylized, chunky and readable. Think toy-like industrial hardware that has been left in the rain for fifty years. Low-to-mid poly models with simple painted textures, so it runs on mid-range PCs and stays cheap to produce.</p>
+  </div>
+  <div class="two">
+    <div class="pillars">
+      <div><b>Chunky proportions</b><span class="muted">Big heads, big hands, big bolts. Tools are oversized so every hit reads from across the yard.</span></div>
+      <div><b>Rust tells the story</b><span class="muted">Orange-brown rust patches, faded hazard stripes and stencilled serial numbers on everything. Rust is a shared texture set, not painted per object.</span></div>
+      <div><b>Damage you can read</b><span class="muted">Each object has 3 visible damage stages: dented, stripped, bare frame. You always know how close you are.</span></div>
+      <div><b>Colour means value</b><span class="muted">Grey iron, orange copper, green electronics, violet rare alloy. Players learn to spot loot by colour alone.</span></div>
+      <div><b>Grey world, rusty machines</b><span class="muted">Black sky, pale grey cratered ground and a blue homeworld overhead. Against that, rusty orange machines and colour-coded scrap stand out at once. Working technology glows cyan.</span></div>
+    </div>
+    <div style="display:grid;gap:18px;align-content:start">
+      <div class="swatches">
+        <div class="sw"><span style="background:#F07A2E"></span><b>Scrapper Orange</b><code>#F07A2E</code></div>
+        <div class="sw"><span style="background:#F4C430"></span><b>Hazard Yellow</b><code>#F4C430</code></div>
+        <div class="sw"><span style="background:#1FA197"></span><b>Engineer Teal</b><code>#1FA197</code></div>
+        <div class="sw"><span style="background:#57C7FF"></span><b>Live-Tech Cyan</b><code>#57C7FF</code></div>
+        <div class="sw"><span style="background:#A8552A"></span><b>Rust</b><code>#A8552A</code></div>
+        <div class="sw"><span style="background:#9A9DA2"></span><b>Regolith Grey</b><code>#9A9DA2</code></div>
+        <div class="sw"><span style="background:#0B0E17"></span><b>Space Black</b><code>#0B0E17</code></div>
+        <div class="sw"><span style="background:#3D7FD6"></span><b>Halcyon Blue</b><code>#3D7FD6</code></div>
+      </div>
+      <div class="callout">
+        <span class="label">Decision needed · camera</span>
+        <b>Recommendation: first-person, with full-body characters built anyway.</b>
+        <span>First-person makes every hit feel close and heavy, and needs fewer player animations for the prototype. We still model the full Rookie so other players can see you in co-op, in menus and in the trailer. A third-person toggle can come later.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cast">
+  <div class="sec-head">
+    <span class="label">Work order 03</span>
+    <h2>The crew</h2>
+    <p>The four characters, now based on your reference images. Each card says what we keep from the reference and what we change to match the brief. The three humans share one skeleton, so Mixamo animations, suits and tools work on all of them.</p>
+  </div>
+  <div class="chars">
+    <article class="char">
+      <div class="art"><span class="tag">PLAYER</span><img src="refs/rookie.png" alt="Rookie Scrapper reference"></div>
+      <div class="info">
+        <h3>Rookie Scrapper</h3>
+        <span class="role">You · junior salvage operative</span>
+        <p>Curious, hard-working and a bit clumsy. Silent in dialogue; the personality shows through animation, like a tool bouncing off something too tough with a loud <i>bonk</i>.</p>
+        <ul>
+          <li>Orange suit and round orange helmet with a fully black visor, so the player has no fixed face</li>
+          <li>Grey ear caps, black harness, belt and gloves, chest pockets, padded knees</li>
+          <li>Small oxygen backpack, heavy black boots</li>
+          <li>Mechanical salvage arm on the left, built from gears and pistons</li>
+        </ul>
+        <div class="change"><b>Proposed gameplay hook</b><span>Tools clip onto the salvage arm. The rusty wrench is the first attachment; every upgrade from Nova replaces it with something bigger. The upgrade is visible on the player and in first-person view.</span></div>
+        <div class="change"><b>Change from the brief</b><span>The helmet is orange, not dark grey. We follow the reference.</span></div>
+      </div>
+    </article>
+    <article class="char">
+      <div class="art"><span class="tag">COMPANION</span><img src="refs/scrap-bot.png" alt="SCRAP-BOT reference"></div>
+      <div class="info">
+        <h3>SCRAP-BOT</h3>
+        <span class="role">Companion · tutorials and scanning</span>
+        <p>A floating helper that follows you, scans objects and runs the tutorial. Helpful, sarcastic and permanently unimpressed.</p>
+        <ul>
+          <li>White head with a black screen face and cyan glowing eyes</li>
+          <li>Yellow ear discs, yellow chest armour, cyan core light</li>
+          <li>Tapered floating body, black ball joints, flipper arms</li>
+        </ul>
+        <div class="change"><b>What we add</b><span>The eyes are drawn on the screen, so they change shape for each mood: eye-roll, squint, hearts at a big sale. The scanner beam shines from the chest core, and small claws fold out of the flippers when it grabs scrap.</span></div>
+        <p class="quote"><b>Sample line:</b> “Scanning… that truck is 80% rust, 20% regret, and some copper.”</p>
+      </div>
+    </article>
+    <article class="char">
+      <div class="art"><span class="tag">NPC · UPGRADES</span><img src="refs/nova.png" alt="Engineer Nova reference"></div>
+      <div class="info">
+        <h3>Engineer Nova</h3>
+        <span class="role">Upgrade Station · tools and machines</span>
+        <p>Smart, confident and quick to fix anything. Runs the Upgrade Station and later unlocks machines and automation.</p>
+        <ul>
+          <li>Long red hair, determined expression</li>
+          <li>Armoured suit with grey shoulder plates, wrist guards and a utility belt</li>
+          <li>Heavy grey work gloves and boots</li>
+          <li>Backpack with a radio antenna</li>
+        </ul>
+        <div class="change"><b>Proposed change</b><span>Recolour the suit to teal with orange armour plates, as in the brief, so Nova doesn't look like the player. Add a flip-down protective visor for workshop scenes.</span></div>
+        <p class="quote"><b>Sample line:</b> “Bring me copper and I'll build you a hammer that respects you.”</p>
+      </div>
+    </article>
+    <article class="char">
+      <div class="art"><span class="tag">NPC · CONTRACTS</span><img class="cover" src="refs/captain-bolt.jpg" alt="Captain Bolt reference"></div>
+      <div class="info">
+        <h3>Captain Bolt</h3>
+        <span class="role">Salvage manager · missions</span>
+        <p>Big smile, bigger ambitions. Hands out missions and contracts. Looks friendly; the greed comes out in what he says.</p>
+        <ul>
+          <li>Round, cheerful face and messy brown hair</li>
+          <li>Orange coverall with teal patch pockets and knee patch</li>
+          <li>Leather harness and tool belt hung with gadgets</li>
+          <li>One yellow robotic hand, one knitted fingerless glove, mismatched boots</li>
+        </ul>
+        <div class="change"><b>Proposed change</b><span>Add the radio headset and a gold OmniSalvage badge from the brief, plus yellow hazard shoulder pads so he reads as the boss. The round orange-and-yellow disc behind him becomes the company's sun logo on his office wall.</span></div>
+        <p class="quote"><b>Sample line:</b> “Every bolt you loosen goes toward my bonus. Our bonus. The company's bonus.”</p>
+      </div>
+    </article>
+  </div>
+  <div class="notes">
+    <div class="callout">
+      <span class="label">Decision needed · colours</span>
+      <b>Three of the four references wear orange.</b>
+      <span>From a distance, players need to tell the player, Nova and Bolt apart. Recommendation: the Rookie keeps solid orange as the player colour, Nova moves to teal, and Bolt keeps orange with teal patches but gets yellow shoulder pads.</span>
+    </div>
+    <div class="callout">
+      <span class="label">Licences · reference images</span>
+      <b>These images guide the look. They are not game assets yet.</b>
+      <span>They come from third-party sites (Tripo AI, IconScout, Fab and a research paper). We only put a model in the game if its licence allows commercial use; otherwise we model an original in Blender to match. Each one goes in the licence register either way.</span>
+    </div>
+  </div>
+</section>
+
+<section id="rust-valley">
+  <div class="sec-head">
+    <span class="label">Work order 04 · starter zone</span>
+    <h2>Rust Valley</h2>
+    <p>An old freight yard in a shallow crater. Grey regolith, crater rims and a perimeter fence close it in. Halcyon fills the sky and distant factory silhouettes make it feel larger than it is. The playable area is about 220 × 140 m: walking from base to the far side takes around 40 seconds.</p>
+  </div>
+  <div class="envrefs">
+    <figure><img src="refs/moon-horizon.jpg" alt="Grey cratered surface with a large blue planet rising over the horizon against a starry sky"><figcaption><b>Sky and horizon.</b> Black starfield with Halcyon low and huge on the horizon. Halcyon is a fictional planet, so its continents get redrawn and it is never shown as Earth.</figcaption></figure>
+    <figure><img src="refs/moon-surface.jpg" alt="Close-up of pale grey lunar surface with craters of many sizes"><figcaption><b>Ground.</b> Pale regolith with craters from tiny pits to rims you can walk around. Tracks and footprints stay in the dust; rusty debris sits half-buried.</figcaption></figure>
+  </div>
+  <div class="mapwrap">
+    <div class="mapscroll">
+      <svg viewBox="0 0 640 400" role="img" aria-label="Top-down layout of Rust Valley: base and services in the south, vehicle graveyard west, container yard east, locked machine row north">
+        <rect width="640" height="400" class="m-cliff"/>
+        <path d="M44 60 Q60 22 140 26 L500 22 Q610 24 612 90 L616 330 Q610 380 540 380 L100 384 Q30 380 32 320 Z" class="m-ground"/>
+        <path d="M320 345 V205 M320 205 H150 V150 M320 205 H500 V150 M320 205 V95" class="m-road"/>
+        <!-- machine row (locked) -->
+        <rect x="220" y="38" width="200" height="62" rx="4" class="m-lock"/>
+        <rect x="220" y="38" width="200" height="62" rx="4" class="m-zone-dash"/>
+        <text x="232" y="58" class="m-title">Machine Row</text>
+        <text x="232" y="74" class="m-muted">LOCKED · NEEDS T3 TOOL (MISSION 8)</text>
+        <circle cx="260" cy="88" r="5" class="m-t3"/><circle cx="290" cy="88" r="5" class="m-t3"/><circle cx="320" cy="88" r="5" class="m-t3"/><circle cx="350" cy="88" r="5" class="m-t3"/><circle cx="380" cy="88" r="5" class="m-t3"/>
+        <rect x="306" y="98" width="28" height="7" fill="#F4C430"/><rect x="310" y="98" width="5" height="7" fill="#22262A"/><rect x="320" y="98" width="5" height="7" fill="#22262A"/>
+        <!-- vehicle graveyard -->
+        <rect x="58" y="86" width="190" height="72" rx="4" class="m-zone-dash"/>
+        <text x="70" y="104" class="m-title">Vehicle Graveyard</text>
+        <text x="70" y="118" class="m-muted">SCOOTERS · CARTS · MULE-7 TRUCKS</text>
+        <circle cx="86" cy="140" r="5" class="m-t1"/><circle cx="108" cy="134" r="5" class="m-t1"/><circle cx="130" cy="144" r="5" class="m-t1"/><rect x="160" y="132" width="14" height="10" class="m-t2"/><rect x="190" y="138" width="14" height="10" class="m-t2"/><circle cx="224" cy="132" r="5" class="m-t1"/>
+        <!-- container yard -->
+        <rect x="400" y="86" width="190" height="72" rx="4" class="m-zone-dash"/>
+        <text x="412" y="104" class="m-title">Container Yard</text>
+        <text x="412" y="118" class="m-muted">CONTAINERS · CRATES · VENDING BOTS</text>
+        <rect x="420" y="130" width="14" height="10" class="m-t2"/><rect x="442" y="130" width="14" height="10" class="m-t2"/><rect x="420" y="144" width="14" height="10" class="m-t2"/><circle cx="480" cy="138" r="5" class="m-t1"/><circle cx="504" cy="144" r="5" class="m-t1"/><rect x="530" y="132" width="14" height="10" class="m-t2"/><circle cx="566" cy="140" r="5" class="m-t1"/>
+        <!-- scatter field -->
+        <text x="110" y="232" class="m-muted">DEBRIS FIELD · DRUMS + JUNK</text>
+        <circle cx="120" cy="250" r="4" class="m-t1"/><circle cx="150" cy="262" r="4" class="m-t1"/><circle cx="196" cy="246" r="4" class="m-t1"/><circle cx="230" cy="270" r="4" class="m-t1"/><circle cx="100" cy="280" r="4" class="m-t1"/>
+        <circle cx="430" cy="252" r="4" class="m-t1"/><circle cx="470" cy="244" r="4" class="m-t1"/><circle cx="520" cy="266" r="4" class="m-t1"/><circle cx="560" cy="250" r="4" class="m-t1"/>
+        <!-- base cluster -->
+        <rect x="270" y="300" width="100" height="56" rx="4" class="m-zone"/>
+        <text x="320" y="324" text-anchor="middle" class="m-title">Base</text>
+        <text x="320" y="340" text-anchor="middle" class="m-muted">SPAWN · BOLT'S TERMINAL</text>
+        <rect x="150" y="304" width="100" height="48" rx="4" class="m-zone"/>
+        <text x="200" y="324" text-anchor="middle" class="m-text">Upgrade Station</text>
+        <text x="200" y="338" text-anchor="middle" class="m-muted">NOVA</text>
+        <rect x="390" y="304" width="100" height="48" rx="4" class="m-zone"/>
+        <text x="440" y="324" text-anchor="middle" class="m-text">Recycling Depot</text>
+        <text x="440" y="338" text-anchor="middle" class="m-muted">SELL HOPPER</text>
+        <rect x="506" y="300" width="88" height="56" rx="4" class="m-zone"/>
+        <text x="550" y="324" text-anchor="middle" class="m-text">Warehouse</text>
+        <text x="550" y="338" text-anchor="middle" class="m-muted">STORAGE · LATER</text>
+        <line x1="370" y1="328" x2="390" y2="328" class="m-line"/><line x1="250" y1="328" x2="270" y2="328" class="m-line"/><line x1="490" y1="328" x2="506" y2="328" class="m-line"/>
+        <!-- wrench pickup -->
+        <polygon points="320,268 325,279 337,280 328,288 331,300 320,293 309,300 312,288 303,280 315,279" class="m-star" transform="translate(-36 -10)"/>
+        <text x="300" y="262" text-anchor="end" class="m-text">Rusty wrench pickup</text>
+        <!-- salvage truck -->
+        <rect x="336" y="268" width="22" height="12" rx="2" fill="#F07A2E" stroke="#22262A"/>
+        <text x="364" y="278" class="m-text">Starter salvage truck</text>
+        <!-- scale + legend -->
+        <line x1="44" y1="364" x2="89" y2="364" class="m-line"/><line x1="44" y1="360" x2="44" y2="368" class="m-line"/><line x1="89" y1="360" x2="89" y2="368" class="m-line"/>
+        <text x="96" y="368" class="m-muted">50 m</text>
+        <text x="604" y="392" text-anchor="end" class="m-muted">N ↑</text>
+      </svg>
+    </div>
+    <div class="mix" style="gap:6px 18px">
+      <span><span class="dot" style="background:var(--rust)"></span>Tier 1 object (wrench)</span>
+      <span><span class="dot" style="background:var(--teal)"></span>Tier 2 object (hammer)</span>
+      <span><span class="dot" style="background:var(--map-lock)"></span>Tier 3 object (dismantler)</span>
+      <span><span class="dot" style="background:var(--hazard)"></span>Tutorial pickup</span>
+    </div>
+  </div>
+  <div class="facilities">
+    <div><b>Base</b><span class="muted">Spawn point, Captain Bolt's mission terminal, save point. The salvage truck is parked outside.</span></div>
+    <div><b>Recycling Depot</b><span class="muted">The selling station. Walk up, empty the backpack into the hopper, see a receipt with per-resource totals.</span></div>
+    <div><b>Upgrade Station</b><span class="muted">Nova's workshop. Tool and backpack shop with stats compared side by side.</span></div>
+    <div><b>Vehicle Graveyard</b><span class="muted">Where the first vehicle gets dismantled. Scooters with the wrench, Mule-7 trucks with the hammer.</span></div>
+    <div><b>Container Yard</b><span class="muted">Containers and crates give lots of iron. Vending bots hide electronics.</span></div>
+    <div><b>Machine Row</b><span class="muted">Generators and pumps behind a locked gate. Opening it is the goal of Mission 8 and teases the next zone.</span></div>
+  </div>
+
+  <h3 style="margin-top:8px">Salvage catalogue · Rust Valley</h3>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Object</th><th>Tier</th><th class="num">Durability</th><th>Scrap mix</th><th class="num">≈ Value</th><th class="num">Wrench</th><th class="num">Hammer</th></tr></thead>
+      <tbody>
+        <tr><td><b>Oil Drum</b><br><span class="proto">prototype</span></td><td><span class="tier t1">T1</span></td><td class="num">30</td><td><div class="mix"><span><i class="dot d-iron"></i>3 Iron</span></div></td><td class="num">6 cr</td><td class="num">2.5 s</td><td class="num">1.4 s</td></tr>
+        <tr><td><b>Busted Vending Bot</b></td><td><span class="tier t1">T1</span></td><td class="num">60</td><td><div class="mix"><span><i class="dot d-iron"></i>3 Iron</span><span><i class="dot d-cu"></i>2 Cu</span><span><i class="dot d-el"></i>1 Elec</span></div></td><td class="num">28 cr</td><td class="num">5 s</td><td class="num">2.7 s</td></tr>
+        <tr><td><b>Zipline-50 Hover Scooter</b><br><span class="proto">prototype · first vehicle</span></td><td><span class="tier t1">T1</span></td><td class="num">120</td><td><div class="mix"><span><i class="dot d-iron"></i>6 Iron</span><span><i class="dot d-cu"></i>3 Cu</span><span><i class="dot d-el"></i>1 Elec</span></div></td><td class="num">39 cr</td><td class="num">10 s</td><td class="num">5.5 s</td></tr>
+        <tr><td><b>Cargo Container</b></td><td><span class="tier t2">T2</span></td><td class="num">300</td><td><div class="mix"><span><i class="dot d-iron"></i>18 Iron</span><span><i class="dot d-cu"></i>2 Cu</span></div></td><td class="num">46 cr</td><td class="num">—</td><td class="num">14 s</td></tr>
+        <tr><td><b>Mule-7 Hauler Truck</b><br><span class="proto">prototype</span></td><td><span class="tier t2">T2</span></td><td class="num">450</td><td><div class="mix"><span><i class="dot d-iron"></i>20 Iron</span><span><i class="dot d-cu"></i>8 Cu</span><span><i class="dot d-el"></i>3 Elec</span><span><i class="dot d-ra"></i>25% · 1 Alloy</span></div></td><td class="num">≈ 126 cr</td><td class="num">—</td><td class="num">20 s</td></tr>
+        <tr><td><b>Generator Unit</b></td><td><span class="tier t3">T3</span></td><td class="num">600</td><td><div class="mix"><span><i class="dot d-cu"></i>14 Cu</span><span><i class="dot d-el"></i>6 Elec</span><span><i class="dot d-ra"></i>1 Alloy</span></div></td><td class="num">182 cr</td><td class="num">—</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted" style="font-size:.88rem;max-width:80ch">Hitting something above your tool tier bounces off with a <i>bonk</i> and SCRAP-BOT tells you which tool you need. Every object goes through intact → dented (66%) → stripped (33%) → frame (10%) → breaks into a few pieces and its scrap. Times assume continuous hitting. All numbers live in ScriptableObjects and are easy to rebalance after playtests.</p>
+</section>
+
+<section id="zones">
+  <div class="sec-head">
+    <span class="label">Work order 05 · roadmap</span>
+    <h2>Beyond the valley</h2>
+    <p>Four more zones, each built around a bigger tool and a new kind of salvage. Only Rust Valley is in the prototype; the others appear as distant skyline and locked gates.</p>
+  </div>
+  <div class="zones">
+    <article class="zone">
+      <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect width="400" height="120" fill="#5E5A66"/><rect y="80" width="400" height="40" fill="#3A3640"/><g fill="#2A2730"><rect x="20" y="40" width="70" height="60"/><rect x="34" y="10" width="10" height="40"/><rect x="60" y="20" width="10" height="30"/><rect x="110" y="54" width="90" height="46"/><polygon points="110,54 140,36 170,54 200,36 200,54"/><rect x="230" y="30" width="60" height="70"/><rect x="300" y="50" width="90" height="50"/><rect x="340" y="16" width="12" height="40"/></g><circle cx="44" cy="8" r="6" fill="#9A9AA6" opacity=".6"/><rect x="250" y="44" width="8" height="8" fill="#F4C430"/></svg>
+      <div class="body"><h3>Iron District</h3><div class="meta"><span>Unlock: Electric Dismantler (T3)</span><span>Mood: grey smog, sodium lights</span></div><p>Abandoned factory blocks. Assembly lines, presses and robot arms that you strip room by room. Introduces indoor salvage and the first conveyor belts.</p></div>
+    </article>
+    <article class="zone">
+      <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect width="400" height="120" fill="#2D3A5A"/><circle cx="330" cy="30" r="16" fill="#E6E0F0" opacity=".85"/><rect y="88" width="400" height="32" fill="#4A4038"/><g fill="#1E2436"><polygon points="30,96 80,40 150,46 190,96"/><polygon points="80,40 92,20 110,42"/><polygon points="220,96 236,60 330,58 360,96"/><rect x="250" y="40" width="8" height="22"/><polygon points="360,96 380,70 396,96"/></g><circle cx="120" cy="66" r="3" fill="#57C7FF"/><circle cx="290" cy="74" r="3" fill="#57C7FF"/></svg>
+      <div class="body"><h3>Spaceport Graveyard</h3><div class="meta"><span>Unlock: Plasma Cutter (T4)</span><span>Mood: blue night, landing lights</span></div><p>Crashed freighters and broken landing pads. Huge hulls are cut apart section by section. Ship cores drop large amounts of electronics and rare alloy.</p></div>
+    </article>
+    <article class="zone">
+      <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect width="400" height="120" fill="#1A1416"/><path d="M0 0 H400 V30 Q300 50 200 28 T0 34z" fill="#2E2226"/><rect y="94" width="400" height="26" fill="#2E2226"/><g fill="#3E3034"><rect x="40" y="40" width="14" height="56"/><rect x="40" y="40" width="80" height="10"/><rect x="200" y="50" width="60" height="46"/><rect x="300" y="34" width="12" height="62"/></g><g fill="#9B7BFF"><polygon points="150,96 158,74 166,96"/><polygon points="168,96 172,82 178,96"/><polygon points="350,96 356,80 362,96"/></g><circle cx="230" cy="70" r="4" fill="#F07A2E"/></svg>
+      <div class="body"><h3>Deep Core</h3><div class="meta"><span>Unlock: Industrial Crusher (T5)</span><span>Mood: dark tunnels, violet crystal glow</span></div><p>Underground mines and drilling rigs. Oxygen matters here. Rare alloy shows up in raw veins next to the old machinery.</p></div>
+    </article>
+    <article class="zone">
+      <svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect width="400" height="120" fill="#7A3B2A"/><rect y="100" width="400" height="20" fill="#3A2420"/><g fill="#2A1A18"><rect x="0" y="60" width="400" height="44"/><rect x="40" y="20" width="40" height="44"/><rect x="120" y="4" width="28" height="60"/><rect x="180" y="30" width="120" height="34"/><rect x="320" y="12" width="30" height="52"/></g><g fill="#F4C430"><rect x="200" y="44" width="10" height="6"/><rect x="230" y="44" width="10" height="6"/><rect x="260" y="44" width="10" height="6"/></g><path d="M134 4 q10 -8 20 0" stroke="#5A3A30" stroke-width="4" fill="none"/></svg>
+      <div class="body"><h3>The Mega-Factory</h3><div class="meta"><span>Unlock: Automated Salvage Robots (T6)</span><span>Mood: furnace red, endless scale</span></div><p>One building the size of a city. The final contract: bring the whole thing down using everything you have built, including your own automated recycling lines.</p></div>
+    </article>
+  </div>
+</section>
+
+<section id="economy">
+  <div class="sec-head">
+    <span class="label">Work order 06</span>
+    <h2>Resources, tools and money</h2>
+    <p>Starting kit: <b>100 credits</b>, the rusty wrench, a 30-slot backpack and the starter salvage truck. First-pass prices are below, tuned so the first upgrade comes after about five minutes.</p>
+  </div>
+  <div class="res">
+    <div><svg><use href="#r-iron"/></svg><b>Iron</b><span class="price">2 cr</span><small>Common. Most of every object. Stack of 50.</small></div>
+    <div><svg><use href="#r-cu"/></svg><b>Copper</b><span class="price">5 cr</span><small>Wiring and pipes. Vehicles and machines. Stack of 50.</small></div>
+    <div><svg><use href="#r-el"/></svg><b>Electronics</b><span class="price">12 cr</span><small>Circuit boards from robots, dashboards, terminals. Stack of 25.</small></div>
+    <div><svg><use href="#r-ra"/></svg><b>Rare Alloy</b><span class="price">40 cr</span><small>Engines and cores. Low drop chance, big payout. Stack of 10.</small></div>
+  </div>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Lv</th><th>Equipment</th><th>Tier</th><th class="num">Damage</th><th class="num">Hits/s</th><th>Damage per second</th><th class="num">Range</th><th class="num">Recovery</th><th class="num">Price</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><b>Rusty Wrench</b><br><span class="proto">prototype · starter</span></td><td><span class="tier t1">T1</span></td><td class="num">10</td><td class="num">1.2</td><td><div class="bar"><i style="width:9%"></i></div><span class="mono" style="font-size:.75rem">12</span></td><td class="num">2.2 m</td><td class="num">100%</td><td class="num">Free</td></tr>
+        <tr><td class="num">2</td><td><b>Scrap Hammer</b><br><span class="proto">prototype</span></td><td><span class="tier t2">T2</span></td><td class="num">22</td><td class="num">1.0</td><td><div class="bar"><i style="width:17%"></i></div><span class="mono" style="font-size:.75rem">22</span></td><td class="num">2.4 m</td><td class="num">110%</td><td class="num">250</td></tr>
+        <tr><td class="num">3</td><td><b>Electric Dismantler</b><br><span class="proto">prototype · stretch</span></td><td><span class="tier t3">T3</span></td><td class="num">14</td><td class="num">3.0</td><td><div class="bar"><i style="width:32%"></i></div><span class="mono" style="font-size:.75rem">42</span></td><td class="num">2.6 m</td><td class="num">120%</td><td class="num">1,200</td></tr>
+        <tr><td class="num">4</td><td><b>Plasma Cutter</b></td><td><span class="tier t4">T4</span></td><td class="num">beam</td><td class="num">cont.</td><td><div class="bar"><i style="width:58%"></i></div><span class="mono" style="font-size:.75rem">75</span></td><td class="num">3.0 m</td><td class="num">130%</td><td class="num">4,500</td></tr>
+        <tr><td class="num">5</td><td><b>Industrial Crusher</b></td><td><span class="tier t5">T5</span></td><td class="num">260</td><td class="num">0.5</td><td><div class="bar"><i style="width:100%"></i></div><span class="mono" style="font-size:.75rem">130</span></td><td class="num">3.2 m</td><td class="num">140%</td><td class="num">12,000</td></tr>
+        <tr><td class="num">6</td><td><b>Automated Salvage Robot</b></td><td><span class="tier t5">T5</span></td><td class="num">auto</td><td class="num">—</td><td><div class="bar"><i style="width:19%"></i></div><span class="mono" style="font-size:.75rem">25 each</span></td><td class="num">zone</td><td class="num">100%</td><td class="num">30,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted" style="font-size:.88rem;max-width:80ch">Recovery is the bonus scrap you get per object. Backpack upgrades: 30 → 50 slots (300 cr) → 80 (900 cr) → 120 (2,500 cr). Every sale is logged in a transaction history at the depot.</p>
+</section>
+
+<section id="missions">
+  <div class="sec-head">
+    <span class="label">Work order 07</span>
+    <h2>First-shift missions</h2>
+    <p>Eight missions teach the whole loop in roughly 15 minutes. Captain Bolt assigns them; SCRAP-BOT explains them.</p>
+  </div>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th class="num">#</th><th>Mission</th><th>Objective</th><th class="num">Reward</th><th>SCRAP-BOT says</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><b>Welcome to Rust Valley</b></td><td>Leave the base and check in at Bolt's terminal</td><td class="num">—</td><td class="muted">“Good news, you're employed. Bad news, see the paperwork.”</td></tr>
+        <tr><td class="num">2</td><td><b>Find Your First Scrap</b></td><td>Pick up the rusty wrench and break an oil drum</td><td class="num">25 cr</td><td class="muted">“Hit the barrel. No, the other barrel. Yes. Wow.”</td></tr>
+        <tr><td class="num">3</td><td><b>Collect 20 Iron</b></td><td>Fill your backpack with 20 iron</td><td class="num">40 cr</td><td class="muted">“The magnet does the bending over. You're welcome.”</td></tr>
+        <tr><td class="num">4</td><td><b>Sell Your First Materials</b></td><td>Empty your backpack at the Recycling Depot</td><td class="num">50 cr</td><td class="muted">“Credits! Don't spend them all on snacks.”</td></tr>
+        <tr><td class="num">5</td><td><b>Upgrade Your Wrench</b></td><td>Buy the Scrap Hammer from Nova</td><td class="num">75 cr</td><td class="muted">“Finally, a tool with self-esteem.”</td></tr>
+        <tr><td class="num">6</td><td><b>Dismantle Your First Vehicle</b></td><td>Take apart a Mule-7 hauler truck</td><td class="num">150 cr</td><td class="muted">“It had a good life. Now it has a good price.”</td></tr>
+        <tr><td class="num">7</td><td><b>Expand Your Backpack</b></td><td>Upgrade to the 50-slot backpack</td><td class="num">100 cr</td><td class="muted">“More pockets. Same posture.”</td></tr>
+        <tr><td class="num">8</td><td><b>Unlock Industrial Machinery</b></td><td>Buy the Electric Dismantler and open Machine Row</td><td class="num">300 cr</td><td class="muted">“Bolt says there's a whole District past this one. Bolt says a lot.”</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="ui">
+  <div class="sec-head">
+    <span class="label">Work order 08</span>
+    <h2>UI and HUD</h2>
+    <p>Clean sci-fi industrial panels: dark translucent plates, thin borders, small monospace labels, one orange accent for "act now". Built with Unity UI Toolkit. Text stays small and readable; nothing covers the centre of the screen.</p>
+  </div>
+  <div class="hud" role="img" aria-label="HUD mockup showing vitals, credits, mission, target durability, tool bar, backpack and SCRAP-BOT message">
+    <svg class="scenebg" viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+      <circle cx="132" cy="16" r="11" fill="#3D7FD6"/><path d="M125 12 q5 -4 9 1 q-3 5 -9 -1z M131 20 q4 -2 7 1 q-2 3 -7 -1z" fill="#6FAF6A"/><circle cx="132" cy="16" r="11" fill="none" stroke="#A9D2FF" stroke-width=".8" opacity=".7"/>
+      <g fill="#FFFFFF" opacity=".7"><circle cx="20" cy="8" r=".4"/><circle cx="48" cy="14" r=".35"/><circle cx="78" cy="6" r=".4"/><circle cx="104" cy="22" r=".3"/><circle cx="152" cy="34" r=".35"/><circle cx="36" cy="26" r=".3"/></g>
+      <g fill="#2A2E35"><rect x="0" y="30" width="18" height="15"/><rect x="5" y="20" width="4" height="12"/><rect x="120" y="32" width="40" height="13"/><rect x="130" y="22" width="4" height="12"/></g>
+      <g transform="translate(58 30)"><rect x="0" y="0" width="38" height="18" fill="#7F9097"/><rect x="38" y="4" width="16" height="14" fill="#6E7F86"/><ellipse cx="10" cy="8" rx="6" ry="4" fill="#A8552A"/><circle cx="8" cy="19" r="4" fill="#23272B"/><circle cx="44" cy="19" r="4" fill="#23272B"/></g>
+      <g transform="translate(118 64) rotate(-20)"><rect x="0" y="0" width="5" height="28" rx="2" fill="#A0522D"/><rect x="-3" y="-4" width="11" height="6" rx="2" fill="#A0522D"/></g>
+      <rect x="112" y="78" width="16" height="14" rx="6" fill="#F07A2E"/>
+    </svg>
+    <div class="p vit">
+      <div class="vrow"><span>HEALTH</span><span class="hb"><i style="width:86%;background:#7BE07B"></i></span><span>86</span></div>
+      <div class="vrow"><span>OXYGEN</span><span class="hb"><i style="width:64%;background:#57C7FF"></i></span><span>64</span></div>
+    </div>
+    <div class="p cred"><span>CREDITS</span><b>1,284</b></div>
+    <div class="p mis"><b>MISSION 6</b><span>Dismantle your first vehicle</span><span style="opacity:.7">▸ Mule-7 truck · 0/1</span></div>
+    <div class="p tgt"><span>MULE-7 HAULER · T2</span><span class="hb"><i style="width:62%"></i></span><span style="opacity:.75">279 / 450</span></div>
+    <div class="xhair"></div>
+    <div class="prompt"><kbd>LMB</kbd>Dismantle</div>
+    <div class="p bot"><span><b>SCRAP-BOT:</b> Two more hits and that door is yours.</span></div>
+    <div class="p tools"><div class="slot"><sup>1</sup>Wrench</div><div class="slot on"><sup>2</sup>Hammer</div><div class="slot"><sup>3</sup>Scan</div></div>
+    <div class="p bag"><span>BACKPACK 41 / 50</span><span class="hb"><i style="width:82%;background:#F4C430"></i></span></div>
+  </div>
+  <div class="uinotes">
+    <div><b>Main menu</b><span class="muted">Logo over a slow camera drift through Rust Valley at dusk. New Game, Continue, Settings, Credits, Exit.</span></div>
+    <div><b>Depot and shop</b><span class="muted">Full-screen panels with a resource list, unit price, quantity and total, then one large Sell or Buy button.</span></div>
+    <div><b>Inventory and missions</b><span class="muted">Tab opens the backpack grid with item descriptions. J opens missions: title, steps, rewards, status.</span></div>
+  </div>
+</section>
+
+<section id="sound">
+  <div class="sec-head">
+    <span class="label">Work order 09</span>
+    <h2>Sound direction</h2>
+    <p>Sound is half of what makes a hit feel good, so it gets priority in the prototype.</p>
+  </div>
+  <div class="facilities">
+    <div><b>Layered hits</b><span class="muted">Each hit is a tool sound plus a material sound (thin sheet, thick plate, glass, circuitry), slightly varied in pitch so repeats don't get tiring.</span></div>
+    <div><b>Break moment</b><span class="muted">A creak, a crunch, then a scatter of bolts. Scrap pickup is a rising "tink" that climbs in pitch as you collect a streak.</span></div>
+    <div><b>Cash register</b><span class="muted">Selling plays a mechanical counter that rolls up with the total. The single most satisfying sound in the game.</span></div>
+    <div><b>Ambience</b><span class="muted">No air means no wind. You hear your own breathing, suit servos, radio hiss and clanks carried through the ground. Calm and lonely, never silent.</span></div>
+    <div><b>Music</b><span class="muted">Relaxed lo-fi industrial: soft beats, pads and tuned metal percussion.</span></div>
+    <div><b>Sources</b><span class="muted">Recorded or from Freesound (CC0 only, or CC-BY with credits), edited in Audacity. Every file logged with its licence.</span></div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="sec-head">
+    <span class="label">Work order 10</span>
+    <h2>Six-week prototype plan</h2>
+    <p>Your four modules, spread over six weeks so there is room for art and a proper QA round. You get a playable Windows build at the end of every module.</p>
+  </div>
+  <div class="weeks">
+    <div class="week"><div class="wk"><span class="label">Week 1</span><b>Module 1</b></div><ul><li>Unity 6 LTS + URP project, Git repo, folder layout, .gitignore</li><li>First-person controller: walk, sprint, jump, look</li><li>Rust Valley grey-box layout matching the map above</li><li>Rookie and SCRAP-BOT placeholder models</li></ul><div class="review"><b>You review</b><span class="muted">Movement feel, scale of the valley, walking distances.</span></div></div>
+    <div class="week"><div class="wk"><span class="label">Week 2</span><b>Module 2</b></div><ul><li>Interaction and tool system, rusty wrench</li><li>Destruction system with damage stages and tier checks</li><li>Oil drum, hover scooter, Mule-7 truck</li><li>Pooled scrap spawning, magnet pickup, hit effects and sounds</li></ul><div class="review"><b>You test</b><span class="muted">Is hitting things fun? Is the break satisfying?</span></div></div>
+    <div class="week"><div class="wk"><span class="label">Week 3</span><b>Module 3</b></div><ul><li>Resources, backpack capacity, inventory screen</li><li>Recycling Depot selling, credits, transaction log</li><li>Upgrade shop: hammer, dismantler, backpacks</li></ul><div class="review"><b>You test</b><span class="muted">The full loop: break, collect, sell, upgrade, break faster.</span></div></div>
+    <div class="week"><div class="wk"><span class="label">Week 4</span><b>Module 4a</b></div><ul><li>Missions 1–8 with SCRAP-BOT tutorial lines</li><li>HUD, main menu, pause menu</li><li>Versioned JSON save/load with backup of the previous save</li></ul><div class="review"><b>You test</b><span class="muted">Can a new player learn it in five minutes without help?</span></div></div>
+    <div class="week"><div class="wk"><span class="label">Week 5</span><b>Module 4b</b></div><ul><li>Blender art pass: characters, props, base buildings</li><li>Settings: graphics quality, resolution, frame-rate cap, audio</li><li>Performance pass: LODs, occlusion, instancing</li></ul><div class="review"><b>You review</b><span class="muted">Look and feel against this concept.</span></div></div>
+    <div class="week"><div class="wk"><span class="label">Week 6</span><b>QA build</b></div><ul><li>PlanetScrappers_v0.1.0_QA.zip with changelog</li><li>QA checklist (QA-001 to QA-012) and bug-report sheet</li><li>Build and setup documentation, licence register</li><li>Fixes from your playtest</li></ul><div class="review"><b>You test</b><span class="muted">A 20–30 minute session from a fresh install.</span></div></div>
+  </div>
+</section>
+
+<section id="approve">
+  <div class="sec-head">
+    <span class="label">Sign-off</span>
+    <h2>What needs your approval</h2>
+    <p>Tick through these as you review. Reply in chat with approvals or changes, for example “change Bolt's hard hat to a helmet” or “go third-person”, and development starts once you approve. Your ticks are only saved in this browser.</p>
+  </div>
+  <div class="approve" id="approveList">
+    <label><input type="checkbox" id="a1"><span><b>Story and setting</b><small>Airless, grey, cratered Kessler-9 with the blue planet Halcyon in the sky. OmniSalvage Ltd., you as the newest employee.</small></span></label>
+    <label><input type="checkbox" id="a2"><span><b>Art direction and palette</b><small>Stylized chunky sci-fi industrial, colour-coded resources.</small></span></label>
+    <label><input type="checkbox" id="a3"><span><b>Camera: first-person</b><small>Full-body models still built for co-op and marketing.</small></span></label>
+    <label><input type="checkbox" id="a4"><span><b>The four characters</b><small>Based on your reference images, with the proposed changes: salvage arm tool mount, teal Nova, headset and shoulder pads for Bolt.</small></span></label>
+    <label><input type="checkbox" id="a5"><span><b>Rust Valley layout</b><small>Base and services in the south, three salvage areas, locked Machine Row.</small></span></label>
+    <label><input type="checkbox" id="a6"><span><b>Future zone order</b><small>Iron District, Spaceport Graveyard, Deep Core, The Mega-Factory.</small></span></label>
+    <label><input type="checkbox" id="a7"><span><b>Starting economy numbers</b><small>Resource prices, tool stats and costs, as a first pass to rebalance after playtests.</small></span></label>
+    <label><input type="checkbox" id="a8"><span><b>Humour and tone</b><small>Sarcastic robot, greedy boss, dry workplace comedy. Family friendly.</small></span></label>
+    <label><input type="checkbox" id="a9"><span><b>Six-week prototype plan</b><small>Four modules, playable build after each.</small></span></label>
+  </div>
+  <p class="progress" id="approveCount">0 of 9 reviewed</p>
+</section>
+
+<footer>
+  <span>Planet Scrappers · Concept bible v0.3 · 14 Nov 2026 · client character and surface references</span>
+  <span>Characters, names and places are original to Planet Scrappers. Character and surface images are client-supplied third-party references (the horizon photo is a watermarked stock image), used here only to show the target look. No assets, maps, characters or code from any existing game are used. Third-party assets added during development will be listed with their licences in the project's licence register.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var boxes=[].slice.call(document.querySelectorAll('#approveList input'));
+  var out=document.getElementById('approveCount');
+  var KEY='ps-concept-approvals';
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){saved={}}
+  function update(){
+    var n=boxes.filter(function(b){return b.checked}).length;
+    out.textContent=n+' of '+boxes.length+' reviewed';
+  }
+  boxes.forEach(function(b){
+    if(saved[b.id]) b.checked=true;
+    b.addEventListener('change',function(){
+      saved[b.id]=b.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}
+      update();
+    });
+  });
+  update();
+})();
+</script>

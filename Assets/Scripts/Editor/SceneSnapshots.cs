@@ -1,0 +1,77 @@
+using System.IO;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+namespace PlanetScrappers.EditorTools
+{
+    /// <summary>
+    /// Renders review screenshots of Rust Valley from fixed viewpoints into Builds/Snapshots.
+    /// Useful for progress reports and for checking the layout without playing.
+    /// Batch mode (needs a GPU, so do not pass -nographics):
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod PlanetScrappers.EditorTools.SceneSnapshots.Capture
+    /// </summary>
+    public static class SceneSnapshots
+    {
+        const string ScenePath = "Assets/Scenes/RustValley.unity";
+
+        [MenuItem("Planet Scrappers/Capture Review Snapshots", priority = 40)]
+        public static void Capture()
+        {
+            var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            string outDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Builds", "Snapshots");
+            Directory.CreateDirectory(outDir);
+
+            var player = GameObject.Find("Player (Rookie Scrapper)");
+            var playerCam = player != null ? player.GetComponentInChildren<Camera>() : null;
+
+            if (playerCam != null)
+                Render(playerCam, Path.Combine(outDir, "01_spawn_first_person.png"));
+
+            var go = new GameObject("SnapshotCamera");
+            var cam = go.AddComponent<Camera>();
+            cam.fieldOfView = 60f;
+            cam.farClipPlane = 3000f;
+            cam.clearFlags = CameraClearFlags.Skybox;
+
+            Shot(cam, new Vector3(0f, 150f, -150f), new Vector3(0f, 0f, 0f), Path.Combine(outDir, "02_overview_from_south.png"));
+            Shot(cam, new Vector3(0f, 220f, 0f), Quaternion.Euler(90f, 0f, 0f), Path.Combine(outDir, "03_top_down.png"));
+            Shot(cam, new Vector3(-30f, 6f, -10f), new Vector3(-60f, 1f, 30f), Path.Combine(outDir, "04_vehicle_graveyard.png"));
+            Shot(cam, new Vector3(30f, 6f, -5f), new Vector3(60f, 1f, 28f), Path.Combine(outDir, "05_container_yard.png"));
+            Shot(cam, new Vector3(0f, 2f, -20f), new Vector3(0f, 2f, 40f), Path.Combine(outDir, "06_machine_row_gate.png"));
+            Shot(cam, new Vector3(0f, 4f, -25f), new Vector3(0f, 3f, -47f), Path.Combine(outDir, "07_base_cluster.png"));
+
+            Object.DestroyImmediate(go);
+            EditorSceneManager.CloseScene(scene, false);
+            Debug.Log($"[Snapshots] Saved to {outDir}");
+        }
+
+        static void Shot(Camera cam, Vector3 pos, Vector3 lookAt, string path) =>
+            Shot(cam, pos, Quaternion.LookRotation(lookAt - pos, Vector3.up), path);
+
+        static void Shot(Camera cam, Vector3 pos, Quaternion rot, string path)
+        {
+            cam.transform.SetPositionAndRotation(pos, rot);
+            Render(cam, path);
+        }
+
+        static void Render(Camera cam, string path, int width = 1600, int height = 900)
+        {
+            var rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+            var prevTarget = cam.targetTexture;
+            var prevActive = RenderTexture.active;
+            cam.targetTexture = rt;
+            cam.Render();
+            RenderTexture.active = rt;
+            var tex = new Texture2D(width, height, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            cam.targetTexture = prevTarget;
+            RenderTexture.active = prevActive;
+            Object.DestroyImmediate(tex);
+            rt.Release();
+            Object.DestroyImmediate(rt);
+        }
+    }
+}

@@ -1,0 +1,62 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Bb]uild/
+/[Bb]uilds/
+/Assets/Plugins/Editor/JetBrains*
+/Assets/AssetStoreTools*
+*_BurstDebugInformation_DoNotShip/
+sysinfo.txt
+crashlytics-buildsettings.json
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Packaged builds
+*.apk
+*.aab
+*.zip
+*.7z
+
+# Blender backups
+*.blend1
+*.blend2
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets — never commit
+.env
+*.pem
+*.key
+*.pfx
+steam_appid.txt
+**/steamworks_credentials*
+
+# Third-party reference images: not licensed for redistribution, keep local only
+docs/concept/refs/

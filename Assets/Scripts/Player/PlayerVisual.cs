@@ -111,7 +111,7 @@ namespace PlanetScrappers.Player
 
             if (body != null)
             {
-                float bob = Mathf.Abs(Mathf.Cos(phase)) * bobHeight * moveBlend;
+                float bob = PlanetScrappers.Core.SettingsManager.Current.reduceMotion ? 0f : Mathf.Abs(Mathf.Cos(phase)) * bobHeight * moveBlend;
                 float breath = Mathf.Sin(Time.time * 1.8f) * idleBreath * (1f - moveBlend);
                 squash = Mathf.MoveTowards(squash, 0f, dt * 4f);
                 body.localPosition = bodyBase + Vector3.up * (bob + breath - squash * 0.12f);

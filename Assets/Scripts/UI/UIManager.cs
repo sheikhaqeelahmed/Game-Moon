@@ -14,7 +14,7 @@ using UnityEngine.UI;
 
 namespace PlanetScrappers.UI
 {
-    public enum GameScreen { None, MainMenu, Inventory, Depot, Shop, Missions, Pause, Settings, Credits }
+    public enum GameScreen { None, MainMenu, Inventory, Depot, Shop, Missions, Pause, Settings, Credits, Achievements, Ending }
 
     /// <summary>
     /// Builds and runs all UI: the gameplay HUD plus every menu screen. Opening a screen pauses
@@ -29,6 +29,8 @@ namespace PlanetScrappers.UI
         [SerializeField] PlayerInteractor interactor;
 
         RectTransform hudRoot, screenRoot;
+        CanvasScaler scaler;
+        GameScreen achievementsReturn = GameScreen.Pause;
         InputAction escape, inventoryKey, missionsKey;
         GameScreen current = GameScreen.None;
         GameScreen settingsReturn = GameScreen.Pause;
@@ -59,6 +61,7 @@ namespace PlanetScrappers.UI
             inventoryKey.AddBinding("<Keyboard>/i");
             inventoryKey.AddBinding("<Gamepad>/select");
             missionsKey = new InputAction("Missions", InputActionType.Button, "<Keyboard>/j");
+            missionsKey.AddBinding("<Gamepad>/dpad/up");
         }
 
         void OnEnable()
@@ -66,6 +69,7 @@ namespace PlanetScrappers.UI
             escape.Enable(); inventoryKey.Enable(); missionsKey.Enable();
             GameEvents.BotSays += OnBotSays;
             GameEvents.CreditsGained += OnCreditsGained;
+            GameEvents.MissionCompleted += OnMissionCompleted;
         }
 
         void OnDisable()
@@ -73,11 +77,40 @@ namespace PlanetScrappers.UI
             escape.Disable(); inventoryKey.Disable(); missionsKey.Disable();
             GameEvents.BotSays -= OnBotSays;
             GameEvents.CreditsGained -= OnCreditsGained;
+            GameEvents.MissionCompleted -= OnMissionCompleted;
+            if (AchievementManager.Instance != null) AchievementManager.Instance.Unlocked -= OnAchievement;
         }
 
         void OnDestroy()
         {
             escape.Dispose(); inventoryKey.Dispose(); missionsKey.Dispose();
+        }
+
+        void Start()
+        {
+            if (AchievementManager.Instance != null) AchievementManager.Instance.Unlocked += OnAchievement;
+        }
+
+        void OnAchievement(AchievementManager.Definition d) => Toast($"Achievement unlocked: {d.title}", 4.5f);
+
+        void OnMissionCompleted(PlanetScrappers.Missions.MissionDefinition m)
+        {
+            var list = GameDatabase.Instance.missions;
+            if (list.Length > 0 && m == list[list.Length - 1]) StartCoroutine(ShowEndingLater());
+        }
+
+        System.Collections.IEnumerator ShowEndingLater()
+        {
+            yield return new WaitForSecondsRealtime(6f);
+            Open(GameScreen.Ending);
+        }
+
+        /// <summary>Text size option: 1 = default. Larger values make every panel bigger.</summary>
+        public void SetUiScale(float scale)
+        {
+            if (scaler == null) return;
+            scale = Mathf.Clamp(scale, 0.8f, 1.5f);
+            scaler.referenceResolution = new Vector2(1920f, 1080f) / scale;
         }
 
         void BuildCanvas()
@@ -87,7 +120,7 @@ namespace PlanetScrappers.UI
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 10;
-            var scaler = canvasGo.AddComponent<CanvasScaler>();
+            scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
@@ -132,6 +165,7 @@ namespace PlanetScrappers.UI
         public void Open(GameScreen screen)
         {
             if (screen == GameScreen.Settings && current != GameScreen.Settings) settingsReturn = current == GameScreen.MainMenu ? GameScreen.MainMenu : GameScreen.Pause;
+            if (screen == GameScreen.Achievements && current != GameScreen.Achievements) achievementsReturn = current == GameScreen.MainMenu ? GameScreen.MainMenu : GameScreen.Pause;
             current = screen;
             Clear(screenRoot);
             switch (screen)
@@ -144,8 +178,11 @@ namespace PlanetScrappers.UI
                 case GameScreen.Pause: BuildPause(); break;
                 case GameScreen.Settings: BuildSettings(); break;
                 case GameScreen.Credits: BuildCredits(); break;
+                case GameScreen.Achievements: BuildAchievements(); break;
+                case GameScreen.Ending: BuildEnding(); break;
             }
             SetPaused(screen != GameScreen.None);
+            SelectFirstButtonForGamepad();
         }
 
         /// <summary>Rebuilds the open screen, e.g. after buying something.</summary>
@@ -155,6 +192,7 @@ namespace PlanetScrappers.UI
         {
             if (current == GameScreen.Settings) { SettingsManager.Save(); Open(settingsReturn); return; }
             if (current == GameScreen.Credits) { Open(GameScreen.MainMenu); return; }
+            if (current == GameScreen.Achievements) { Open(achievementsReturn); return; }
             if (current == GameScreen.MainMenu) return;
             CloseAll();
         }
@@ -172,6 +210,14 @@ namespace PlanetScrappers.UI
             if (player != null) player.InputEnabled = !paused;
             if (paused) CursorLock.Unlock();
             else CursorLock.Lock();
+        }
+
+        /// <summary>Gamepad players need a selected button to navigate menus with the D-pad or stick.</summary>
+        void SelectFirstButtonForGamepad()
+        {
+            if (Gamepad.current == null || EventSystem.current == null) return;
+            var first = screenRoot.GetComponentInChildren<Button>();
+            EventSystem.current.SetSelectedGameObject(first != null ? first.gameObject : null);
         }
 
         static void Clear(Transform t)
@@ -345,7 +391,7 @@ namespace PlanetScrappers.UI
                 {
                     missionHead.text = $"MISSION {m.number} OF {GameDatabase.Instance.missions.Length}" + (m.number > 8 ? "   ·   CONTRACTS" : "");
                     missionObjective.text = m.objectiveText;
-                    missionProgress.text = m.count > 1 ? $"{Mathf.Min(mm.Progress, m.count)} / {m.count}   ·   reward {m.rewardCredits} cr" : $"Reward {m.rewardCredits} cr   ·   J for details";
+                    missionProgress.text = (m.count > 1 ? $"{Mathf.Min(mm.Progress, m.count)} / {m.count}   ·   reward {m.rewardCredits:N0} cr" : $"Reward {m.rewardCredits:N0} cr   ·   J for details") + TargetHint(mm);
                 }
                 else
                 {
@@ -419,6 +465,22 @@ namespace PlanetScrappers.UI
             gainPanel.SetActive(gainTimer > 0f);
         }
 
+        /// <summary>"Target 85 m, ahead-left" for the current objective, relative to where the camera looks.</summary>
+        string TargetHint(MissionManager mm)
+        {
+            var truck = SalvageTruck.Instance;
+            Transform from = truck != null && truck.Driving ? truck.transform : player != null ? player.transform : null;
+            if (from == null || !mm.TryGetTarget(from.position, out var target)) return "";
+            Vector3 d = target - from.position;
+            d.y = 0f;
+            float dist = d.magnitude;
+            if (dist < 4f) return "\nTarget: right here";
+            float camYaw = player != null && player.Camera != null ? player.Camera.Yaw : from.eulerAngles.y;
+            float angle = Mathf.DeltaAngle(camYaw, Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg);
+            string dir = Mathf.Abs(angle) < 25f ? "ahead" : Mathf.Abs(angle) > 155f ? "behind you" : angle > 0f ? (angle < 90f ? "ahead-right" : "to your right") : (angle > -90f ? "ahead-left" : "to your left");
+            return $"\nTarget: {dist:0} m {dir}";
+        }
+
         static ToolDefinition ToolAtLevel(int level)
         {
             foreach (var t in GameDatabase.Instance.tools) if (t != null && t.level == level) return t;
@@ -429,7 +491,7 @@ namespace PlanetScrappers.UI
         {
             if (string.IsNullOrEmpty(line)) return;
             botText.text = line;
-            botTimer = seconds;
+            botTimer = seconds * Mathf.Max(0.5f, SettingsManager.Current.messageDuration);
         }
 
         void OnCreditsGained(int amount, string label)

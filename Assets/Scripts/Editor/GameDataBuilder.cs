@@ -63,7 +63,10 @@ namespace PlanetScrappers.EditorTools
                 Obj("mine_cart", "Mine Cart", 3, 400f, 300f, Y(iron, 20), Y(copper, 6)),
                 Obj("crystal_vein", "Crystal Vein", 4, 900f, 480f, Y(alloy, 5), Y(elec, 2)),
                 Obj("ore_crusher", "Ore Crusher", 5, 2400f, 600f, Y(iron, 60), Y(copper, 18), Y(elec, 6), Y(alloy, 2)),
-                Obj("drilling_rig", "Drilling Rig", 5, 2800f, 720f, Y(iron, 50), Y(copper, 24), Y(elec, 12), Y(alloy, 4))
+                Obj("drilling_rig", "Drilling Rig", 5, 2800f, 720f, Y(iron, 50), Y(copper, 24), Y(elec, 12), Y(alloy, 4)),
+                Obj("smelter", "Mega-Smelter", 5, 3000f, 720f, Y(iron, 80), Y(copper, 30), Y(alloy, 3)),
+                Obj("factory_pylon", "Power Pylon", 5, 3000f, 0f, Y(copper, 20), Y(elec, 20), Y(alloy, 2)),
+                Obj("reactor_core", "Mega-Factory Reactor Core", 5, 9000f, 0f, Y(copper, 40), Y(elec, 40), Y(alloy, 25))
             };
 
             var missions = new[]
@@ -147,7 +150,19 @@ namespace PlanetScrappers.EditorTools
                 Mission(20, "Deep Core", "West of the valley, the Deep Core mine: drilling rigs and crystal veins. Oxygen drains fast underground.",
                     "Dismantle a drilling rig in the Deep Core", ObjectiveType.Dismantle, "drilling_rig", 1, 2000,
                     "The Deep Core gate in the west fence opens for tier 5 tools. Fill your oxygen at base first. It drains twice as fast down there.",
-                    "Every contract done. Only the Mega-Factory is left, and Bolt says it isn't ready for us. Yet.")
+                    "Deep Core cleared. Bolt just called: the Mega-Factory gate in the south fence is open. This is the big one."),
+                Mission(21, "The Mega-Factory", "South of the base stands the Mega-Factory, the last and largest structure on Kessler-9.",
+                    "Dismantle a Mega-Smelter inside the Mega-Factory", ObjectiveType.Dismantle, "smelter", 1, 2500,
+                    "The Mega-Factory gate is in the south fence, behind the base. Smelters line the walls inside. Crusher only.",
+                    "The smelters are falling. The core in the middle is shielded, though."),
+                Mission(22, "Pull the Plug", "Four power pylons feed the reactor core's shield. All four must come down.",
+                    "Dismantle all four power pylons", ObjectiveType.Dismantle, "factory_pylon", 4, 3000,
+                    "Four pylons surround the reactor core. Each one you break weakens the shield. They don't come back.",
+                    "Shield's down. Nothing protects the core now. Except physics. And Bolt's insurance."),
+                Mission(23, "Core Breach", "Take apart the Mega-Factory's reactor core: the final contract on Kessler-9.",
+                    "Dismantle the Mega-Factory reactor core", ObjectiveType.Dismantle, "reactor_core", 1, 10000,
+                    "The core is the biggest thing you'll ever take apart. 9,000 durability. Bring the Crusher and patience.",
+                    "That's it. The Mega-Factory is scrap. Kessler-9 is officially cleared. Captain Bolt is crying. Happy tears, I think.")
             };
 
             var db = Load<GameDatabase>("Assets/Resources/GameDatabase.asset");

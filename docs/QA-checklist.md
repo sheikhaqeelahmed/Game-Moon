@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.3.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.4.0)
 ========================================
 
 How to test
@@ -56,6 +56,14 @@ QA-036  Spaceport Graveyard gate               Opens once you own the Plasma Cut
 QA-037  Cut the freighter apart                Nose and wings with tier 4; hull and engine need the Crusher (tier 5).
 QA-038  Deep Core gate and oxygen              Opens with the Crusher; oxygen drains much faster underground.
 QA-039  Complete missions 15-20                Each pays its reward; the last says only the Mega-Factory remains.
+QA-040  Mega-Factory gate                      Opens only after mission 20 with the Crusher.
+QA-041  Hit the reactor core early             It is shielded; SCRAP-BOT says how many pylons remain.
+QA-042  Dismantle the four pylons, then core   Shield bubble disappears; the core can be taken apart.
+QA-043  Finish mission 23                      Ending screen with stats; Keep salvaging returns to play.
+QA-044  Achievements                           Pop-up on unlock; Achievements screen lists them with dates.
+QA-045  Objective marker                       Mission panel shows distance and direction to the target.
+QA-046  Accessibility settings                 Text size, reduce motion, toggle tool use, message time all work.
+QA-047  Gamepad in menus                       D-pad/stick moves between buttons, A selects, B/Start goes back.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

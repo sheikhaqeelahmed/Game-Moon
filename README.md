@@ -39,9 +39,9 @@ collect the scrap, sell it, buy better tools and grow a salvage operation.
 | Use tool (hold) | Left mouse button | Right trigger |
 | Use / pick up | E | X / Square |
 | SCRAP-BOT scan | F | Y / Triangle |
-| Switch tool | 1 to 5 | — |
+| Switch tool | 1 to 5, mouse side buttons | D-pad left / right |
 | Inventory | Tab or I | View / Select |
-| Missions | J | — |
+| Missions | J | D-pad up |
 | Switch third / first person | V | Right stick press |
 | Pause / close | Esc | Start |
 | Get in / out of truck | E | X / Square |
@@ -109,4 +109,5 @@ docs/             Concept, licences, QA material
 | Phase 2 | Salvage truck, Iron District, Plasma Cutter, collectors, warehouse, missions 9–14 | Done (v0.2.0) |
 | Phase 3 | Factory, conveyors, salvage robots, Spaceport Graveyard, Deep Core, Industrial Crusher, missions 15–20 | Done (v0.3.0) |
 | Phase 4 | Co-op multiplayer | Not started (needs 2+ PCs to test) |
-| Phase 5 | Mega-Factory, Steam release | Not started (needs Steamworks account) |
+| Phase 5a | Mega-Factory, ending, achievements, accessibility, controller menus | Done (v0.4.0) |
+| Phase 5b | Steam release (store page, Steamworks, achievements on Steam, beta) | Not started (needs Steamworks account) |

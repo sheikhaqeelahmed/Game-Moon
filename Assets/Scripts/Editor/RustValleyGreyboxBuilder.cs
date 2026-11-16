@@ -92,6 +92,7 @@ namespace PlanetScrappers.EditorTools
             BuildSpaceport();
             BuildDeepCore();
             BuildAutomation();
+            BuildMegaFactory();
             BuildSky();
             var player = BuildPlayer();
             BuildScrapBot(player);
@@ -179,7 +180,7 @@ namespace PlanetScrappers.EditorTools
             {
                 float a = i / (float)count * Mathf.PI * 2f;
                 float rx = 300f + (float)rng.NextDouble() * 25f;
-                float rz = (Mathf.Sin(a) > 0.2f ? 215f : 130f) + (float)rng.NextDouble() * 20f;
+                float rz = (Mathf.Sin(a) > 0.2f ? 215f : Mathf.Sin(a) < -0.2f ? 265f : 130f) + (float)rng.NextDouble() * 20f;
                 var pos = new Vector3(Mathf.Cos(a) * rx, -1f, Mathf.Sin(a) * rz);
                 float s = 16f + (float)rng.NextDouble() * 16f;
                 var rock = Primitive(PrimitiveType.Cube, "RimRock", rim, pos,
@@ -195,7 +196,7 @@ namespace PlanetScrappers.EditorTools
             BuildCrater(root, MapToWorld(250, 140), 5f);
             BuildCrater(root, MapToWorld(420, 240), 4f);
             // Larger craters outside the fence for the view.
-            BuildCrater(root, new Vector3(-60f, 0f, -115f), 22f);
+            BuildCrater(root, new Vector3(-160f, 0f, -150f), 22f);
             BuildCrater(root, new Vector3(140f, 0f, -90f), 18f);
             BuildCrater(root, new Vector3(-165f, 0f, 120f), 26f);
         }
@@ -259,7 +260,11 @@ namespace PlanetScrappers.EditorTools
             var se = new Vector3(HalfWidth, 0f, -HalfDepth);
             var ne = new Vector3(HalfWidth, 0f, HalfDepth);
             var nw = new Vector3(-HalfWidth, 0f, HalfDepth);
-            Side(sw, se);
+            Side(sw, new Vector3(-6f, 0f, -HalfDepth));
+            Side(new Vector3(6f, 0f, -HalfDepth), se);
+            Side(new Vector3(-MegaHalfWidth, 0f, -HalfDepth), new Vector3(-MegaHalfWidth, 0f, MegaFar));
+            Side(new Vector3(-MegaHalfWidth, 0f, MegaFar), new Vector3(MegaHalfWidth, 0f, MegaFar));
+            Side(new Vector3(MegaHalfWidth, 0f, MegaFar), new Vector3(MegaHalfWidth, 0f, -HalfDepth));
             Side(se, new Vector3(HalfWidth, 0f, -6f));
             Side(new Vector3(HalfWidth, 0f, 6f), ne);
             Side(new Vector3(HalfWidth, 0f, -ZoneHalfDepth), new Vector3(ZoneFar, 0f, -ZoneHalfDepth));
@@ -1365,6 +1370,112 @@ namespace PlanetScrappers.EditorTools
             }
         }
 
+        // ───────────────────────────── Phase 5: the Mega-Factory ─────────────────────────────
+
+        const float MegaHalfWidth = 70f;
+        const float MegaFar = -225f;
+
+        static void BuildMegaFactory()
+        {
+            var area = new GameObject("Mega-Factory").transform;
+            area.SetParent(SalvageRoot());
+
+            var gate = Box("Mega-Factory Gate", area, new Vector3(0f, 1.4f, -HalfDepth - 0.5f), new Vector3(12f, 2.8f, 0.4f), m.Hazard);
+            var g = gate.AddComponent<MachineRowGate>();
+            var gso = new SerializedObject(g);
+            gso.FindProperty("requiredTier").intValue = 5;
+            gso.FindProperty("requiredMissionIndex").intValue = 20;
+            gso.ApplyModifiedPropertiesWithoutUndo();
+            Sign(area, "MEGA-FACTORY  ·  FINAL CONTRACT", new Vector3(0f, 3.6f, -HalfDepth + 1.5f), 180f, 0.6f);
+            MarkStatic(Box("Mega Road", area, new Vector3(0f, 0.02f, (-HalfDepth + MegaFar) * 0.5f), new Vector3(9f, 0.04f, -MegaFar - HalfDepth), m.Road, collider: false));
+            MarkStatic(Box("Base Link Road", area, new Vector3(0f, 0.02f, -63f), new Vector3(9f, 0.04f, 18f), m.Road, collider: false));
+
+            // The building: tall walls, a wide north entrance, smoke stacks visible across the valley.
+            var hall = new GameObject("Mega-Factory Hall").transform;
+            hall.SetParent(area, true);
+            float x0 = -58f, x1 = 58f, zN = -92f, zS = -210f, h = 18f, t = 1.2f;
+            float cz = (zN + zS) * 0.5f, depth = zN - zS;
+            MarkStatic(Box("Wall West", hall, new Vector3(x0, h * 0.5f, cz), new Vector3(t, h, depth), m.LockedGrey));
+            MarkStatic(Box("Wall East", hall, new Vector3(x1, h * 0.5f, cz), new Vector3(t, h, depth), m.LockedGrey));
+            MarkStatic(Box("Wall South", hall, new Vector3(0f, h * 0.5f, zS), new Vector3(x1 - x0, h, t), m.LockedGrey));
+            float side = (x1 - x0 - 16f) * 0.5f;
+            MarkStatic(Box("Wall North W", hall, new Vector3(x0 + side * 0.5f, h * 0.5f, zN), new Vector3(side, h, t), m.LockedGrey));
+            MarkStatic(Box("Wall North E", hall, new Vector3(x1 - side * 0.5f, h * 0.5f, zN), new Vector3(side, h, t), m.LockedGrey));
+            MarkStatic(Box("Entrance Lintel", hall, new Vector3(0f, h - 3f, zN), new Vector3(16f, 6f, t), m.LockedGrey));
+            MarkStatic(Box("Rust Band", hall, new Vector3(0f, h - 1.5f, zN + 0.7f), new Vector3(x1 - x0, 1f, 0.1f), m.Rust, collider: false));
+            Sign(hall, "MEGA-FACTORY", new Vector3(0f, h + 1.5f, zN + 0.8f), 0f, 2.4f);
+            foreach (var sx in new[] { -45f, -15f, 15f, 45f })
+            {
+                MarkStatic(Primitive(PrimitiveType.Cylinder, "Smoke Stack", hall, new Vector3(sx, 16f, zS + 8f), new Vector3(5f, 16f, 5f), m.MetalDark, collider: false));
+                MarkStatic(Primitive(PrimitiveType.Cylinder, "Stack Band", hall, new Vector3(sx, 28f, zS + 8f), new Vector3(5.2f, 0.8f, 5.2f), m.Hazard, collider: false));
+            }
+
+            // Reactor core in the middle, fed by four power pylons.
+            var corePos = new Vector3(0f, 0f, -160f);
+            var pylons = new DestructibleObject[4];
+            int pi = 0;
+            foreach (var off in new[] { new Vector3(-20f, 0f, 14f), new Vector3(20f, 0f, 14f), new Vector3(-20f, 0f, -14f), new Vector3(20f, 0f, -14f) })
+            {
+                var p = Prop(area, $"T5_FactoryPylon_{pi + 1:00}", corePos + off, 0f);
+                BoxLocal("Pylon Base", p, new Vector3(0f, 1f, 0f), new Vector3(3.6f, 2f, 3.6f), m.MetalDark);
+                BoxLocal("Pylon Column", p, new Vector3(0f, 6f, 0f), new Vector3(1.6f, 8f, 1.6f), m.LockedGrey);
+                Part(PrimitiveType.Sphere, "Pylon Orb", p, new Vector3(0f, 10.6f, 0f), Vector3.one * 2f, m.BotEye);
+                BoxLocal("Hazard", p, new Vector3(0f, 2.2f, 1.82f), new Vector3(3f, 0.6f, 0.05f), m.Hazard, collider: false);
+                var cable = BoxLocal("Cable", p, new Vector3(-off.x * 0.25f, 0.3f, -off.z * 0.25f), new Vector3(0.4f, 0.3f, off.magnitude * 0.5f), m.Rubber, collider: false);
+                cable.transform.localRotation = Quaternion.LookRotation(-off);
+                pylons[pi++] = p.gameObject.AddComponent<DestructibleObject>();
+                pylons[pi - 1].Setup(db.Dismantlable("factory_pylon"), p.name);
+            }
+
+            var core = Prop(area, "T5_ReactorCore_01", corePos, 0f);
+            CylLocal("Core Base", core, new Vector3(0f, 1.5f, 0f), new Vector3(14f, 1.5f, 14f), m.MetalDark);
+            CylLocal("Core Body", core, new Vector3(0f, 7f, 0f), new Vector3(9f, 5f, 9f), m.LockedGrey, collider: false);
+            for (int i = 0; i < 4; i++)
+                CylLocal("Core Ring", core, new Vector3(0f, 4f + i * 2.4f, 0f), new Vector3(10f, 0.3f, 10f), i % 2 == 0 ? m.Hazard : m.TrimOrange, collider: false);
+            Part(PrimitiveType.Sphere, "Core Heart", core, new Vector3(0f, 13.5f, 0f), Vector3.one * 5f, m.Crystal);
+            CylLocal("Core Cap", core, new Vector3(0f, 12.2f, 0f), new Vector3(6f, 0.5f, 6f), m.MetalDark, collider: false);
+            var coreObj = core.gameObject.AddComponent<DestructibleObject>();
+            coreObj.Setup(db.Dismantlable("reactor_core"), core.name);
+
+            var particleBase = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/ParticlesUnlit.mat");
+            var shieldMat = ParticleMaterial("CoreShield", particleBase, AssetDatabase.LoadAssetAtPath<Texture2D>($"{TextureDir}/SoftDot.png"), new Color(0.35f, 0.8f, 1f, 0.22f));
+            var bubble = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            bubble.name = "Shield Bubble";
+            Object.DestroyImmediate(bubble.GetComponent<Collider>());
+            bubble.transform.SetParent(area, false);
+            bubble.transform.position = corePos + Vector3.up * 7f;
+            bubble.transform.localScale = Vector3.one * 22f;
+            bubble.GetComponent<Renderer>().sharedMaterial = shieldMat;
+            bubble.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            core.gameObject.AddComponent<CoreShield>().Setup(pylons, bubble);
+
+            int n = 1;
+            foreach (var p in new[] { new Vector3(-48f, 0f, -110f), new Vector3(48f, 0f, -110f), new Vector3(-48f, 0f, -195f), new Vector3(48f, 0f, -195f) })
+                Smelter(area, p, n++);
+            // Older machinery on the factory floor.
+            HydraulicPress(area, new Vector3(-30f, 0f, -105f), 0f, 41);
+            HydraulicPress(area, new Vector3(30f, 0f, -105f), 0f, 42);
+            AssemblyLine(area, new Vector3(-44f, 0f, -150f), 0f, 41);
+            AssemblyLine(area, new Vector3(44f, 0f, -150f), 0f, 42);
+            RobotArm(area, new Vector3(-38f, 0f, -125f), 60f, 41);
+            RobotArm(area, new Vector3(38f, 0f, -125f), -60f, 42);
+            RobotArm(area, new Vector3(-38f, 0f, -178f), 120f, 43);
+            RobotArm(area, new Vector3(38f, 0f, -178f), -120f, 44);
+            FactoryCrane(area, new Vector3(0f, 0f, -120f), 41);
+            FactoryCrane(area, new Vector3(0f, 0f, -198f), 42);
+        }
+
+        static void Smelter(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T5_Smelter_{index:00}", pos, 0f);
+            CylLocal("Furnace", t, new Vector3(0f, 3.5f, 0f), new Vector3(6f, 3.5f, 6f), m.MetalDark);
+            CylLocal("Crucible", t, new Vector3(0f, 7.6f, 0f), new Vector3(4.4f, 0.8f, 4.4f), m.Rust, collider: false);
+            Part(PrimitiveType.Sphere, "Molten Glow", t, new Vector3(0f, 8.2f, 0f), new Vector3(3.6f, 0.6f, 3.6f), m.TrimOrange);
+            BoxLocal("Pour Spout", t, new Vector3(3.4f, 5f, 0f), new Vector3(2f, 0.6f, 0.8f), m.Metal, collider: false);
+            BoxLocal("Hazard", t, new Vector3(0f, 1.2f, 3.05f), new Vector3(4f, 0.6f, 0.05f), m.Hazard, collider: false);
+            CylLocal("Vent", t, new Vector3(-1.8f, 9.5f, 0f), new Vector3(0.8f, 1.6f, 0.8f), m.LockedGrey, collider: false);
+        }
+
         // ───────────────────────────── Gameplay wiring ─────────────────────────────
 
         /// <summary>Turns every T1_/T2_/T3_ prop into a dismantlable object with a stable save id.</summary>
@@ -1376,12 +1487,13 @@ namespace PlanetScrappers.EditorTools
                 ("CargoContainer", "cargo_container"), ("Mule7Truck", "mule7_truck"), ("GeneratorUnit", "generator_unit"),
                 ("RobotArm", "robot_arm"), ("HydraulicPress", "hydraulic_press"), ("AssemblyLine", "assembly_line"), ("FactoryCrane", "factory_crane"),
                 ("CargoPod", "cargo_pod"), ("ShipNose", "ship_nose"), ("ShipWing", "ship_wing"), ("ShipHull", "ship_hull"), ("ShipEngine", "ship_engine"),
-                ("ShuttleCabin", "shuttle_cabin"), ("MineCart", "mine_cart"), ("CrystalVein", "crystal_vein"), ("OreCrusher", "ore_crusher"), ("DrillingRig", "drilling_rig")
+                ("ShuttleCabin", "shuttle_cabin"), ("MineCart", "mine_cart"), ("CrystalVein", "crystal_vein"), ("OreCrusher", "ore_crusher"), ("DrillingRig", "drilling_rig"), ("Smelter", "smelter")
             };
             int count = 0;
             foreach (var t in SalvageRoot().GetComponentsInChildren<Transform>(true))
             {
                 if (t.name.Length < 4 || t.name[0] != 'T' || t.name[2] != '_') continue;
+                if (t.GetComponent<DestructibleObject>() != null) { count++; continue; } // already set up (pylons, core)
                 foreach (var (prefix, id) in map)
                 {
                     if (!t.name.Substring(3).StartsWith(prefix)) continue;
@@ -1431,6 +1543,7 @@ namespace PlanetScrappers.EditorTools
             var gm = systems.AddComponent<GameManager>();
             SetRef(gm, "player", player);
             systems.AddComponent<MissionManager>();
+            systems.AddComponent<AchievementManager>();
             var autotest = systems.AddComponent<AutoPlaytest>();
             SetRef(autotest, "player", player);
 

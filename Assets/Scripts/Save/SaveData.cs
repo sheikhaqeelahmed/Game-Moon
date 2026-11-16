@@ -45,6 +45,11 @@ namespace PlanetScrappers.Save
         // Phase 3
         public List<MachineState> machines = new List<MachineState>();
         public int robots;
+
+        // Lifetime stats for the ending screen
+        public int totalDismantled;
+        public int totalScrap;
+        public int totalEarned;
     }
 
     [Serializable]

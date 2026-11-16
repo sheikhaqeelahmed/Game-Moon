@@ -18,6 +18,11 @@ namespace PlanetScrappers.Core
         public bool invertY;
         public bool firstPerson;
         public float masterVolume = 0.8f;
+        // Accessibility
+        public float uiScale = 1f;
+        public bool reduceMotion;
+        public float messageDuration = 1f;
+        public bool toggleToolUse;
     }
 
     /// <summary>Loads, applies and saves player settings (settings.json beside the save file).</summary>
@@ -77,6 +82,8 @@ namespace PlanetScrappers.Core
             QualitySettings.vSyncCount = s.vSync ? 1 : 0;
             Application.targetFrameRate = s.vSync || s.frameRateCap <= 0 ? -1 : s.frameRateCap;
             AudioManager.SetMasterVolume(s.masterVolume);
+
+            PlanetScrappers.UI.UIManager.Instance?.SetUiScale(s.uiScale);
 
             if (playerCamera != null)
             {

@@ -34,6 +34,9 @@ namespace PlanetScrappers.Core
         public int SessionScrap { get; private set; }
         public int SessionEarned { get; private set; }
         public string LastSavedAt { get; private set; }
+        public int TotalDismantled { get; private set; }
+        public int TotalScrap { get; private set; }
+        public int TotalEarned { get; private set; }
 
         float autosaveTimer;
 
@@ -51,6 +54,7 @@ namespace PlanetScrappers.Core
             GameEvents.MissionCompleted += OnAutosaveEvent;
             GameEvents.ObjectDismantled += OnDismantled;
             GameEvents.ScrapCollected += OnCollected;
+            GameEvents.CreditsGained += OnCredits;
         }
 
         void OnDisable()
@@ -61,6 +65,7 @@ namespace PlanetScrappers.Core
             GameEvents.MissionCompleted -= OnAutosaveEvent;
             GameEvents.ObjectDismantled -= OnDismantled;
             GameEvents.ScrapCollected -= OnCollected;
+            GameEvents.CreditsGained -= OnCredits;
         }
 
         void Start()
@@ -93,8 +98,9 @@ namespace PlanetScrappers.Core
             OnAutosaveEvent(0);
         }
 
-        void OnDismantled(DestructibleObject o) => SessionDismantled++;
-        void OnCollected(ResourceDefinition r, int amount) => SessionScrap += amount;
+        void OnDismantled(DestructibleObject o) { SessionDismantled++; TotalDismantled++; }
+        void OnCollected(ResourceDefinition r, int amount) { SessionScrap += amount; TotalScrap += amount; }
+        void OnCredits(int amount, string label) => TotalEarned += amount;
         void OnAutosaveEvent<T>(T _) { if (InGame) SaveGame(false); }
 
         void StartNew()
@@ -153,6 +159,9 @@ namespace PlanetScrappers.Core
             }
             foreach (var pad in CollectorPad.Pads) pad.SetBuilt(data.builtCollectors.Contains(pad.PadId));
 
+            TotalDismantled = data.totalDismantled;
+            TotalScrap = data.totalScrap;
+            TotalEarned = data.totalEarned;
             PlaySeconds = data.playSeconds;
             LastSavedAt = data.savedAt;
             InGame = true;
@@ -176,7 +185,10 @@ namespace PlanetScrappers.Core
                 backpackLevel = PlayerInventory.Instance.CapacityLevel,
                 equippedTool = PlayerEquipment.Instance.Equipped != null ? PlayerEquipment.Instance.Equipped.id : null,
                 missionIndex = MissionManager.Instance.Index,
-                missionProgress = MissionManager.Instance.Progress
+                missionProgress = MissionManager.Instance.Progress,
+                totalDismantled = TotalDismantled,
+                totalScrap = TotalScrap,
+                totalEarned = TotalEarned
             };
             Vector3 p = player.transform.position;
             data.position = new[] { p.x, p.y + 0.1f, p.z };

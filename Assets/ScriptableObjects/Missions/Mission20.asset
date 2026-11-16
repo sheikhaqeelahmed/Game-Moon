@@ -23,5 +23,5 @@ MonoBehaviour:
   rewardCredits: 2000
   botIntro: The Deep Core gate in the west fence opens for tier 5 tools. Fill your
     oxygen at base first. It drains twice as fast down there.
-  botComplete: Every contract done. Only the Mega-Factory is left, and Bolt says
-    it isn't ready for us. Yet.
+  botComplete: 'Deep Core cleared. Bolt just called: the Mega-Factory gate in the
+    south fence is open. This is the big one.'

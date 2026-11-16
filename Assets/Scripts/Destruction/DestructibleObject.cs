@@ -35,6 +35,7 @@ namespace PlanetScrappers.Destruction
         float shakeTime;
         Vector3 restPosition;
         float respawnTimer;
+        float lastShieldHint = -100f;
 
         public DismantlableDefinition Definition => definition;
         public string UniqueId => uniqueId;
@@ -84,6 +85,18 @@ namespace PlanetScrappers.Destruction
         public HitResult Hit(ToolDefinition tool, Vector3 point, Vector3 normal)
         {
             if (IsDismantled || tool == null) return HitResult.TooWeak;
+            var shield = GetComponent<CoreShield>();
+            if (shield != null && shield.Active)
+            {
+                AudioManager.PlayVaried("hit_bonk", 0.7f * Audible());
+                DestructionFx.Instance?.Sparks(point, normal, 6);
+                if (Time.time - lastShieldHint > 6f)
+                {
+                    lastShieldHint = Time.time;
+                    GameEvents.Say($"Shielded. {shield.PylonsStanding} power pylon{(shield.PylonsStanding == 1 ? "" : "s")} still feeding it. Take them down first.", 5f);
+                }
+                return HitResult.TooWeak;
+            }
             if (tool.tier < definition.tier)
             {
                 AudioManager.PlayVaried("hit_bonk", 0.9f * Audible());
@@ -197,7 +210,8 @@ namespace PlanetScrappers.Destruction
             if (shakeTime > 0f)
             {
                 shakeTime -= Time.deltaTime;
-                transform.position = shakeTime > 0f ? restPosition + Random.insideUnitSphere * 0.03f : restPosition;
+                bool calm = SettingsManager.Current.reduceMotion;
+                transform.position = shakeTime > 0f && !calm ? restPosition + Random.insideUnitSphere * 0.03f : restPosition;
             }
 
             if (IsDismantled && definition.respawnSeconds > 0f)
@@ -213,6 +227,8 @@ namespace PlanetScrappers.Destruction
         public string ScanText(ToolDefinition tool)
         {
             var sb = new StringBuilder();
+            var sh = GetComponent<CoreShield>();
+            if (sh != null && sh.Active) sb.Append($"Shield up, powered by {sh.PylonsStanding} pylons. ");
             sb.Append($"{definition.displayName}: tier {definition.tier}, {Mathf.CeilToInt(durability)}/{definition.durability:0}. Inside: ");
             for (int i = 0; i < definition.yields.Length; i++)
             {

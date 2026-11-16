@@ -17,7 +17,8 @@ namespace PlanetScrappers.Equipment
         [SerializeField] PlayerEquipment equipment;
         [SerializeField] float aimDistance = 30f;
 
-        InputAction attack, scan;
+        InputAction attack, scan, nextTool, prevTool;
+        bool toggledOn;
         readonly InputAction[] toolKeys = new InputAction[5];
         readonly RaycastHit[] hits = new RaycastHit[16];
         float cooldown;
@@ -34,11 +35,15 @@ namespace PlanetScrappers.Equipment
             scan.AddBinding("<Gamepad>/buttonNorth");
             for (int i = 0; i < toolKeys.Length; i++)
                 toolKeys[i] = new InputAction("Tool" + (i + 1), InputActionType.Button, "<Keyboard>/" + (i + 1));
+            nextTool = new InputAction("NextTool", InputActionType.Button, "<Gamepad>/dpad/right");
+            nextTool.AddBinding("<Mouse>/forwardButton");
+            prevTool = new InputAction("PrevTool", InputActionType.Button, "<Gamepad>/dpad/left");
+            prevTool.AddBinding("<Mouse>/backButton");
         }
 
-        void OnEnable() { attack.Enable(); scan.Enable(); foreach (var k in toolKeys) k.Enable(); }
-        void OnDisable() { attack.Disable(); scan.Disable(); foreach (var k in toolKeys) k.Disable(); }
-        void OnDestroy() { attack.Dispose(); scan.Dispose(); foreach (var k in toolKeys) k.Dispose(); }
+        void OnEnable() { attack.Enable(); scan.Enable(); nextTool.Enable(); prevTool.Enable(); foreach (var k in toolKeys) k.Enable(); }
+        void OnDisable() { attack.Disable(); scan.Disable(); nextTool.Disable(); prevTool.Disable(); foreach (var k in toolKeys) k.Disable(); }
+        void OnDestroy() { attack.Dispose(); scan.Dispose(); nextTool.Dispose(); prevTool.Dispose(); foreach (var k in toolKeys) k.Dispose(); }
 
         void Update()
         {
@@ -56,6 +61,8 @@ namespace PlanetScrappers.Equipment
 
             for (int i = 0; i < toolKeys.Length; i++)
                 if (toolKeys[i].WasPressedThisFrame()) SwitchTo(i + 1);
+            if (nextTool.WasPressedThisFrame()) Cycle(1);
+            if (prevTool.WasPressedThisFrame()) Cycle(-1);
 
             if (scan.WasPressedThisFrame())
             {
@@ -64,7 +71,14 @@ namespace PlanetScrappers.Equipment
             }
 
             var tool = equipment.Equipped;
-            if (!attack.IsPressed()) return;
+            bool usingTool;
+            if (SettingsManager.Current.toggleToolUse)
+            {
+                if (attack.WasPressedThisFrame()) toggledOn = !toggledOn;
+                usingTool = toggledOn;
+            }
+            else usingTool = attack.IsPressed();
+            if (!usingTool) return;
 
             if (tool == null)
             {
@@ -93,6 +107,16 @@ namespace PlanetScrappers.Equipment
             else
             {
                 AudioManager.PlayVaried("swing_whoosh", 0.5f);
+            }
+        }
+
+        void Cycle(int dir)
+        {
+            int current = equipment.Equipped != null ? equipment.Equipped.level : 0;
+            for (int step = 1; step <= 6; step++)
+            {
+                int level = ((current - 1 + dir * step) % 6 + 6) % 6 + 1;
+                if (equipment.OwnedToolAtLevel(level) != null) { SwitchTo(level); return; }
             }
         }
 

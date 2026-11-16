@@ -99,6 +99,7 @@ namespace PlanetScrappers.UI
                 GameManager.NewGame();
             }, !hasSave, 24, 58);
             UIKit.Button(panel.transform, "Settings", () => Open(GameScreen.Settings), false, 24, 58);
+            UIKit.Button(panel.transform, "Achievements", () => Open(GameScreen.Achievements), false, 24, 58);
             UIKit.Button(panel.transform, "Credits", () => Open(GameScreen.Credits), false, 24, 58);
             UIKit.Button(panel.transform, "Exit", GameManager.Quit, false, 24, 58);
             Spacer(panel.transform, 18);
@@ -354,6 +355,55 @@ namespace PlanetScrappers.UI
             UIKit.Size(b.gameObject, 190, 44, 190, 44, 0f);
         }
 
+        void BuildAchievements()
+        {
+            var am = AchievementManager.Instance;
+            var all = AchievementManager.All;
+            var card = Card(1300, 900, $"{(am != null ? am.UnlockedCount : 0)} of {all.Length} unlocked · saved on this PC", "Achievements", UIKit.Amber);
+            var cols = Columns(card, 20f);
+            var left = Column(cols, 1f, 8f);
+            var right = Column(cols, 1f, 8f);
+            for (int i = 0; i < all.Length; i++)
+            {
+                var a = all[i];
+                bool got = am != null && am.IsUnlocked(a.id);
+                var tile = UIKit.Panel(i < 8 ? left : right, a.title, got ? new Color(1f, 0.95f, 0.8f, 0.95f) : new Color(1, 1, 1, 0.55f));
+                UIKit.Outline(tile, got ? UIKit.Accent : UIKit.Line);
+                UIKit.HLayout(tile.gameObject, 12f, 10);
+                UIKit.Label(tile.transform, got ? "√" : "·", 26, got ? UIKit.Green : UIKit.Muted, FontStyle.Bold, TextAnchor.MiddleCenter).Width(30);
+                var text = Column(tile.transform, 1f, 1f);
+                UIKit.Label(text, a.title, 19, got ? UIKit.Ink : UIKit.Muted, FontStyle.Bold);
+                UIKit.Label(text, got ? $"{a.description}   ·   {am.UnlockDate(a.id)}" : a.description, 14, UIKit.Muted);
+            }
+        }
+
+        void BuildEnding()
+        {
+            var gm = GameManager.Instance;
+            var am = AchievementManager.Instance;
+            var card = Card(1200, 860, "Final contract complete", "Kessler-9 cleared", UIKit.Green, false);
+            UIKit.Label(card, "The Mega-Factory is scrap. Every contract OmniSalvage signed for Kessler-9 is done. Captain Bolt has already started looking at the next planet.", 21, UIKit.Ink);
+            var cols = Columns(card, 30f);
+            var left = Column(cols, 1f, 10f);
+            var right = Column(cols, 1f, 10f);
+            UIKit.Label(left, "YOUR SALVAGE CAREER", 15, UIKit.Muted, FontStyle.Bold);
+            float t = gm != null ? gm.PlaySeconds : 0f;
+            Stat(left, $"{(int)(t / 3600)}h {(int)(t % 3600 / 60):00}m", "Time on Kessler-9");
+            Stat(left, gm != null ? gm.TotalDismantled.ToString("N0") : "0", "Objects dismantled");
+            Stat(left, gm != null ? gm.TotalScrap.ToString("N0") : "0", "Scrap collected");
+            Stat(left, gm != null ? $"{gm.TotalEarned:N0} cr" : "0 cr", "Credits earned");
+            Stat(left, am != null ? $"{am.UnlockedCount} / {AchievementManager.All.Length}" : "0", "Achievements");
+            UIKit.Label(right, "CREDITS", 15, UIKit.Muted, FontStyle.Bold);
+            UIKit.Label(right, "Planet Scrappers\nDesign and development: the Planet Scrappers team, with Claude (Anthropic)\nEngine: Unity 6, Universal Render Pipeline\nSound: generated in-house\nCharacters: the Rookie, SCRAP-BOT, Engineer Nova, Captain Bolt\n\nThank you for playing.", 18, UIKit.Ink);
+            UIKit.Label(right, "<b>SCRAP-BOT:</b> We did it. Well, you did it. I supervised. Emotionally.", 18, UIKit.Cyan);
+            var row = UIKit.Row(card, 14f);
+            UIKit.Label(row, "Your game is saved. You can keep salvaging: junk keeps respawning and your machines keep earning.", 16, UIKit.Muted).Flex();
+            var keep = UIKit.Button(row, "Keep salvaging", CloseAll, true, 20, 54);
+            UIKit.Size(keep.gameObject, 240, 54, 240, 54, 0f);
+            var menu = UIKit.Button(row, "Main Menu", GameManager.ReturnToMenu, false, 20, 54);
+            UIKit.Size(menu.gameObject, 200, 54, 200, 54, 0f);
+        }
+
         static string ShopLine(ToolDefinition t) => t.id switch
         {
             "scrap_hammer" => "Finally, a tool with self-esteem. Tier 2 means trucks and containers now.",
@@ -372,7 +422,8 @@ namespace PlanetScrappers.UI
             int chapterEnd = 8, chapterStart = 0;
             string chapterName = "First shift";
             if (mm.Index >= 8) { chapterStart = 8; chapterEnd = 14; chapterName = "Phase 2 contracts"; }
-            if (mm.Index >= 14) { chapterStart = 14; chapterEnd = list.Length; chapterName = "Phase 3 contracts"; }
+            if (mm.Index >= 14) { chapterStart = 14; chapterEnd = 20; chapterName = "Phase 3 contracts"; }
+            if (mm.Index >= 20) { chapterStart = 20; chapterEnd = list.Length; chapterName = "Final contract: the Mega-Factory"; }
             var card = Card(1240, 780, $"{chapterName} · {mm.CompletedCount} of {list.Length} missions done", "Missions", UIKit.AccentText);
             var cols = Columns(card);
             var left = Column(cols, 1f, 8f);
@@ -422,6 +473,7 @@ namespace PlanetScrappers.UI
             UIKit.Button(left, "Resume", Back, true, 24, 58);
             UIKit.Button(left, "Settings", () => Open(GameScreen.Settings), false, 22, 54);
             UIKit.Button(left, "Save Game", () => { gm.SaveGame(true); Refresh(); }, false, 22, 54);
+            UIKit.Button(left, "Achievements", () => Open(GameScreen.Achievements), false, 22, 54);
             UIKit.Button(left, "Main Menu", GameManager.ReturnToMenu, false, 22, 54);
             UIKit.Button(left, "Exit to Desktop", GameManager.Quit, false, 22, 54);
 
@@ -447,10 +499,13 @@ namespace PlanetScrappers.UI
         void BuildSettings()
         {
             var s = SettingsManager.Current;
-            var card = Card(1100, 820, "Graphics · audio · controls", "Settings", UIKit.Muted);
+            var card = Card(1500, 980, "Graphics · audio · controls · accessibility", "Settings", UIKit.Muted);
+            var cols = Columns(card, 40f);
+            var left = Column(cols, 1f, 6f);
+            var right = Column(cols, 1f, 6f);
             var resolutions = Screen.resolutions;
 
-            Stepper(card, "Resolution", $"{s.resolutionWidth} × {s.resolutionHeight}", dir =>
+            Stepper(left, "Resolution", $"{s.resolutionWidth} × {s.resolutionHeight}", dir =>
             {
                 if (resolutions.Length == 0) return;
                 int i = System.Array.FindIndex(resolutions, r => r.width == s.resolutionWidth && r.height == s.resolutionHeight);
@@ -458,20 +513,24 @@ namespace PlanetScrappers.UI
                 s.resolutionWidth = resolutions[i].width;
                 s.resolutionHeight = resolutions[i].height;
             });
-            Stepper(card, "Display mode", SettingsManager.DisplayModeNames[Mathf.Clamp(s.displayMode, 0, 2)], dir => s.displayMode = (s.displayMode + dir + 3) % 3);
-            Stepper(card, "Graphics quality", QualitySettings.names[Mathf.Clamp(s.quality, 0, QualitySettings.names.Length - 1)],
+            Stepper(left, "Display mode", SettingsManager.DisplayModeNames[Mathf.Clamp(s.displayMode, 0, 2)], dir => s.displayMode = (s.displayMode + dir + 3) % 3);
+            Stepper(left, "Graphics quality", QualitySettings.names[Mathf.Clamp(s.quality, 0, QualitySettings.names.Length - 1)],
                 dir => s.quality = Mathf.Clamp(s.quality + dir, 0, QualitySettings.names.Length - 1));
-            Stepper(card, "Frame-rate cap", s.vSync ? "Off (V-sync on)" : s.frameRateCap <= 0 ? "Unlimited" : s.frameRateCap + " fps", dir =>
+            Stepper(left, "Frame-rate cap", s.vSync ? "Off (V-sync on)" : s.frameRateCap <= 0 ? "Unlimited" : s.frameRateCap + " fps", dir =>
             {
                 int i = System.Array.IndexOf(SettingsManager.FrameRateOptions, s.frameRateCap);
                 i = (Mathf.Max(0, i) + dir + SettingsManager.FrameRateOptions.Length) % SettingsManager.FrameRateOptions.Length;
                 s.frameRateCap = SettingsManager.FrameRateOptions[i];
             });
-            Stepper(card, "V-sync", s.vSync ? "On" : "Off", dir => s.vSync = !s.vSync);
-            Stepper(card, "Camera", s.firstPerson ? "First-person" : "Third-person (V switches)", dir => s.firstPerson = !s.firstPerson);
-            Stepper(card, "Mouse sensitivity", s.mouseSensitivity.ToString("0.0"), dir => s.mouseSensitivity = Mathf.Clamp(Mathf.Round((s.mouseSensitivity + dir * 0.1f) * 10f) / 10f, 0.2f, 3f));
-            Stepper(card, "Invert vertical look", s.invertY ? "On" : "Off", dir => s.invertY = !s.invertY);
-            Stepper(card, "Master volume", Mathf.RoundToInt(s.masterVolume * 100f) + "%", dir => s.masterVolume = Mathf.Clamp01(Mathf.Round((s.masterVolume + dir * 0.1f) * 10f) / 10f));
+            Stepper(left, "V-sync", s.vSync ? "On" : "Off", dir => s.vSync = !s.vSync);
+            Stepper(right, "Camera", s.firstPerson ? "First-person" : "Third-person (V switches)", dir => s.firstPerson = !s.firstPerson);
+            Stepper(right, "Mouse sensitivity", s.mouseSensitivity.ToString("0.0"), dir => s.mouseSensitivity = Mathf.Clamp(Mathf.Round((s.mouseSensitivity + dir * 0.1f) * 10f) / 10f, 0.2f, 3f));
+            Stepper(right, "Invert vertical look", s.invertY ? "On" : "Off", dir => s.invertY = !s.invertY);
+            Stepper(right, "Text size", Mathf.RoundToInt(s.uiScale * 100f) + "%", dir => s.uiScale = Mathf.Clamp(Mathf.Round((s.uiScale + dir * 0.1f) * 10f) / 10f, 0.8f, 1.5f));
+            Stepper(right, "Reduce motion", s.reduceMotion ? "On" : "Off", dir => s.reduceMotion = !s.reduceMotion);
+            Stepper(right, "Use tools", s.toggleToolUse ? "Click to start / stop" : "Hold button", dir => s.toggleToolUse = !s.toggleToolUse);
+            Stepper(right, "SCRAP-BOT message time", s.messageDuration.ToString("0.0") + "×", dir => s.messageDuration = Mathf.Clamp(Mathf.Round((s.messageDuration + dir * 0.5f) * 10f) / 10f, 1f, 3f));
+            Stepper(left, "Master volume", Mathf.RoundToInt(s.masterVolume * 100f) + "%", dir => s.masterVolume = Mathf.Clamp01(Mathf.Round((s.masterVolume + dir * 0.1f) * 10f) / 10f));
 
             Spacer(card, 6);
             var foot = UIKit.Row(card, 12f);
@@ -503,11 +562,11 @@ namespace PlanetScrappers.UI
 
         void Stepper(Transform parent, string label, string value, System.Action<int> change)
         {
-            var row = UIKit.Row(parent, 12f, 50);
-            UIKit.Label(row, label, 21, UIKit.Ink, FontStyle.Bold).Flex();
+            var row = UIKit.Row(parent, 10f, 50);
+            UIKit.Label(row, label, 20, UIKit.Ink, FontStyle.Bold).Flex();
             var minus = UIKit.Button(row, "‹", () => { change(-1); SettingsManager.Apply(player.Camera); Refresh(); }, false, 26, 46);
             UIKit.Size(minus.gameObject, 56, 46, 56, 46, 0f);
-            UIKit.Label(row, value, 20, UIKit.Ink, FontStyle.Normal, TextAnchor.MiddleCenter).Width(320);
+            UIKit.Label(row, value, 19, UIKit.Ink, FontStyle.Normal, TextAnchor.MiddleCenter).Width(250);
             var plus = UIKit.Button(row, "›", () => { change(1); SettingsManager.Apply(player.Camera); Refresh(); }, false, 26, 46);
             UIKit.Size(plus.gameObject, 56, 46, 56, 46, 0f);
         }

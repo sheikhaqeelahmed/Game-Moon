@@ -2,6 +2,24 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.4.0] — Content complete: the Mega-Factory, ending, achievements and polish
+
+### Added
+- **The Mega-Factory** (south gate behind the base; opens with the Crusher after mission 20): a walled factory
+  with smoke stacks, four Mega-Smelters, older machinery, and the **reactor core** at its heart. The core is
+  shielded until all four **power pylons** are dismantled. Pylons and core never respawn.
+- **Missions 21–23** (The Mega-Factory, Pull the Plug, Core Breach) and an **ending screen** with your career
+  stats (time, objects dismantled, scrap, credits earned, achievements) and credits. You can keep salvaging afterwards.
+- **15 achievements** with unlock pop-ups and an Achievements screen (main menu and pause). Stored per PC in
+  `achievements.json`; the ids are ready to map to Steam achievements.
+- **Objective marker:** the mission panel shows the distance and direction to the current target.
+- **Accessibility:** text size (80–150%), reduce motion, click-to-toggle tool use instead of holding,
+  and longer SCRAP-BOT messages (1–3×). Settings screen rearranged into two columns.
+- **Controller:** menus can be navigated with a gamepad; D-pad left/right (or mouse side buttons) cycle tools;
+  D-pad up opens missions.
+- Lifetime stats saved with the game. 19 new dismantlable objects (97 in total).
+- Automated playtest covers all 23 missions and the ending (80 checks); it now also protects your achievements file.
+
 ## [0.3.0] — Phase 3: automation and new zones
 
 ### Added

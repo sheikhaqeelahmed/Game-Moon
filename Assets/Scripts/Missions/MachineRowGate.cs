@@ -9,6 +9,8 @@ namespace PlanetScrappers.Missions
     {
         [SerializeField] int requiredTier = 3;
         [SerializeField] float sinkDepth = 3.2f;
+        [Tooltip("Also require this many completed missions (0 = no mission requirement).")]
+        [SerializeField] int requiredMissionIndex;
 
         Vector3 closedPosition;
         bool open;
@@ -18,7 +20,8 @@ namespace PlanetScrappers.Missions
         void Update()
         {
             var eq = PlayerEquipment.Instance;
-            if (!open && eq != null)
+            bool missionsOk = requiredMissionIndex <= 0 || (MissionManager.Instance != null && MissionManager.Instance.Index >= requiredMissionIndex);
+            if (!open && eq != null && missionsOk)
             {
                 foreach (var t in GameDatabase.Instance.tools)
                 {

@@ -264,7 +264,30 @@ namespace PlanetScrappers.Core
             float oxyBefore = SuitSystems.Instance.Oxygen;
             yield return Dismantle("drilling_rig", "19_deep_core");
             Check(SuitSystems.Instance.InDeepCore || player.transform.position.x < -120f, "reached the Deep Core");
-            Check(mm.AllComplete, "mission 20 complete, all contracts done");
+            Check(mm.Index == 20, "mission 20 complete, Phase 3 contracts done");
+
+            // ── Final contract: the Mega-Factory ──
+            yield return new WaitForSecondsRealtime(2f);
+            var megaGate = FindObjectsByType<MachineRowGate>(FindObjectsSortMode.None).First(g => g.name == "Mega-Factory Gate");
+            Check(megaGate.GetComponent<Collider>() == null || !megaGate.GetComponent<Collider>().enabled, "Mega-Factory gate opened after mission 20");
+            yield return Dismantle("smelter", "20_smelter");
+            Check(mm.Index == 21, "mission 21 complete (smelter)");
+
+            var core = Nearest("reactor_core");
+            Check(core != null && core.Hit(eq.Equipped, core.Center, Vector3.up) == HitResult.TooWeak, "reactor core is shielded while pylons stand");
+            for (int i = 0; i < 4; i++) yield return Dismantle("factory_pylon", i == 0 ? "21_pylon" : null);
+            Check(mm.Index == 22, "mission 22 complete (all four pylons)");
+            Check(core != null && !core.GetComponent<CoreShield>().Active, "core shield dropped");
+            yield return Dismantle("reactor_core", "22_core");
+            Check(mm.AllComplete, "mission 23 complete, Kessler-9 cleared");
+            yield return new WaitForSecondsRealtime(8f);
+            Check(UIManager.Instance.Current == GameScreen.Ending, "ending screen shown");
+            yield return Shot("23_ending");
+            UIManager.Instance.ShowHud();
+            Check(AchievementManager.Instance.IsUnlocked("planet_cleared") && AchievementManager.Instance.UnlockedCount >= 10,
+                $"achievements unlocked ({AchievementManager.Instance.UnlockedCount}/{AchievementManager.All.Length})");
+            Check(GameManager.Instance.TotalDismantled > 20, $"lifetime stats tracked ({GameManager.Instance.TotalDismantled} dismantled)");
+            yield return OpenShot(GameScreen.Achievements, "24_achievements");
 
             // Save and reload check
             int credits = wallet.Credits;
@@ -381,12 +404,14 @@ namespace PlanetScrappers.Core
         }
 
         static string Backup => SaveManager.SavePath + ".autotest-backup";
+        static string AchBackup => AchievementManager.FilePath + ".autotest-backup";
         static string BackupBak => SaveManager.BackupPath + ".autotest-backup";
 
         static void BackupRealSave()
         {
             if (File.Exists(SaveManager.SavePath)) File.Copy(SaveManager.SavePath, Backup, true);
             if (File.Exists(SaveManager.BackupPath)) File.Copy(SaveManager.BackupPath, BackupBak, true);
+            if (File.Exists(AchievementManager.FilePath)) { File.Copy(AchievementManager.FilePath, AchBackup, true); File.Delete(AchievementManager.FilePath); }
         }
 
         static void RestoreRealSave()
@@ -394,6 +419,8 @@ namespace PlanetScrappers.Core
             SaveManager.DeleteAll();
             if (File.Exists(Backup)) { File.Copy(Backup, SaveManager.SavePath, true); File.Delete(Backup); }
             if (File.Exists(BackupBak)) { File.Copy(BackupBak, SaveManager.BackupPath, true); File.Delete(BackupBak); }
+            if (File.Exists(AchievementManager.FilePath)) File.Delete(AchievementManager.FilePath);
+            if (File.Exists(AchBackup)) { File.Copy(AchBackup, AchievementManager.FilePath, true); File.Delete(AchBackup); }
         }
     }
 }

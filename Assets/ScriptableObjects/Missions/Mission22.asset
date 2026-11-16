@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission22
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 22
+  title: Pull the Plug
+  description: Four power pylons feed the reactor core's shield. All four must come
+    down.
+  objectiveText: Dismantle all four power pylons
+  type: 1
+  targetId: factory_pylon
+  count: 4
+  rewardCredits: 3000
+  botIntro: Four pylons surround the reactor core. Each one you break weakens the
+    shield. They don't come back.
+  botComplete: Shield's down. Nothing protects the core now. Except physics. And
+    Bolt's insurance.

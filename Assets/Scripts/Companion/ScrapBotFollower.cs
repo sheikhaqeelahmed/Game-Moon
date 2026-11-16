@@ -61,7 +61,7 @@ namespace PlanetScrappers.Companion
             if (cameraRig == null && playerCamera != null) cameraRig = playerCamera.GetComponent<PlanetScrappers.Player.PlayerCamera>();
             bool firstPerson = cameraRig != null && cameraRig.Mode == PlanetScrappers.Player.CameraMode.FirstPerson;
             Vector3 offset = (firstPerson ? firstPersonOffset : this.offset) * offsetScale;
-            float bob = Mathf.Sin(Time.time * bobFrequency * Mathf.PI * 2f) * bobAmplitude;
+            float bob = PlanetScrappers.Core.SettingsManager.Current.reduceMotion ? 0f : Mathf.Sin(Time.time * bobFrequency * Mathf.PI * 2f) * bobAmplitude;
             Vector3 desired = player.position + yaw * offset + playerVelocity * followSmoothTime + Vector3.up * bob;
 
             if ((transform.position - desired).sqrMagnitude > snapDistance * snapDistance)

@@ -94,6 +94,82 @@ namespace PlanetScrappers.Missions
             else StartCoroutine(SayLater("Every contract done. Keep salvaging, keep earning. Captain Bolt drops fresh junk every few minutes.", 6.5f, 9f));
         }
 
+        /// <summary>Where the current objective is, for the HUD marker. False when there is no single place.</summary>
+        public bool TryGetTarget(Vector3 from, out Vector3 target)
+        {
+            target = from;
+            var m = Current;
+            if (m == null) return false;
+            switch (m.type)
+            {
+                case ObjectiveType.Dismantle: return Nearest(from, m.targetId, out target);
+                case ObjectiveType.SellAny: return Station("depot", out target);
+                case ObjectiveType.BuyTool:
+                case ObjectiveType.BuyBackpack: return Station("shop", out target);
+                case ObjectiveType.CollectResource: return NearestWith(from, m.targetId, out target);
+                case ObjectiveType.CollectToStorage: return NearestWith(from, "iron", out target);
+                case ObjectiveType.Interact:
+                    if (m.targetId == "terminal") return Station("terminal", out target);
+                    if (m.targetId == "build_factory" || m.targetId == "buy_robot") return Station("shop", out target);
+                    if (m.targetId == "truck" && PlanetScrappers.Vehicles.SalvageTruck.Instance != null)
+                    {
+                        target = PlanetScrappers.Vehicles.SalvageTruck.Instance.transform.position;
+                        return true;
+                    }
+                    if (m.targetId == "build_collector")
+                    {
+                        float best = float.MaxValue;
+                        foreach (var pad in PlanetScrappers.Automation.CollectorPad.Pads)
+                        {
+                            float d = (pad.transform.position - from).sqrMagnitude;
+                            if (!pad.Built && d < best) { best = d; target = pad.transform.position; }
+                        }
+                        return best < float.MaxValue;
+                    }
+                    return false;
+            }
+            return false;
+        }
+
+        static bool Station(string id, out Vector3 pos)
+        {
+            foreach (var s in UnityEngine.Object.FindObjectsByType<PlanetScrappers.Interaction.StationInteractable>(FindObjectsSortMode.None))
+                if (s.StationId == id) { pos = s.transform.position; return true; }
+            pos = Vector3.zero;
+            return false;
+        }
+
+        static bool Nearest(Vector3 from, string defId, out Vector3 pos)
+        {
+            pos = from;
+            float best = float.MaxValue;
+            foreach (var o in DestructibleObject.All)
+            {
+                if (o.IsDismantled || o.Definition.id != defId) continue;
+                float d = (o.Center - from).sqrMagnitude;
+                if (d < best) { best = d; pos = o.Center; }
+            }
+            return best < float.MaxValue;
+        }
+
+        static bool NearestWith(Vector3 from, string resourceId, out Vector3 pos)
+        {
+            pos = from;
+            float best = float.MaxValue;
+            var tool = PlayerEquipment.Instance != null ? PlayerEquipment.Instance.Equipped : null;
+            int tier = tool != null ? tool.tier : 1;
+            foreach (var o in DestructibleObject.All)
+            {
+                if (o.IsDismantled || o.Definition.tier > tier) continue;
+                bool has = false;
+                foreach (var y in o.Definition.yields) if (y.resource != null && y.resource.id == resourceId) has = true;
+                if (!has) continue;
+                float d = (o.Center - from).sqrMagnitude;
+                if (d < best) { best = d; pos = o.Center; }
+            }
+            return best < float.MaxValue;
+        }
+
         IEnumerator SayLater(string line, float delay, float seconds)
         {
             yield return new WaitForSeconds(delay);

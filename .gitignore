@@ -60,3 +60,7 @@ steam_appid.txt
 
 # Third-party reference images: not licensed for redistribution, keep local only
 docs/concept/refs/
+
+# Python bytecode
+__pycache__/
+*.pyc

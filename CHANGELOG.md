@@ -2,7 +2,26 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
-## [0.0.1] — Module 1 (in progress)
+## [0.0.2] — Module 1b: character revision
+
+### Changed
+- Third-person over-the-shoulder camera is now the default; the Rookie is visible on the moon surface.
+- Movement is relative to the camera; the Rookie turns to face the direction of travel.
+- SCRAP-BOT rebuilt to match the approved reference (white head, screen face with slanted cyan eyes,
+  yellow ear discs and chest, cyan core light) and hovers at shoulder height beside the player.
+
+### Added
+- V (or right-stick click) switches between third-person and first-person; the body still casts a shadow in first person.
+- Placeholder Rookie model styled after the reference: orange suit and helmet, black visor, grey ear caps,
+  backpack with oxygen tanks, mechanical salvage arm on the right with a tool mount for Module 2.
+- Walk, sprint, jump and landing animation (procedural, replaced by real animations in the art pass).
+- Boot prints in the regolith that fade after about 25 seconds, and low-gravity dust puffs on steps and landings.
+- Camera pulls in so rocks and buildings never block the view.
+
+### Removed
+- First-person-only controller (replaced by the player controller and camera rig).
+
+## [0.0.1] — Module 1
 
 ### Added
 - Unity 6 URP project structure and folder layout.

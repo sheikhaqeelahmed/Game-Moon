@@ -32,7 +32,7 @@ namespace PlanetScrappers.EditorTools
 
         class Mats
         {
-            public Material Regolith, Road, Rim, CraterFloor, BaseWhite, TrimOrange, TrimTeal, TrimYellow, Glass, Screen,
+            public Material Regolith, Road, Rim, CraterFloor, BaseWhite, SuitOrange, SuitOrangeDark, SuitGrey, VisorBlack, TrimOrange, TrimTeal, TrimYellow, Glass, Screen,
                 Rust, RustDark, Metal, MetalDark, Rubber, ContainerRed, ContainerTeal, ContainerBlue, VendingRed,
                 ScooterOrange, TruckGrey, LockedGrey, Hazard, Halcyon, BotYellow, BotWhite, BotEye, WrenchRust, Fence;
         }
@@ -529,7 +529,7 @@ namespace PlanetScrappers.EditorTools
 
         // ───────────────────────────── Player & companion ─────────────────────────────
 
-        static FirstPersonController BuildPlayer()
+        static PlayerController BuildPlayer()
         {
             var spawn = MapToWorld(320, 300) + Vector3.up * 0.1f;
             var player = new GameObject("Player (Rookie Scrapper)");
@@ -537,71 +537,310 @@ namespace PlanetScrappers.EditorTools
             player.tag = "Player";
 
             var cc = player.AddComponent<CharacterController>();
-            cc.height = 1.8f;
-            cc.radius = 0.35f;
-            cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.height = 2.0f;
+            cc.radius = 0.38f;
+            cc.center = new Vector3(0f, 1.0f, 0f);
             cc.stepOffset = 0.4f;
             cc.slopeLimit = 50f;
 
-            var camGo = new GameObject("Main Camera");
+            var visual = BuildRookie(player.transform);
+            var controller = player.AddComponent<PlayerController>();
+            SetRef(visual, "controller", controller);
+
+            BuildStepEffects(player.transform, visual);
+
+            var camGo = new GameObject("Player Camera");
             camGo.tag = "MainCamera";
-            camGo.transform.SetParent(player.transform, false);
-            camGo.transform.localPosition = new Vector3(0f, 1.65f, 0f);
             var cam = camGo.AddComponent<Camera>();
-            cam.fieldOfView = 75f;
+            cam.fieldOfView = 65f;
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 3000f;
             cam.clearFlags = CameraClearFlags.Skybox;
             camGo.AddComponent<AudioListener>();
+            var playerCam = camGo.AddComponent<PlayerCamera>();
+            SetRef(playerCam, "target", player.transform);
+            SetRef(playerCam, "visual", visual);
+            SetRef(controller, "playerCamera", playerCam);
 
-            var fpc = player.AddComponent<FirstPersonController>();
-            var so = new SerializedObject(fpc);
-            so.FindProperty("cameraRoot").objectReferenceValue = camGo.transform;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            return fpc;
+            Physics.SyncTransforms();
+            playerCam.SetTarget(player.transform, visual);
+            playerCam.SnapToPose();
+            return controller;
         }
 
-        static void BuildScrapBot(FirstPersonController player)
+        static void SetRef(Object component, string field, Object value)
         {
-            var bot = new GameObject("SCRAP-BOT (placeholder)");
-            bot.transform.position = player.transform.position + new Vector3(1.7f, 1.9f, 3.2f);
+            var so = new SerializedObject(component);
+            so.FindProperty(field).objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
 
-            var head = Primitive(PrimitiveType.Sphere, "Head", bot.transform, Vector3.zero, Vector3.one * 0.55f, m.BotWhite, collider: false);
-            head.transform.localPosition = new Vector3(0f, 0.15f, 0f);
-            var face = Primitive(PrimitiveType.Cube, "Face Screen", head.transform, Vector3.zero, Vector3.one, m.MetalDark, collider: false);
-            face.transform.localPosition = new Vector3(0f, 0.02f, 0.38f);
-            face.transform.localScale = new Vector3(0.7f, 0.42f, 0.2f);
-            foreach (float x in new[] { -0.17f, 0.17f })
+        /// <summary>
+        /// Placeholder Rookie built from primitives, styled after the approved reference:
+        /// orange suit and round helmet, black visor, grey ear caps, black harness and backpack,
+        /// mechanical salvage arm on the left. Pivots sit at hips and shoulders for PlayerVisual.
+        /// </summary>
+        static PlayerVisual BuildRookie(Transform player)
+        {
+            var root = new GameObject("Rookie (placeholder model)").transform;
+            root.SetParent(player, false);
+
+            var body = new GameObject("Body").transform;
+            body.SetParent(root, false);
+
+            // Torso and kit
+            Part(PrimitiveType.Capsule, "Torso", body, new Vector3(0f, 1.28f, 0f), new Vector3(0.64f, 0.36f, 0.48f), m.SuitOrange);
+            Part(PrimitiveType.Cylinder, "Belt", body, new Vector3(0f, 1.0f, 0f), new Vector3(0.66f, 0.05f, 0.5f), m.Rubber);
+            Part(PrimitiveType.Cube, "Belt Buckle", body, new Vector3(0f, 1.0f, 0.25f), new Vector3(0.14f, 0.08f, 0.02f), m.MetalDark);
+            foreach (float x in new[] { -0.15f, 0.15f })
             {
-                var eye = Primitive(PrimitiveType.Sphere, "Eye", head.transform, Vector3.zero, Vector3.one, m.BotEye, collider: false);
-                eye.transform.localPosition = new Vector3(x, 0.03f, 0.47f);
-                eye.transform.localScale = new Vector3(0.16f, 0.1f, 0.05f);
-                var ear = Primitive(PrimitiveType.Cylinder, "Ear", head.transform, Vector3.zero, Vector3.one, m.BotYellow, collider: false);
-                ear.transform.localPosition = new Vector3(x * 3f, 0f, 0f);
-                ear.transform.localScale = new Vector3(0.28f, 0.05f, 0.28f);
-                ear.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                Part(PrimitiveType.Cube, "Harness Strap", body, new Vector3(x, 1.32f, 0.235f), new Vector3(0.07f, 0.52f, 0.02f), m.Rubber);
+                Part(PrimitiveType.Cube, "Chest Pocket", body, new Vector3(x, 1.4f, 0.24f), new Vector3(0.14f, 0.1f, 0.03f), m.SuitOrangeDark);
             }
-            var body = Primitive(PrimitiveType.Sphere, "Body", bot.transform, Vector3.zero, Vector3.one, m.BotYellow, collider: false);
-            body.transform.localPosition = new Vector3(0f, -0.25f, 0f);
-            body.transform.localScale = new Vector3(0.38f, 0.32f, 0.34f);
-            var core = Primitive(PrimitiveType.Sphere, "Core Light", body.transform, Vector3.zero, Vector3.one, m.BotEye, collider: false);
-            core.transform.localPosition = new Vector3(0f, 0f, 0.48f);
-            core.transform.localScale = Vector3.one * 0.3f;
+            Part(PrimitiveType.Cylinder, "Collar", body, new Vector3(0f, 1.64f, 0f), new Vector3(0.44f, 0.04f, 0.44f), m.SuitGrey);
+            Part(PrimitiveType.Cube, "Backpack", body, new Vector3(0f, 1.32f, -0.3f), new Vector3(0.5f, 0.56f, 0.24f), m.Rubber);
+            foreach (float x in new[] { -0.12f, 0.12f })
+                Part(PrimitiveType.Cylinder, "Oxygen Tank", body, new Vector3(x, 1.36f, -0.43f), new Vector3(0.14f, 0.24f, 0.14f), m.MetalDark);
 
-            var light = new GameObject("Eye Glow").AddComponent<Light>();
-            light.transform.SetParent(bot.transform, false);
-            light.transform.localPosition = new Vector3(0f, 0.1f, 0.5f);
+            // Helmet
+            var head = new GameObject("Head").transform;
+            head.SetParent(body, false);
+            head.localPosition = new Vector3(0f, 1.88f, 0f);
+            Part(PrimitiveType.Sphere, "Helmet", head, Vector3.zero, Vector3.one * 0.6f, m.SuitOrange);
+            Part(PrimitiveType.Sphere, "Visor", head, new Vector3(0f, -0.01f, 0.17f), new Vector3(0.48f, 0.42f, 0.3f), m.VisorBlack);
+            foreach (float x in new[] { -0.3f, 0.3f })
+            {
+                Part(PrimitiveType.Cylinder, "Ear Cap", head, new Vector3(x, 0f, 0f), new Vector3(0.2f, 0.05f, 0.2f), m.SuitGrey, new Vector3(0f, 0f, 90f));
+                Part(PrimitiveType.Cylinder, "Ear Cap Centre", head, new Vector3(x * 1.08f, 0f, 0f), new Vector3(0.1f, 0.05f, 0.1f), m.Rubber, new Vector3(0f, 0f, 90f));
+            }
+
+            // Left arm: suit sleeve and glove
+            var armL = Pivot("Arm L", body, new Vector3(-0.4f, 1.52f, 0f));
+            Part(PrimitiveType.Capsule, "Sleeve", armL, new Vector3(0f, -0.26f, 0f), new Vector3(0.21f, 0.26f, 0.21f), m.SuitOrange);
+            Part(PrimitiveType.Cylinder, "Cuff", armL, new Vector3(0f, -0.47f, 0f), new Vector3(0.23f, 0.03f, 0.23f), m.SuitOrangeDark);
+            Part(PrimitiveType.Sphere, "Glove", armL, new Vector3(0f, -0.57f, 0f), Vector3.one * 0.2f, m.Rubber);
+
+            // Right arm: mechanical salvage arm, as in the reference (tools mount here in Module 2)
+            var armR = Pivot("Salvage Arm R", body, new Vector3(0.4f, 1.52f, 0f));
+            Part(PrimitiveType.Cylinder, "Shoulder Gear", armR, new Vector3(0.05f, 0f, 0f), new Vector3(0.28f, 0.04f, 0.28f), m.Metal, new Vector3(0f, 0f, 90f));
+            Part(PrimitiveType.Capsule, "Upper Rod", armR, new Vector3(0f, -0.22f, 0f), new Vector3(0.12f, 0.2f, 0.12f), m.Metal);
+            Part(PrimitiveType.Cylinder, "Elbow Gear", armR, new Vector3(0.04f, -0.42f, 0f), new Vector3(0.21f, 0.04f, 0.21f), m.Metal, new Vector3(0f, 0f, 90f));
+            Part(PrimitiveType.Capsule, "Forearm", armR, new Vector3(0f, -0.58f, 0f), new Vector3(0.11f, 0.16f, 0.11f), m.MetalDark);
+            var tool = Pivot("Tool Mount", armR, new Vector3(0f, -0.74f, 0f));
+            Part(PrimitiveType.Cube, "Claw A", tool, new Vector3(-0.05f, -0.05f, 0.03f), new Vector3(0.04f, 0.13f, 0.04f), m.MetalDark, new Vector3(0f, 0f, 12f));
+            Part(PrimitiveType.Cube, "Claw B", tool, new Vector3(0.05f, -0.05f, 0.03f), new Vector3(0.04f, 0.13f, 0.04f), m.MetalDark, new Vector3(0f, 0f, -12f));
+            Part(PrimitiveType.Cube, "Claw C", tool, new Vector3(0f, -0.05f, -0.05f), new Vector3(0.04f, 0.13f, 0.04f), m.MetalDark, new Vector3(-12f, 0f, 0f));
+
+            // Legs
+            Transform Leg(string side, float x, out Transform foot)
+            {
+                var leg = Pivot("Leg " + side, root, new Vector3(x, 0.92f, 0f));
+                Part(PrimitiveType.Capsule, "Trouser", leg, new Vector3(0f, -0.4f, 0f), new Vector3(0.25f, 0.4f, 0.25f), m.SuitOrange);
+                Part(PrimitiveType.Sphere, "Knee Pad", leg, new Vector3(0f, -0.42f, 0.1f), new Vector3(0.21f, 0.17f, 0.12f), m.SuitOrangeDark);
+                Part(PrimitiveType.Cube, "Boot", leg, new Vector3(0f, -0.83f, 0.04f), new Vector3(0.27f, 0.18f, 0.38f), m.Rubber);
+                foot = Pivot("Foot " + side, leg, new Vector3(0f, -0.92f, 0.04f));
+                return leg;
+            }
+            var legL = Leg("L", -0.14f, out var footL);
+            var legR = Leg("R", 0.14f, out var footR);
+
+            var visual = root.gameObject.AddComponent<PlayerVisual>();
+            SetRef(visual, "body", body);
+            SetRef(visual, "leftLeg", legL);
+            SetRef(visual, "rightLeg", legR);
+            SetRef(visual, "leftArm", armL);
+            SetRef(visual, "rightArm", armR);
+            SetRef(visual, "leftFoot", footL);
+            SetRef(visual, "rightFoot", footR);
+            return visual;
+        }
+
+        static Transform Pivot(string name, Transform parent, Vector3 localPos)
+        {
+            var t = new GameObject(name).transform;
+            t.SetParent(parent, false);
+            t.localPosition = localPos;
+            return t;
+        }
+
+        /// <summary>A collider-free primitive in local space, for character parts.</summary>
+        static GameObject Part(PrimitiveType type, string name, Transform parent, Vector3 localPos, Vector3 scale, Material mat, Vector3 euler = default)
+        {
+            var go = GameObject.CreatePrimitive(type);
+            go.name = name;
+            Object.DestroyImmediate(go.GetComponent<Collider>());
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            go.transform.localRotation = Quaternion.Euler(euler);
+            go.transform.localScale = scale;
+            go.GetComponent<Renderer>().sharedMaterial = mat;
+            return go;
+        }
+
+        static void BuildStepEffects(Transform player, PlayerVisual visual)
+        {
+            var root = new GameObject("Step Effects").transform;
+            root.SetParent(player, false);
+
+            var particleBase = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/ParticlesUnlit.mat");
+            var printMat = ParticleMaterial("Footprint", particleBase, GenerateFootprint(), new Color(0.16f, 0.17f, 0.19f, 0.8f));
+            var dustMat = ParticleMaterial("RegolithDust", particleBase, GenerateSoftDot(), new Color(0.86f, 0.87f, 0.89f, 0.55f));
+
+            var prints = Particles("Footprints", root, printMat, lifetime: 25f, max: 160, horizontal: true, gravity: 0f);
+            var dust = Particles("Dust", root, dustMat, lifetime: 1.6f, max: 200, horizontal: false, gravity: 0.12f);
+            var dustMain = dust.main;
+            dustMain.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.42f);
+            var size = dust.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.6f, 1f, 1.6f));
+            var limit = dust.limitVelocityOverLifetime;
+            limit.enabled = true;
+            limit.drag = 1.2f;
+
+            var fx = player.gameObject.AddComponent<FootprintsAndDust>();
+            SetRef(fx, "visual", visual);
+            SetRef(fx, "prints", prints);
+            SetRef(fx, "dust", dust);
+        }
+
+        static ParticleSystem Particles(string name, Transform parent, Material mat, float lifetime, int max, bool horizontal, float gravity)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.duration = 5f;
+            main.startLifetime = lifetime;
+            main.startSpeed = 0f;
+            main.startSize = 0.34f;
+            main.maxParticles = max;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.gravityModifier = gravity;
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            var shape = ps.shape;
+            shape.enabled = false;
+            var colour = ps.colorOverLifetime;
+            colour.enabled = true;
+            var fade = new Gradient();
+            fade.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, horizontal ? 0.6f : 0.2f), new GradientAlphaKey(0f, 1f) });
+            colour.color = fade;
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.renderMode = horizontal ? ParticleSystemRenderMode.HorizontalBillboard : ParticleSystemRenderMode.Billboard;
+            renderer.sharedMaterial = mat;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            return ps;
+        }
+
+        static Material ParticleMaterial(string name, Material baseMat, Texture2D tex, Color tint)
+        {
+            string path = $"{MaterialDir}/{name}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = baseMat != null ? new Material(baseMat) : new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            // Alpha-blended transparent surface.
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.SetTexture("_BaseMap", tex);
+            mat.SetColor("_BaseColor", tint);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        static Texture2D GenerateFootprint()
+        {
+            const int size = 128;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float u = (x - 64f) / 64f, v = (y - 64f) / 64f;
+                // Sole: oval toe box (top) and smaller heel (bottom); texture "up" = walking direction.
+                float toe = (u * u) / (0.30f * 0.30f) + ((v - 0.32f) * (v - 0.32f)) / (0.52f * 0.52f);
+                float heel = (u * u) / (0.24f * 0.24f) + ((v + 0.55f) * (v + 0.55f)) / (0.28f * 0.28f);
+                float d = Mathf.Min(toe, heel);
+                float a = Mathf.Clamp01((1.05f - d) * 6f);
+                bool tread = ((int)((v + 1f) * 14f)) % 2 == 0;
+                a *= tread ? 1f : 0.55f;
+                px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+            tex.SetPixels32(px);
+            return SaveTexture(tex, "Footprint", TextureWrapMode.Clamp, mipmaps: true, alpha: true);
+        }
+
+        static Texture2D GenerateSoftDot()
+        {
+            const int size = 64;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x, y), new Vector2(31.5f, 31.5f)) / 32f;
+                float a = Mathf.Clamp01(1f - d);
+                px[y * size + x] = new Color32(255, 255, 255, (byte)(a * a * 255));
+            }
+            tex.SetPixels32(px);
+            return SaveTexture(tex, "SoftDot", TextureWrapMode.Clamp, mipmaps: true, alpha: true);
+        }
+
+        /// <summary>
+        /// SCRAP-BOT placeholder styled after the approved reference: white head with a black
+        /// screen face and cyan slanted eyes, yellow ear discs and chest, cyan core light,
+        /// tapered white lower body, flipper arms. Hovers at shoulder height beside the player.
+        /// </summary>
+        static void BuildScrapBot(PlayerController player)
+        {
+            var bot = new GameObject("SCRAP-BOT (placeholder model)");
+            bot.transform.position = player.transform.position + new Vector3(1.15f, 1.65f, 0.9f);
+            var model = new GameObject("Model").transform;
+            model.SetParent(bot.transform, false);
+            model.localScale = Vector3.one * 0.8f;
+
+            Part(PrimitiveType.Sphere, "Head", model, new Vector3(0f, 0.18f, 0f), new Vector3(0.58f, 0.5f, 0.52f), m.BotWhite);
+            Part(PrimitiveType.Cylinder, "Head Crest", model, new Vector3(0f, 0.43f, -0.02f), new Vector3(0.22f, 0.025f, 0.26f), m.BotYellow);
+            Part(PrimitiveType.Sphere, "Face Screen", model, new Vector3(0f, 0.17f, 0.17f), new Vector3(0.46f, 0.34f, 0.22f), m.VisorBlack);
+            Part(PrimitiveType.Cube, "Eye L", model, new Vector3(-0.09f, 0.19f, 0.285f), new Vector3(0.12f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, -20f));
+            Part(PrimitiveType.Cube, "Eye R", model, new Vector3(0.09f, 0.19f, 0.285f), new Vector3(0.12f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, 20f));
+            foreach (float x in new[] { -0.29f, 0.29f })
+            {
+                Part(PrimitiveType.Cylinder, "Ear Disc", model, new Vector3(x, 0.18f, 0f), new Vector3(0.19f, 0.04f, 0.19f), m.BotYellow, new Vector3(0f, 0f, 90f));
+                Part(PrimitiveType.Cylinder, "Ear Centre", model, new Vector3(x * 1.06f, 0.18f, 0f), new Vector3(0.09f, 0.04f, 0.09f), m.Rubber, new Vector3(0f, 0f, 90f));
+                Part(PrimitiveType.Sphere, "Shoulder", model, new Vector3(x * 0.83f, -0.1f, 0f), Vector3.one * 0.13f, m.Rubber);
+                Part(PrimitiveType.Capsule, "Flipper", model, new Vector3(x * 1.1f, -0.28f, 0f), new Vector3(0.1f, 0.16f, 0.08f), m.BotWhite, new Vector3(0f, 0f, x > 0 ? 20f : -20f));
+            }
+            Part(PrimitiveType.Sphere, "Chest", model, new Vector3(0f, -0.18f, 0f), new Vector3(0.42f, 0.3f, 0.36f), m.BotYellow);
+            Part(PrimitiveType.Sphere, "Core Light", model, new Vector3(0f, -0.16f, 0.17f), Vector3.one * 0.1f, m.BotEye);
+            Part(PrimitiveType.Capsule, "Lower Body", model, new Vector3(0f, -0.42f, 0f), new Vector3(0.3f, 0.18f, 0.28f), m.BotWhite);
+
+            var light = new GameObject("Core Glow").AddComponent<Light>();
+            light.transform.SetParent(model, false);
+            light.transform.localPosition = new Vector3(0f, -0.1f, 0.4f);
             light.type = LightType.Point;
             light.color = new Color(0.34f, 0.78f, 1f);
-            light.range = 3f;
-            light.intensity = 1.2f;
+            light.range = 2.5f;
+            light.intensity = 1f;
 
             var follower = bot.AddComponent<ScrapBotFollower>();
-            follower.SetTarget(player.transform, player.CameraRoot);
-            var so = new SerializedObject(follower);
-            so.FindProperty("player").objectReferenceValue = player.transform;
-            so.FindProperty("playerCamera").objectReferenceValue = player.CameraRoot;
-            so.ApplyModifiedPropertiesWithoutUndo();
+            var camTransform = player.Camera != null ? player.Camera.transform : null;
+            follower.SetTarget(player.transform, camTransform);
+            SetRef(follower, "player", player.transform);
+            SetRef(follower, "playerCamera", camTransform);
         }
 
         // ───────────────────────────── Primitive helpers ─────────────────────────────
@@ -739,6 +978,10 @@ namespace PlanetScrappers.EditorTools
                 Halcyon = Lit("Halcyon", Color.white, 0.3f, tex: halcyonTex, emission: Hex("#0A1830")),
                 BotYellow = Lit("BotYellow", Hex("#F4C430"), 0.55f),
                 BotWhite = Lit("BotWhite", Hex("#F2F2EC"), 0.6f),
+                SuitOrange = Lit("SuitOrange", Hex("#EC6E24"), 0.35f),
+                SuitOrangeDark = Lit("SuitOrangeDark", Hex("#C9561A"), 0.3f),
+                SuitGrey = Lit("SuitGrey", Hex("#9AA3AB"), 0.5f, metallic: 0.3f),
+                VisorBlack = Lit("VisorBlack", Hex("#07090C"), 0.95f, metallic: 0.2f),
                 BotEye = Lit("BotEye", Hex("#57C7FF"), 0.8f, emission: Hex("#57C7FF") * 2.5f),
                 WrenchRust = Lit("WrenchRust", Hex("#A0522D"), 0.2f, metallic: 0.3f),
                 Fence = Lit("Fence", Hex("#6B737B"), 0.3f, metallic: 0.5f),
@@ -925,7 +1168,7 @@ namespace PlanetScrappers.EditorTools
             return SaveTexture(tex, "Halcyon", TextureWrapMode.Repeat, mipmaps: true);
         }
 
-        static Texture2D SaveTexture(Texture2D tex, string name, TextureWrapMode wrap, bool mipmaps)
+        static Texture2D SaveTexture(Texture2D tex, string name, TextureWrapMode wrap, bool mipmaps, bool alpha = false)
         {
             tex.Apply();
             string path = $"{TextureDir}/{name}.png";
@@ -939,6 +1182,7 @@ namespace PlanetScrappers.EditorTools
             importer.sRGBTexture = true;
             importer.textureCompression = TextureImporterCompression.CompressedHQ;
             importer.maxTextureSize = 4096;
+            importer.alphaIsTransparency = alpha;
             importer.SaveAndReimport();
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }

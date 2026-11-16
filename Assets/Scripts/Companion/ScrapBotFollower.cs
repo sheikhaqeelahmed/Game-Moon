@@ -12,7 +12,7 @@ namespace PlanetScrappers.Companion
         [SerializeField] Transform playerCamera;
 
         [Tooltip("Hover position relative to the player's facing direction (x = right, y = up, z = forward).")]
-        [SerializeField] Vector3 offset = new Vector3(1.7f, 1.9f, 3.2f);
+        [SerializeField] Vector3 offset = new Vector3(1.15f, 1.65f, 0.9f);
         [SerializeField] float followSmoothTime = 0.3f;
         [SerializeField] float turnSpeed = 5f;
         [SerializeField] float bobAmplitude = 0.12f;
@@ -20,6 +20,10 @@ namespace PlanetScrappers.Companion
         [Tooltip("If the bot falls this far behind (e.g. after a respawn), it snaps back.")]
         [SerializeField] float snapDistance = 30f;
 
+        [Tooltip("Hover position used in first-person view, further out so it does not fill the screen.")]
+        [SerializeField] Vector3 firstPersonOffset = new Vector3(1.7f, 1.75f, 2.8f);
+
+        PlanetScrappers.Player.PlayerCamera cameraRig;
         Vector3 velocity;
         Vector3 lastPlayerPosition;
         Vector3 playerVelocity;
@@ -48,7 +52,12 @@ namespace PlanetScrappers.Companion
             if (frameVelocity.sqrMagnitude > 400f) frameVelocity = Vector3.zero; // teleport, ignore
             playerVelocity = Vector3.Lerp(playerVelocity, frameVelocity, 1f - Mathf.Exp(-10f * dt));
 
-            Quaternion yaw = Quaternion.Euler(0f, player.eulerAngles.y, 0f);
+            // Stay on the right of what the camera sees, whichever way the body faces.
+            float viewYaw = playerCamera != null ? playerCamera.eulerAngles.y : player.eulerAngles.y;
+            Quaternion yaw = Quaternion.Euler(0f, viewYaw, 0f);
+            if (cameraRig == null && playerCamera != null) cameraRig = playerCamera.GetComponent<PlanetScrappers.Player.PlayerCamera>();
+            bool firstPerson = cameraRig != null && cameraRig.Mode == PlanetScrappers.Player.CameraMode.FirstPerson;
+            Vector3 offset = firstPerson ? firstPersonOffset : this.offset;
             float bob = Mathf.Sin(Time.time * bobFrequency * Mathf.PI * 2f) * bobAmplitude;
             Vector3 desired = player.position + yaw * offset + playerVelocity * followSmoothTime + Vector3.up * bob;
 

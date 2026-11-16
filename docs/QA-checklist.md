@@ -17,6 +17,9 @@ QA-002  [M1]    Start in Rust Valley                    Player stands outside th
 QA-003  [M1]    Move: WASD, Shift to sprint, Space      Smooth movement, sprint is faster, jump is slightly floaty (low gravity).
 QA-003b [M1]    Look with the mouse                     Camera turns smoothly, cannot flip upside down.
 QA-003c [M1]    Esc, then click                         Esc frees the mouse and shows a hint; clicking resumes play.
+QA-003d [M1b]   Press V                                 View switches between third-person and first-person.
+QA-003e [M1b]   Walk and jump in third-person           Rookie walks with legs and arms swinging, leaves footprints and dust.
+QA-003f [M1b]   Walk close to a building or rock        Camera moves in so the view is never blocked.
 QA-004  [M2]    Hit an object with the wrench           Object takes damage, durability bar drops, sound and sparks play.
 QA-005  [M2]    Break an object                         Object breaks apart and is removed.
 QA-006  [M2]    Collect scrap                           Scrap flies to the player; backpack count increases.

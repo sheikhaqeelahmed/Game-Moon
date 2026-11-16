@@ -23,16 +23,25 @@ namespace PlanetScrappers.EditorTools
             Directory.CreateDirectory(outDir);
 
             var player = GameObject.Find("Player (Rookie Scrapper)");
-            var playerCam = player != null ? player.GetComponentInChildren<Camera>() : null;
+            var camObject = GameObject.Find("Player Camera");
+            var playerCam = camObject != null ? camObject.GetComponent<Camera>() : null;
 
             if (playerCam != null)
-                Render(playerCam, Path.Combine(outDir, "01_spawn_first_person.png"));
+                Render(playerCam, Path.Combine(outDir, "01_spawn_third_person.png"));
 
             var go = new GameObject("SnapshotCamera");
             var cam = go.AddComponent<Camera>();
             cam.fieldOfView = 60f;
             cam.farClipPlane = 3000f;
             cam.clearFlags = CameraClearFlags.Skybox;
+
+            if (player != null)
+            {
+                Vector3 p = player.transform.position;
+                cam.fieldOfView = 40f;
+                Shot(cam, p + new Vector3(1.4f, 1.5f, 4.2f), p + new Vector3(0.3f, 1.2f, 0f), Path.Combine(outDir, "00_rookie_and_bot_closeup.png"));
+                cam.fieldOfView = 60f;
+            }
 
             Shot(cam, new Vector3(0f, 150f, -150f), new Vector3(0f, 0f, 0f), Path.Combine(outDir, "02_overview_from_south.png"));
             Shot(cam, new Vector3(0f, 220f, 0f), Quaternion.Euler(90f, 0f, 0f), Path.Combine(outDir, "03_top_down.png"));

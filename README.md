@@ -28,14 +28,15 @@ collect the scrap, sell it, buy better tools and grow a salvage operation.
    textures and `Assets/Scenes/RustValley.unity`.
 5. Open `Assets/Scenes/RustValley.unity` and press Play.
 
-## Controls (Module 1)
+## Controls (Module 1b)
 
 | Action | Keyboard / mouse | Gamepad |
 |---|---|---|
 | Move | WASD or arrow keys | Left stick |
-| Look | Mouse | Right stick |
+| Look / orbit camera | Mouse | Right stick |
 | Sprint | Left Shift | Left stick press |
 | Jump | Space | A / Cross |
+| Switch third / first person | V | Right stick press |
 | Release mouse | Esc | — |
 | Resume | Left click | — |
 
@@ -78,7 +79,8 @@ docs/             Concept, licences, QA material
 
 | Module | Scope | Status |
 |---|---|---|
-| 1 | Project setup, first-person movement, Rust Valley grey-box | In progress |
+| 1 | Project setup, movement, Rust Valley grey-box | Done (v0.0.1) |
+| 1b | Third-person camera, Rookie and SCRAP-BOT placeholders, dust and footprints | Done (v0.0.2), awaiting client review |
 | 2 | Wrench, destruction, scrap collection | Not started |
 | 3 | Inventory, selling, credits, upgrades | Not started |
 | 4 | Missions, UI, save/load, art pass, QA package | Not started |

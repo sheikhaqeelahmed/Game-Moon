@@ -2,6 +2,19 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.6.0] — Art pass 2a: Rust Valley props and buildings
+
+### Added
+- **New models for all Rust Valley junk** (script-built in Blender, `tools/blender/build_props.py`): oil drums
+  (rust and teal), busted vending bots with a dome head and product window, hover scooters with glowing hover pods,
+  corrugated cargo containers (red, teal, blue) with doors and lock bars, Mule-7 hauler trucks with a loose wheel,
+  and Machine Row generator units with a turbine fan, vents and a control panel.
+- **New base buildings:** the Base, Upgrade Station, Recycling Depot and Warehouse now have panelled walls, a
+  coloured band, door canopies with lights, framed windows, roof units, a solar panel, an antenna and a dish.
+  The Warehouse has a roller door.
+- Props are built in pieces, so damage still knocks panels and details off in stages before the object breaks.
+  Collision shapes are unchanged, so gameplay plays exactly as before.
+
 ## [0.5.0] — Art pass 1: characters, truck and a brighter look
 
 ### Added

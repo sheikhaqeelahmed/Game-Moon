@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.5.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.6.0)
 ========================================
 
 How to test
@@ -68,6 +68,9 @@ QA-048  New character models                 Rookie walks, swings the arm and ho
 QA-049  Nova and Captain Bolt                 Standing at their stations; heads turn toward you when you are close.
 QA-050  SH-01 truck                           New model drives; the wheels spin the right way; the bin still fills.
 QA-051  Brighter look                         Scene looks sunlit, not dark; nothing is washed out or too glowy.
+QA-052  New junk models                        Drums, vending bots, scooters, containers, Mule-7 trucks and generators lose pieces as you hit them.
+QA-053  Collisions on new models              You can't walk through any prop or building; nothing blocks you where nothing is visible.
+QA-054  Base buildings                       Base, Upgrade Station, Depot and Warehouse look finished; signs are readable.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

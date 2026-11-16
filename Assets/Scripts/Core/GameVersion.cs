@@ -6,8 +6,8 @@ namespace PlanetScrappers.Core
     /// </summary>
     public static class GameVersion
     {
-        public const string Version = "0.5.0";
-        public const string Milestone = "Art pass 1: characters, truck, bright look";
+        public const string Version = "0.6.0";
+        public const string Milestone = "Art pass 2a: Rust Valley props and buildings";
         public const string ProductName = "Planet Scrappers";
 
         public static string Label => $"{ProductName} v{Version} · {Milestone}";

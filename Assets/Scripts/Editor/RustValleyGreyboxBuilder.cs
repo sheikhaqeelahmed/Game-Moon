@@ -441,6 +441,14 @@ namespace PlanetScrappers.EditorTools
             var b = new GameObject(name).transform;
             b.SetParent(parent);
             b.position = groundPos;
+            var model = InstantiateModel("Buildings/" + name.Replace(" ", ""), b, "Model");
+            if (model != null)
+            {
+                ColliderBox(b, "Shell", new Vector3(0f, size.y * 0.5f, 0f), size);
+                foreach (var tr in b.GetComponentsInChildren<Transform>()) MarkStatic(tr.gameObject);
+                Sign(b, label, groundPos + new Vector3(0f, size.y * 0.72f + 0.9f, size.z * 0.5f + 0.1f), 180f, 1f);
+                return;
+            }
             MarkStatic(BoxLocal("Shell", b, new Vector3(0f, size.y * 0.5f, 0f), size, m.BaseWhite));
             MarkStatic(BoxLocal("Trim", b, new Vector3(0f, size.y * 0.72f, 0f), new Vector3(size.x + 0.06f, 0.5f, size.z + 0.06f), trim, collider: false));
             MarkStatic(BoxLocal("Roof Vents", b, new Vector3(0f, size.y + 0.25f, 0f), new Vector3(size.x * 0.6f, 0.5f, size.z * 0.3f), m.MetalDark, collider: false));
@@ -554,6 +562,11 @@ namespace PlanetScrappers.EditorTools
         static void Drum(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T1_OilDrum_{index:00}", pos, index * 37f);
+            if (PropModel(t, "OilDrum", index % 3 == 0 ? "Rust" : null, "ContainerTeal"))
+            {
+                ColliderBox(t, "Drum", new Vector3(0f, 0.45f, 0f), new Vector3(0.6f, 0.9f, 0.6f));
+                return;
+            }
             CylLocal("Drum", t, new Vector3(0f, 0.45f, 0f), new Vector3(0.6f, 0.45f, 0.6f), index % 3 == 0 ? m.ContainerTeal : m.Rust);
             CylLocal("Band", t, new Vector3(0f, 0.6f, 0f), new Vector3(0.62f, 0.03f, 0.62f), m.RustDark, collider: false);
             CylLocal("Band", t, new Vector3(0f, 0.3f, 0f), new Vector3(0.62f, 0.03f, 0.62f), m.RustDark, collider: false);
@@ -562,6 +575,11 @@ namespace PlanetScrappers.EditorTools
         static void Scooter(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T1_HoverScooter_{index:00}", pos, yaw);
+            if (PropModel(t, "HoverScooter"))
+            {
+                ColliderBox(t, "Deck", new Vector3(0f, 0.45f, 0f), new Vector3(0.7f, 0.25f, 1.8f));
+                return;
+            }
             BoxLocal("Deck", t, new Vector3(0f, 0.45f, 0f), new Vector3(0.7f, 0.25f, 1.8f), m.ScooterOrange);
             BoxLocal("Hover Pad", t, new Vector3(0f, 0.25f, 0f), new Vector3(0.8f, 0.15f, 1.4f), m.MetalDark, collider: false);
             BoxLocal("Stem", t, new Vector3(0f, 0.95f, 0.75f), new Vector3(0.12f, 0.9f, 0.12f), m.Metal, collider: false);
@@ -572,6 +590,15 @@ namespace PlanetScrappers.EditorTools
         static void Mule7(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T2_Mule7Truck_{index:00}", pos, yaw);
+            if (PropModel(t, "Mule7Truck"))
+            {
+                ColliderBox(t, "Cargo Box", new Vector3(0f, 1.9f, -1.1f), new Vector3(2.6f, 2.4f, 5f));
+                ColliderBox(t, "Cab", new Vector3(0f, 1.5f, 2.4f), new Vector3(2.4f, 1.9f, 2f));
+                ColliderBox(t, "Chassis", new Vector3(0f, 0.65f, 0.3f), new Vector3(2.3f, 0.4f, 7.2f));
+                ColliderBox(t, "Loose Wheel", new Vector3(2.6f, 0.15f, -3.5f), new Vector3(1.1f, 0.3f, 1.1f));
+                t.rotation *= Quaternion.Euler(0f, 0f, -2.5f);
+                return;
+            }
             BoxLocal("Cargo Box", t, new Vector3(0f, 1.9f, -1.1f), new Vector3(2.6f, 2.4f, 5f), m.TruckGrey);
             BoxLocal("Rust", t, new Vector3(1.31f, 1.6f, -1.6f), new Vector3(0.02f, 1.2f, 1.8f), m.Rust, collider: false);
             BoxLocal("Cab", t, new Vector3(0f, 1.5f, 2.4f), new Vector3(2.4f, 1.9f, 2f), m.TruckGrey);
@@ -589,6 +616,11 @@ namespace PlanetScrappers.EditorTools
         static void Container(Transform parent, Vector3 pos, float yaw, Material colour, int index)
         {
             var t = Prop(parent, $"T2_CargoContainer_{index:00}", pos, yaw);
+            if (PropModel(t, "CargoContainer", "ContainerRed", colour.name))
+            {
+                ColliderBox(t, "Shell", new Vector3(0f, 1.3f, 0f), new Vector3(2.4f, 2.6f, 6f));
+                return;
+            }
             BoxLocal("Shell", t, new Vector3(0f, 1.3f, 0f), new Vector3(2.4f, 2.6f, 6f), colour);
             for (int i = -4; i <= 4; i++)
                 BoxLocal("Rib", t, new Vector3(1.21f, 1.3f, i * 0.65f), new Vector3(0.04f, 2.5f, 0.12f), colour, collider: false);
@@ -599,6 +631,11 @@ namespace PlanetScrappers.EditorTools
         static void VendingBot(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T1_VendingBot_{index:00}", pos, yaw);
+            if (PropModel(t, "VendingBot"))
+            {
+                ColliderBox(t, "Body", new Vector3(0f, 1f, 0f), new Vector3(1.1f, 2f, 0.8f));
+                return;
+            }
             BoxLocal("Body", t, new Vector3(0f, 1f, 0f), new Vector3(1.1f, 2f, 0.8f), m.VendingRed);
             BoxLocal("Screen", t, new Vector3(0f, 1.5f, 0.41f), new Vector3(0.7f, 0.4f, 0.02f), m.Screen, collider: false);
             BoxLocal("Slot", t, new Vector3(0f, 0.4f, 0.41f), new Vector3(0.6f, 0.2f, 0.02f), m.MetalDark, collider: false);
@@ -608,6 +645,11 @@ namespace PlanetScrappers.EditorTools
         static void Generator(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T3_GeneratorUnit_{index:00}", pos, 0f);
+            if (PropModel(t, "GeneratorUnit"))
+            {
+                ColliderBox(t, "Housing", new Vector3(0f, 1.4f, 0f), new Vector3(4f, 2.8f, 3f));
+                return;
+            }
             BoxLocal("Housing", t, new Vector3(0f, 1.4f, 0f), new Vector3(4f, 2.8f, 3f), m.LockedGrey);
             CylLocal("Turbine", t, new Vector3(0f, 3.2f, 0f), new Vector3(1.8f, 0.4f, 1.8f), m.MetalDark, collider: false);
             BoxLocal("Hazard Panel", t, new Vector3(0f, 1.6f, -1.51f), new Vector3(1.6f, 1f, 0.02f), m.Hazard, collider: false);
@@ -778,7 +820,7 @@ namespace PlanetScrappers.EditorTools
         /// material named after its "__Key" suffix. Returns null when the model is missing,
         /// so callers fall back to the primitive placeholder.
         /// </summary>
-        static Transform InstantiateModel(string file, Transform parent, string name)
+        static Transform InstantiateModel(string file, Transform parent, string name, string remapFrom = null, string remapTo = null)
         {
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>($"{ModelDir}/{file}.fbx");
             if (asset == null) return null;
@@ -792,13 +834,38 @@ namespace PlanetScrappers.EditorTools
             {
                 int cut = r.name.LastIndexOf("__", System.StringComparison.Ordinal);
                 string key = cut >= 0 ? r.name.Substring(cut + 2) : "";
+                if (remapFrom != null && key == remapFrom) key = remapTo;
                 var field = typeof(Mats).GetField(key);
                 var mat = field != null ? field.GetValue(m) as Material : null;
                 if (mat == null) { Debug.LogWarning($"[Models] {file}: no material '{key}' for {r.name}"); mat = m.MetalDark; }
                 r.sharedMaterial = mat;
                 r.shadowCastingMode = ShadowCastingMode.On;
             }
+            SortChildren(go.transform);
             return go.transform;
+        }
+
+        /// <summary>Orders children by name so prop part groups (P00, P01, ...) come off in sequence.</summary>
+        static void SortChildren(Transform t)
+        {
+            var kids = new System.Collections.Generic.List<Transform>();
+            foreach (Transform c in t) kids.Add(c);
+            kids.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            for (int i = 0; i < kids.Count; i++) { kids[i].SetSiblingIndex(i); SortChildren(kids[i]); }
+        }
+
+        /// <summary>Puts a prop model under t. False when the model file is missing (primitive fallback).</summary>
+        static bool PropModel(Transform t, string file, string remapFrom = null, string remapTo = null) =>
+            InstantiateModel("Props/" + file, t, "Model", remapFrom, remapTo) != null;
+
+        /// <summary>An invisible box collider in the prop's local space (keeps gameplay shapes unchanged).</summary>
+        static void ColliderBox(Transform t, string name, Vector3 localPos, Vector3 size, float zTilt = 0f)
+        {
+            var go = new GameObject(name + " Collider");
+            go.transform.SetParent(t, false);
+            go.transform.localPosition = localPos;
+            go.transform.localRotation = Quaternion.Euler(0f, 0f, zTilt);
+            go.AddComponent<BoxCollider>().size = size;
         }
 
         static void PlaceNpc(string file, string name, Transform parent, Vector3 pos, float yaw)

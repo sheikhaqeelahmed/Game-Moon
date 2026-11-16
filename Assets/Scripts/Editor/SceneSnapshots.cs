@@ -86,10 +86,10 @@ namespace PlanetScrappers.EditorTools
             cam.farClipPlane = 3000f;
             cam.clearFlags = CameraClearFlags.Skybox;
             var all = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
-            foreach (var (prefix, file) in new[] { ("T1_OilDrum", "junk_1_oil_drum.png"), ("T1_VendingBot", "junk_2_vending_bot.png"), ("T1_HoverScooter", "junk_3_hover_scooter.png") })
+            foreach (var (prefix, file) in new[] { ("T1_OilDrum", "junk_1_oil_drum.png"), ("T1_VendingBot", "junk_2_vending_bot.png"), ("T1_HoverScooter", "junk_3_hover_scooter.png"), ("T2_CargoContainer", "junk_6_cargo_container.png"), ("T2_Mule7Truck", "junk_7_mule7_truck.png"), ("T3_GeneratorUnit", "junk_8_generator.png"), ("Recycling Depot", "bldg_depot.png"), ("Warehouse", "bldg_warehouse.png") })
             {
                 Transform t = null;
-                foreach (var x in all) if (x.name.StartsWith(prefix) && (t == null || string.CompareOrdinal(x.name, t.name) < 0)) t = x;
+                foreach (var x in all) if (x.name.StartsWith(prefix) && x.parent != null && x.parent.name != "Model" && (t == null || string.CompareOrdinal(x.name, t.name) < 0)) t = x;
                 if (t == null) continue;
                 var rs = t.GetComponentsInChildren<Renderer>();
                 if (rs.Length == 0) continue;

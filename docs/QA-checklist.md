@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.4.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.5.0)
 ========================================
 
 How to test
@@ -64,6 +64,10 @@ QA-044  Achievements                           Pop-up on unlock; Achievements sc
 QA-045  Objective marker                       Mission panel shows distance and direction to the target.
 QA-046  Accessibility settings                 Text size, reduce motion, toggle tool use, message time all work.
 QA-047  Gamepad in menus                       D-pad/stick moves between buttons, A selects, B/Start goes back.
+QA-048  New character models                 Rookie walks, swings the arm and holds tools correctly; no gaps or floating parts.
+QA-049  Nova and Captain Bolt                 Standing at their stations; heads turn toward you when you are close.
+QA-050  SH-01 truck                           New model drives; the wheels spin the right way; the bin still fills.
+QA-051  Brighter look                         Scene looks sunlit, not dark; nothing is washed out or too glowy.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

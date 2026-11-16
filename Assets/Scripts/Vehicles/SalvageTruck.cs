@@ -23,6 +23,7 @@ namespace PlanetScrappers.Vehicles
         [SerializeField] StorageScrapSink binMagnet;
         [SerializeField] Transform exitPoint;
         [SerializeField] Transform[] wheels;
+        [SerializeField] Vector3 wheelAxis = Vector3.up;
 
         [Header("Handling")]
         [SerializeField] float maxForward = 14f;
@@ -156,7 +157,7 @@ namespace PlanetScrappers.Vehicles
 
             if (wheels != null)
                 foreach (var w in wheels)
-                    if (w != null) w.Rotate(Vector3.up, speed / 0.45f * Mathf.Rad2Deg * dt, Space.Self);
+                    if (w != null) w.Rotate(wheelAxis, speed / 0.45f * Mathf.Rad2Deg * dt, Space.Self);
         }
 
         /// <summary>Places the parked truck (save loading).</summary>

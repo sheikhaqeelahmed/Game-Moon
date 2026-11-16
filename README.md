@@ -95,7 +95,16 @@ Assets/
   Settings/
   UI/
 docs/             Concept, licences, QA material
+tools/blender/    Script that builds the character and vehicle models (FBX into Assets/Art/Models)
 ```
+
+To regenerate the models (Blender 4.2 or newer):
+
+```
+blender -b --factory-startup --python tools/blender/build_models.py
+```
+
+Then rebuild the scene from the Unity menu **Planet Scrappers > Build Rust Valley Greybox**.
 
 ## Milestone status
 
@@ -105,9 +114,11 @@ docs/             Concept, licences, QA material
 | 1b | Third-person camera, Rookie and SCRAP-BOT placeholders, dust and footprints | Done (v0.0.2) |
 | 2 | Wrench, destruction, scrap collection | Done (v0.1.0) |
 | 3 | Inventory, selling, credits, upgrades | Done (v0.1.0) |
-| 4 | Missions, UI, save/load, QA package | Done (v0.1.0); Blender art pass still to do |
+| 4 | Missions, UI, save/load, QA package | Done (v0.1.0) |
 | Phase 2 | Salvage truck, Iron District, Plasma Cutter, collectors, warehouse, missions 9–14 | Done (v0.2.0) |
 | Phase 3 | Factory, conveyors, salvage robots, Spaceport Graveyard, Deep Core, Industrial Crusher, missions 15–20 | Done (v0.3.0) |
 | Phase 4 | Co-op multiplayer | Not started (needs 2+ PCs to test) |
 | Phase 5a | Mega-Factory, ending, achievements, accessibility, controller menus | Done (v0.4.0) |
+| Art pass 1 | Blender models for the Rookie, SCRAP-BOT, Nova, Captain Bolt and the SH-01 truck; bright look | Done (v0.5.0) |
+| Art pass 2 | Props, buildings and zone dressing | Next |
 | Phase 5b | Steam release (store page, Steamworks, achievements on Steam, beta) | Not started (needs Steamworks account) |

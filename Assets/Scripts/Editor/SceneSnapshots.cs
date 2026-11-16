@@ -50,6 +50,25 @@ namespace PlanetScrappers.EditorTools
             Shot(cam, new Vector3(0f, 2f, -20f), new Vector3(0f, 2f, 40f), Path.Combine(outDir, "06_machine_row_gate.png"));
             Shot(cam, new Vector3(0f, 4f, -25f), new Vector3(0f, 3f, -47f), Path.Combine(outDir, "07_base_cluster.png"));
 
+            // Character and vehicle close-ups for the art pass.
+            cam.fieldOfView = 35f;
+            if (player != null)
+            {
+                Vector3 p = player.transform.position;
+                Shot(cam, p + new Vector3(0.6f, 1.4f, 3.6f), p + new Vector3(0f, 1.15f, 0f), Path.Combine(outDir, "08_rookie_front.png"));
+                Shot(cam, p + new Vector3(3.4f, 1.6f, 0.6f), p + new Vector3(0f, 1.15f, 0f), Path.Combine(outDir, "09_rookie_side.png"));
+            }
+            foreach (var (n, file) in new[] { ("Captain Bolt", "10_bolt.png"), ("Engineer Nova", "11_nova.png"), ("Starter Salvage Truck", "12_truck.png") })
+            {
+                var t = GameObject.Find(n);
+                if (t == null) continue;
+                bool truck = file == "12_truck.png";
+                Vector3 c = t.transform.position + Vector3.up * (truck ? 1.3f : 1.1f);
+                Vector3 eye = c + t.transform.forward * (truck ? 7.5f : 3.4f) + t.transform.right * (truck ? 4.5f : 0.9f) + Vector3.up * (truck ? 1.8f : 0.3f);
+                Shot(cam, eye, c, Path.Combine(outDir, file));
+            }
+            cam.fieldOfView = 60f;
+
             Object.DestroyImmediate(go);
             EditorSceneManager.CloseScene(scene, false);
             Debug.Log($"[Snapshots] Saved to {outDir}");

@@ -2,6 +2,24 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.5.0] — Art pass 1: characters, truck and a brighter look
+
+### Added
+- **New 3D models** made in Blender from a script (`tools/blender/build_models.py`), replacing the primitive
+  placeholders: the **Rookie** (rounded helmet with visor ring and antenna, harness, belt pouches, life-support
+  pack, mechanical salvage arm with gears, piston and claw), **SCRAP-BOT** (rounded head, friendly face screen,
+  thruster), and the **SH-01 salvage truck** (white cab with orange stripe, light bar, rusty ribbed scrap bin,
+  magnet crane, spinning wheels). SCRAP-BOT now carries a cleaning broom.
+- **Captain Bolt** now stands at the missions terminal and **Engineer Nova** at the Upgrade Station. They breathe
+  and turn their heads to watch you when you come close.
+- Models import automatically with the right materials; if a model file is missing the old placeholder is used.
+
+### Changed
+- **Brighter, sunlit look** from the approved screen designs: stronger sun, lighter sky and ambient light, and a
+  post-processing pass (filmic tone mapping, soft bloom, more colour, light vignette).
+- **Moon surface** is now pale, smooth and powdery, with only a few small, faint craters (the old dark texture
+  with large stamped craters repeated visibly).
+
 ## [0.4.0] — Content complete: the Mega-Factory, ending, achievements and polish
 
 ### Added

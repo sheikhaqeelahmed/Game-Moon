@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using PlanetScrappers.Companion;
 using PlanetScrappers.Core;
 using PlanetScrappers.Destruction;
@@ -16,6 +17,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace PlanetScrappers.EditorTools
 {
@@ -46,7 +48,8 @@ namespace PlanetScrappers.EditorTools
         {
             public Material Crystal, CaveRock, Regolith, Road, Rim, CraterFloor, BaseWhite, SuitOrange, SuitOrangeDark, SuitGrey, VisorBlack, TrimOrange, TrimTeal, TrimYellow, Glass, Screen,
                 Rust, RustDark, Metal, MetalDark, Rubber, ContainerRed, ContainerTeal, ContainerBlue, VendingRed,
-                ScooterOrange, TruckGrey, LockedGrey, Hazard, Halcyon, BotYellow, BotWhite, BotEye, WrenchRust, Fence;
+                ScooterOrange, TruckGrey, LockedGrey, Hazard, Halcyon, BotYellow, BotWhite, BotEye, WrenchRust, Fence,
+                Skin, Hair, HairGrey, Leather, Gold, Headlight, TealDark;
         }
 
         [MenuItem("Planet Scrappers/Build Rust Valley Greybox", priority = 0)]
@@ -94,6 +97,7 @@ namespace PlanetScrappers.EditorTools
             BuildAutomation();
             BuildMegaFactory();
             BuildSky();
+            BuildPostProcessing();
             var player = BuildPlayer();
             BuildScrapBot(player);
 
@@ -120,7 +124,7 @@ namespace PlanetScrappers.EditorTools
             var sun = sunGo.AddComponent<Light>();
             sun.type = LightType.Directional;
             sun.color = new Color(1f, 0.96f, 0.9f);
-            sun.intensity = 1.6f;
+            sun.intensity = 2.1f;
             sun.shadows = LightShadows.Soft;
             sun.shadowStrength = 0.95f; // no atmosphere: deep, crisp shadows
             // Sun in the north-east, so building fronts (which face north into the valley) are lit.
@@ -128,11 +132,44 @@ namespace PlanetScrappers.EditorTools
             RenderSettings.sun = sun;
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.22f, 0.25f, 0.33f);
-            RenderSettings.ambientEquatorColor = new Color(0.26f, 0.27f, 0.29f);
+            RenderSettings.ambientSkyColor = new Color(0.36f, 0.42f, 0.55f);
+            RenderSettings.ambientEquatorColor = new Color(0.42f, 0.44f, 0.47f);
             RenderSettings.ambientGroundColor = new Color(0.10f, 0.10f, 0.11f);
             RenderSettings.fog = false;
             RenderSettings.defaultReflectionMode = DefaultReflectionMode.Skybox;
+        }
+
+        /// <summary>Bright, slightly filmic look from the approved screen designs.</summary>
+        static void BuildPostProcessing()
+        {
+            const string path = "Assets/Settings/RustValleyLook.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
+            if (profile == null)
+            {
+                profile = ScriptableObject.CreateInstance<VolumeProfile>();
+                AssetDatabase.CreateAsset(profile, path);
+            }
+            foreach (var c in profile.components.ToArray()) { profile.Remove(c.GetType()); Object.DestroyImmediate(c, true); }
+
+            var tone = profile.Add<Tonemapping>(true);
+            tone.mode.Override(TonemappingMode.ACES);
+            var bloom = profile.Add<Bloom>(true);
+            bloom.threshold.Override(1.1f);
+            bloom.intensity.Override(0.6f);
+            bloom.scatter.Override(0.6f);
+            var colour = profile.Add<ColorAdjustments>(true);
+            colour.postExposure.Override(0.45f);
+            colour.saturation.Override(12f);
+            colour.contrast.Override(8f);
+            var vignette = profile.Add<Vignette>(true);
+            vignette.intensity.Override(0.18f);
+            foreach (var c in profile.components) AssetDatabase.AddObjectToAsset(c, profile);
+            EditorUtility.SetDirty(profile);
+
+            var go = new GameObject("Post Processing");
+            var volume = go.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.sharedProfile = profile;
         }
 
         static void BuildSky()
@@ -323,6 +360,7 @@ namespace PlanetScrappers.EditorTools
             terminal.AddComponent<StationInteractable>().Setup("terminal", "Missions terminal (Captain Bolt)");
             BoxLocal("Terminal Screen", terminal.transform, new Vector3(0f, 0.15f, 0.51f), new Vector3(0.7f, 0.35f, 0.05f), m.Screen, collider: false);
             Sign(root, "MISSIONS", basePos + new Vector3(-5f, 2f, 7.6f), 180f, 0.5f);
+            PlaceNpc("CaptainBolt", "Captain Bolt", root, basePos + new Vector3(-6.5f, 0f, 7.7f), 20f);
 
             // Upgrade Station (Nova).
             var upgradePos = MapToWorld(200, 335);
@@ -330,6 +368,7 @@ namespace PlanetScrappers.EditorTools
             var bench = Box("Workbench", root, upgradePos + new Vector3(0f, 0.5f, 6.5f), new Vector3(3f, 1f, 1.2f), m.Metal);
             bench.AddComponent<StationInteractable>().Setup("shop", "Upgrade Station (Nova)");
             Sign(root, "NOVA'S UPGRADES", upgradePos + new Vector3(0f, 1.6f, 7.2f), 180f, 0.45f);
+            PlaceNpc("Nova", "Engineer Nova", root, upgradePos + new Vector3(2.4f, 0f, 6.7f), -20f);
 
             // Recycling Depot with sell hopper.
             var depotPos = MapToWorld(440, 335);
@@ -358,6 +397,16 @@ namespace PlanetScrappers.EditorTools
             truck.SetParent(root);
             truck.position = MapToWorld(347, 274);
             truck.rotation = Quaternion.Euler(0f, 90f, 0f);
+            var truckModel = InstantiateModel("SH01Truck", truck, "SH-01 Truck");
+            if (truckModel != null)
+            {
+                var modelWheels = new GameObject[4];
+                string[] names = { "Wheel FL", "Wheel FR", "Wheel RL", "Wheel RR" };
+                for (int i = 0; i < 4; i++) modelWheels[i] = FindDeep(truckModel, names[i]).gameObject;
+                SetupTruck(truck, modelWheels, Vector3.right);
+            }
+            else
+            {
             BoxLocal("Body", truck, new Vector3(0f, 1.4f, 0f), new Vector3(2.3f, 1.8f, 4.8f), m.BaseWhite, collider: false);
             BoxLocal("Scrap Bin", truck, new Vector3(0f, 2.55f, -1.2f), new Vector3(2.1f, 0.5f, 2.2f), m.Rust, collider: false);
             BoxLocal("Stripe", truck, new Vector3(0f, 1.2f, 0f), new Vector3(2.34f, 0.35f, 4.84f), m.TrimOrange, collider: false);
@@ -365,6 +414,7 @@ namespace PlanetScrappers.EditorTools
             BoxLocal("Roof Rack", truck, new Vector3(0f, 2.4f, -0.3f), new Vector3(2f, 0.15f, 3.4f), m.MetalDark, collider: false);
             var truckWheels = Wheels(truck, 1.15f, 1.6f, 0.45f);
             SetupTruck(truck, truckWheels);
+            }
 
             // Rusty wrench pickup (becomes interactive in Module 2).
             var wrenchPos = MapToWorld(284, 275);
@@ -607,6 +657,7 @@ namespace PlanetScrappers.EditorTools
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 3000f;
             cam.clearFlags = CameraClearFlags.Skybox;
+            cam.GetUniversalAdditionalCameraData().renderPostProcessing = true;
             camGo.AddComponent<AudioListener>();
             var playerCam = camGo.AddComponent<PlayerCamera>();
             SetRef(playerCam, "target", player.transform);
@@ -633,6 +684,20 @@ namespace PlanetScrappers.EditorTools
         /// </summary>
         static PlayerVisual BuildRookie(Transform player)
         {
+            var model = InstantiateModel("Rookie", player, "Rookie");
+            if (model != null)
+            {
+                var v = model.gameObject.AddComponent<PlayerVisual>();
+                SetRef(v, "body", FindDeep(model, "Body"));
+                SetRef(v, "leftLeg", FindDeep(model, "Leg L"));
+                SetRef(v, "rightLeg", FindDeep(model, "Leg R"));
+                SetRef(v, "leftArm", FindDeep(model, "Arm L"));
+                SetRef(v, "rightArm", FindDeep(model, "Salvage Arm R"));
+                SetRef(v, "leftFoot", FindDeep(model, "Foot L"));
+                SetRef(v, "rightFoot", FindDeep(model, "Foot R"));
+                return v;
+            }
+
             var root = new GameObject("Rookie (placeholder model)").transform;
             root.SetParent(player, false);
 
@@ -704,6 +769,50 @@ namespace PlanetScrappers.EditorTools
             SetRef(visual, "leftFoot", footL);
             SetRef(visual, "rightFoot", footR);
             return visual;
+        }
+
+        const string ModelDir = "Assets/Art/Models";
+
+        /// <summary>
+        /// Instantiates a Blender model from Assets/Art/Models and gives each mesh the builder
+        /// material named after its "__Key" suffix. Returns null when the model is missing,
+        /// so callers fall back to the primitive placeholder.
+        /// </summary>
+        static Transform InstantiateModel(string file, Transform parent, string name)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>($"{ModelDir}/{file}.fbx");
+            if (asset == null) return null;
+            var go = (GameObject)Object.Instantiate(asset, parent, false);
+            go.name = name;
+            // The FBX root node keeps the exporter's axis rotation; the children are already in Unity space.
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+            foreach (var r in go.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                int cut = r.name.LastIndexOf("__", System.StringComparison.Ordinal);
+                string key = cut >= 0 ? r.name.Substring(cut + 2) : "";
+                var field = typeof(Mats).GetField(key);
+                var mat = field != null ? field.GetValue(m) as Material : null;
+                if (mat == null) { Debug.LogWarning($"[Models] {file}: no material '{key}' for {r.name}"); mat = m.MetalDark; }
+                r.sharedMaterial = mat;
+                r.shadowCastingMode = ShadowCastingMode.On;
+            }
+            return go.transform;
+        }
+
+        static void PlaceNpc(string file, string name, Transform parent, Vector3 pos, float yaw)
+        {
+            var holder = new GameObject(name).transform;
+            holder.SetParent(parent, true);
+            holder.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw, 0f));
+            var model = InstantiateModel(file, holder, name + " Model");
+            if (model == null) { Object.DestroyImmediate(holder.gameObject); return; }
+            var col = holder.gameObject.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0f, 0.95f, 0f);
+            col.height = 1.9f;
+            col.radius = 0.35f;
+            holder.gameObject.AddComponent<NpcIdle>().Setup(FindDeep(model, "Body"), FindDeep(model, "Head"));
         }
 
         static Transform Pivot(string name, Transform parent, Vector3 localPos)
@@ -863,6 +972,8 @@ namespace PlanetScrappers.EditorTools
             model.SetParent(bot.transform, false);
             model.localScale = Vector3.one * 0.8f;
 
+            if (InstantiateModel("ScrapBot", model, "SCRAP-BOT") != null) goto Follower;
+
             // Rounded-box head like the reference: a cube core softened by a sphere.
             Part(PrimitiveType.Sphere, "Head", model, new Vector3(0f, 0.18f, 0f), new Vector3(0.6f, 0.5f, 0.5f), m.BotWhite);
             Part(PrimitiveType.Cube, "Head Core", model, new Vector3(0f, 0.18f, -0.02f), new Vector3(0.5f, 0.4f, 0.42f), m.BotWhite);
@@ -882,6 +993,7 @@ namespace PlanetScrappers.EditorTools
             Part(PrimitiveType.Sphere, "Core Light", model, new Vector3(0f, -0.16f, 0.17f), Vector3.one * 0.1f, m.BotEye);
             Part(PrimitiveType.Capsule, "Lower Body", model, new Vector3(0f, -0.42f, 0f), new Vector3(0.3f, 0.18f, 0.28f), m.BotWhite);
 
+        Follower:;
             var follower = bot.AddComponent<ScrapBotFollower>();
             var camTransform = player.Camera != null ? player.Camera.transform : null;
             follower.SetTarget(player.transform, camTransform);
@@ -891,7 +1003,7 @@ namespace PlanetScrappers.EditorTools
 
         // ───────────────────────────── Phase 2: truck, collectors, Iron District ─────────────────────────────
 
-        static void SetupTruck(Transform truck, GameObject[] wheels)
+        static void SetupTruck(Transform truck, GameObject[] wheels, Vector3? wheelAxis = null)
         {
             var cc = truck.gameObject.AddComponent<CharacterController>();
             cc.height = 2.6f;
@@ -924,6 +1036,7 @@ namespace PlanetScrappers.EditorTools
             w.arraySize = alive;
             int k = 0;
             foreach (var g in wheels) if (g != null) w.GetArrayElementAtIndex(k++).objectReferenceValue = g.transform;
+            so.FindProperty("wheelAxis").vector3Value = wheelAxis ?? Vector3.up;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -1709,10 +1822,10 @@ namespace PlanetScrappers.EditorTools
 
             return new Mats
             {
-                Regolith = Lit("Regolith", Hex("#9EA1A6"), 0.08f, tex: regolithTex, tiling: new Vector2(200f, 200f)),
-                Road = Lit("Road", Hex("#6C7076"), 0.12f, tex: regolithTex, tiling: new Vector2(1f, 12f)),
-                Rim = Lit("CraterRim", Hex("#83868B"), 0.04f, tex: regolithTex, tiling: new Vector2(2f, 2f)),
-                CraterFloor = Lit("CraterFloor", Hex("#76797E"), 0.05f, tex: regolithTex, tiling: new Vector2(4f, 4f)),
+                Regolith = Lit("Regolith", Hex("#D6D8DB"), 0.06f, tex: regolithTex, tiling: new Vector2(200f, 200f)),
+                Road = Lit("Road", Hex("#B4B8BD"), 0.1f, tex: regolithTex, tiling: new Vector2(1f, 12f)),
+                Rim = Lit("CraterRim", Hex("#C3C6CA"), 0.04f, tex: regolithTex, tiling: new Vector2(2f, 2f)),
+                CraterFloor = Lit("CraterFloor", Hex("#B6B9BD"), 0.05f, tex: regolithTex, tiling: new Vector2(4f, 4f)),
                 BaseWhite = Lit("BaseWhite", Hex("#E3E6E9"), 0.45f),
                 TrimOrange = Lit("TrimOrange", Hex("#F07A2E"), 0.35f),
                 TrimTeal = Lit("TrimTeal", Hex("#1FA197"), 0.35f),
@@ -1744,6 +1857,13 @@ namespace PlanetScrappers.EditorTools
                 BotEye = Lit("BotEye", Hex("#57C7FF"), 0.8f, emission: Hex("#57C7FF") * 2.5f),
                 WrenchRust = Lit("WrenchRust", Hex("#A0522D"), 0.2f, metallic: 0.3f),
                 Fence = Lit("Fence", Hex("#6B737B"), 0.3f, metallic: 0.5f),
+                Skin = Lit("Skin", Hex("#D9A27E"), 0.3f),
+                Hair = Lit("Hair", Hex("#C8402A"), 0.25f),
+                HairGrey = Lit("HairGrey", Hex("#C9CCD0"), 0.2f),
+                Leather = Lit("Leather", Hex("#5B3A26"), 0.3f),
+                Gold = Lit("Gold", Hex("#E8B52E"), 0.7f, metallic: 0.9f),
+                Headlight = Lit("Headlight", Hex("#FFF4D6"), 0.9f, emission: Hex("#FFE9B0") * 1.5f),
+                TealDark = Lit("TealDark", Hex("#14726B"), 0.3f),
             };
         }
 
@@ -1827,7 +1947,7 @@ namespace PlanetScrappers.EditorTools
             {
                 float up = Mathf.Abs(y / (float)(h - 1) - 0.5f) * 2f; // 0 at horizon, 1 at zenith/nadir
                 float k = Mathf.Pow(1f - up, 3f);
-                var c = new Color32((byte)Mathf.Lerp(14, 70, k), (byte)Mathf.Lerp(20, 92, k), (byte)Mathf.Lerp(40, 140, k), 255);
+                var c = new Color32((byte)Mathf.Lerp(18, 120, k), (byte)Mathf.Lerp(28, 150, k), (byte)Mathf.Lerp(58, 200, k), 255);
                 for (int x = 0; x < w; x++) px[y * w + x] = c;
             }
 
@@ -1869,23 +1989,25 @@ namespace PlanetScrappers.EditorTools
             for (int x = 0; x < size; x++)
             {
                 float u = x / (float)size, v = y / (float)size;
+                // Soft powdery regolith: gentle large-scale variation plus fine grain.
                 float n = 0.55f * TileNoise(u, v, cells / 4) + 0.3f * TileNoise(u, v, cells / 2) + 0.15f * TileNoise(u, v, cells);
-                shade[y * size + x] = 0.82f + (n - 0.5f) * 0.25f;
+                float grain = TileNoise(u, v, cells * 8) - 0.5f;
+                shade[y * size + x] = 0.9f + (n - 0.5f) * 0.1f + grain * 0.05f;
             }
 
-            // Tileable craters: darker floors, bright rims, wrapping at the edges.
+            // A few small, faint craters (wrapping at the edges) so the tiling never shows.
             var rng = new System.Random(77);
-            for (int c = 0; c < 70; c++)
+            for (int c = 0; c < 22; c++)
             {
                 float cx = (float)rng.NextDouble() * size, cy = (float)rng.NextDouble() * size;
-                float r = 4f + Mathf.Pow((float)rng.NextDouble(), 2.5f) * 40f;
+                float r = 2.5f + Mathf.Pow((float)rng.NextDouble(), 3f) * 12f;
                 int ir = Mathf.CeilToInt(r * 1.3f);
                 for (int dy = -ir; dy <= ir; dy++)
                 for (int dx = -ir; dx <= ir; dx++)
                 {
                     float d = Mathf.Sqrt(dx * dx + dy * dy) / r;
                     if (d > 1.3f) continue;
-                    float delta = d < 0.85f ? -0.12f * (1f - d / 0.85f) - 0.03f : 0.1f * (1f - Mathf.Abs(d - 1.05f) / 0.25f);
+                    float delta = d < 0.85f ? -0.05f * (1f - d / 0.85f) - 0.012f : 0.035f * (1f - Mathf.Abs(d - 1.05f) / 0.25f);
                     int px = ((int)cx + dx + size) % size, py = ((int)cy + dy + size) % size;
                     shade[py * size + px] += Mathf.Max(delta, -0.2f);
                 }

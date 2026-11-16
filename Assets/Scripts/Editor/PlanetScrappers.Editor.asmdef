@@ -2,7 +2,9 @@
     "name": "PlanetScrappers.Editor",
     "rootNamespace": "PlanetScrappers.EditorTools",
     "references": [
-        "PlanetScrappers"
+        "PlanetScrappers",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [
         "Editor"

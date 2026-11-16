@@ -49,6 +49,15 @@ namespace PlanetScrappers.Player
 
         public void Bind(PlayerController owner) => controller = owner;
 
+        float swingTime, swingDuration = 0.4f;
+
+        /// <summary>Plays one tool swing on the salvage arm.</summary>
+        public void PlaySwing(float duration)
+        {
+            swingDuration = Mathf.Max(0.12f, duration);
+            swingTime = swingDuration;
+        }
+
         /// <summary>In first person the body still casts a shadow but is not drawn.</summary>
         public void SetFirstPerson(bool firstPerson)
         {
@@ -87,7 +96,18 @@ namespace PlanetScrappers.Player
             SetX(leftLeg, swing * (1f - airBlend) + legAir);
             SetX(rightLeg, -swing * (1f - airBlend) + legAir * 0.6f);
             SetX(leftArm, -arm * (1f - airBlend) + armAir);
-            SetX(rightArm, arm * (1f - airBlend) + armAir);
+            if (swingTime > 0f)
+            {
+                // Tool swing on the salvage arm: wind up, strike, recover.
+                swingTime -= dt;
+                float t = 1f - Mathf.Clamp01(swingTime / swingDuration);
+                float angle = t < 0.35f ? Mathf.Lerp(0f, -150f, t / 0.35f) : Mathf.Lerp(-150f, -20f, (t - 0.35f) / 0.65f);
+                SetX(rightArm, angle);
+            }
+            else
+            {
+                SetX(rightArm, arm * (1f - airBlend) + armAir);
+            }
 
             if (body != null)
             {

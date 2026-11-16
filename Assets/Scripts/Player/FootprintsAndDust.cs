@@ -1,3 +1,4 @@
+using PlanetScrappers.Core;
 using UnityEngine;
 
 namespace PlanetScrappers.Player
@@ -30,6 +31,8 @@ namespace PlanetScrappers.Player
             Vector3 ground = footPosition;
             if (Physics.Raycast(footPosition + Vector3.up * 0.5f, Vector3.down, out var hit, 1.5f, ~0, QueryTriggerInteraction.Ignore))
                 ground = hit.point;
+
+            AudioManager.PlayVaried("footstep", 0.3f, 0.15f);
 
             if (prints != null)
             {

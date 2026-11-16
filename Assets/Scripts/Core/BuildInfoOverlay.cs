@@ -31,11 +31,6 @@ namespace PlanetScrappers.Core
             float h = style.fontSize * 1.8f;
             GUI.Label(new Rect(10, Screen.height - h - 6, 600, h), text, style);
 
-            if (!CursorLock.IsLocked)
-            {
-                var center = new GUIStyle(style) { alignment = TextAnchor.MiddleCenter, fontSize = style.fontSize + 4 };
-                GUI.Label(new Rect(0, Screen.height * 0.5f - 20, Screen.width, 40), "Click to play  ·  Esc releases the mouse", center);
-            }
         }
     }
 }

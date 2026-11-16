@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission06
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 6
+  title: Dismantle Your First Vehicle
+  description: The Mule-7 haulers in the Vehicle Graveyard are full of iron and copper
+    wiring.
+  objectiveText: Take apart a Mule-7 hauler truck
+  type: 1
+  targetId: mule7_truck
+  count: 1
+  rewardCredits: 150
+  botIntro: Mule-7 trucks are in the Vehicle Graveyard, left at the crossroads. Hammer
+    only, the wrench just bounces off.
+  botComplete: It had a good life. Now it has a good price.

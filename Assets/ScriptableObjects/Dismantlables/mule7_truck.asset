@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f31393121f4b644c8b31a467c469c12, type: 3}
+  m_Name: mule7_truck
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Destruction.DismantlableDefinition
+  id: mule7_truck
+  displayName: Mule-7 Hauler Truck
+  tier: 2
+  durability: 450
+  yields:
+  - resource: {fileID: 11400000, guid: cc757d53952aedb46a9742ae7c68fd75, type: 2}
+    amount: 20
+    chance: 1
+  - resource: {fileID: 11400000, guid: a56fa20cf5ad346448f46f3c288adf64, type: 2}
+    amount: 8
+    chance: 1
+  - resource: {fileID: 11400000, guid: 683307a26de8b374fa80ce891e630e43, type: 2}
+    amount: 3
+    chance: 1
+  - resource: {fileID: 11400000, guid: 66e2228820941034987b024d5b6afda0, type: 2}
+    amount: 1
+    chance: 0.25
+  respawnSeconds: 300

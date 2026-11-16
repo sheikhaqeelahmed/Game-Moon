@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35eee958b62a21b44926f32159b1e751, type: 3}
+  m_Name: GameDatabase
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Core.GameDatabase
+  startingCredits: 100
+  backpackCapacities: 1e000000320000005000000078000000
+  backpackPrices: 000000002c01000084030000c4090000
+  oxygenSeconds: 420
+  oxygenRefillPerSecond: 12
+  baseSafeRadius: 20
+  resources:
+  - {fileID: 11400000, guid: cc757d53952aedb46a9742ae7c68fd75, type: 2}
+  - {fileID: 11400000, guid: a56fa20cf5ad346448f46f3c288adf64, type: 2}
+  - {fileID: 11400000, guid: 683307a26de8b374fa80ce891e630e43, type: 2}
+  - {fileID: 11400000, guid: 66e2228820941034987b024d5b6afda0, type: 2}
+  tools:
+  - {fileID: 11400000, guid: fdfa6efceaad8564ca2baf89384a0341, type: 2}
+  - {fileID: 11400000, guid: 8a940795cec90d24bb55e8b0c175d41b, type: 2}
+  - {fileID: 11400000, guid: d8ac78513eec3e14f8b1da800f9793ba, type: 2}
+  - {fileID: 11400000, guid: c476a2f4dbc13ca4a9fbe9d9342551cd, type: 2}
+  - {fileID: 11400000, guid: 6265ffcf73241be4b8137f34acf96bb7, type: 2}
+  - {fileID: 11400000, guid: 17be9ffd07a7336449bec18befb13c53, type: 2}
+  dismantlables:
+  - {fileID: 11400000, guid: ce457739e43d8d94cabd430dcde2304d, type: 2}
+  - {fileID: 11400000, guid: 14a012aadc2e27e419bf8cf2055d04bf, type: 2}
+  - {fileID: 11400000, guid: 974e98a20bfe5d84cbf55575893703f9, type: 2}
+  - {fileID: 11400000, guid: feb2ad525a4db8244b59d529b10b7910, type: 2}
+  - {fileID: 11400000, guid: 09593db68d6fabc43882cea091fb252d, type: 2}
+  - {fileID: 11400000, guid: 447b2eb38faf0394db8997006f99d603, type: 2}
+  missions:
+  - {fileID: 11400000, guid: 46d3aac2f30991a45b872881d2d071ed, type: 2}
+  - {fileID: 11400000, guid: 8d655e1db46553542bc1c105440c9c21, type: 2}
+  - {fileID: 11400000, guid: 4907146afcb8e3748b202e1f3a04257a, type: 2}
+  - {fileID: 11400000, guid: 7f3c955c52e3224418edb410ffbd5319, type: 2}
+  - {fileID: 11400000, guid: e37016233e34fdd409b28bf197c8bc75, type: 2}
+  - {fileID: 11400000, guid: 3a3c12a9745119142b5721c7343cd613, type: 2}
+  - {fileID: 11400000, guid: 69139a479e119a74cbaad9fe8d139560, type: 2}
+  - {fileID: 11400000, guid: 67fc6852aca3b644daeb5c67d114b3ba, type: 2}

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission02
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 2
+  title: Find Your First Scrap
+  description: Every Scrapper starts with a rusty wrench and a barrel that has it
+    coming.
+  objectiveText: Pick up the rusty wrench and break an oil drum
+  type: 1
+  targetId: oil_drum
+  count: 1
+  rewardCredits: 25
+  botIntro: The wrench is on the crate with the warm light, just west of the road.
+    Press E to grab it, then hold the left mouse button on a drum.
+  botComplete: Look at it fly. Scrap pops out of everything you break.

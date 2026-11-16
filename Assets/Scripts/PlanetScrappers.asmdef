@@ -2,7 +2,8 @@
     "name": "PlanetScrappers",
     "rootNamespace": "PlanetScrappers",
     "references": [
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission04
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 4
+  title: Sell Your First Materials
+  description: The Recycling Depot pays cash for anything in your backpack.
+  objectiveText: Sell scrap at the Recycling Depot hopper
+  type: 3
+  targetId: 
+  count: 1
+  rewardCredits: 50
+  botIntro: The Recycling Depot is the yellow-striped building at the base. Walk
+    to the hopper and press E.
+  botComplete: Credits! Don't spend them all on snacks.

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f31393121f4b644c8b31a467c469c12, type: 3}
+  m_Name: oil_drum
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Destruction.DismantlableDefinition
+  id: oil_drum
+  displayName: Oil Drum
+  tier: 1
+  durability: 30
+  yields:
+  - resource: {fileID: 11400000, guid: cc757d53952aedb46a9742ae7c68fd75, type: 2}
+    amount: 3
+    chance: 1
+  respawnSeconds: 180

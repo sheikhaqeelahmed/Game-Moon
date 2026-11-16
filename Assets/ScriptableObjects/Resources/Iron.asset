@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0646ae7ca484df49aa06938ac69e626, type: 3}
+  m_Name: Iron
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Economy.ResourceDefinition
+  id: iron
+  displayName: Iron
+  description: Plates, beams and bolts. Most of every machine.
+  unitValue: 2
+  stackLimit: 50
+  rarity: Common
+  color: {r: 0.5568628, g: 0.5921569, b: 0.61960787, a: 1}

@@ -1,6 +1,13 @@
 using System.IO;
 using PlanetScrappers.Companion;
 using PlanetScrappers.Core;
+using PlanetScrappers.Destruction;
+using PlanetScrappers.Economy;
+using PlanetScrappers.Equipment;
+using PlanetScrappers.Interaction;
+using PlanetScrappers.Inventory;
+using PlanetScrappers.Missions;
+using PlanetScrappers.UI;
 using PlanetScrappers.Environment;
 using PlanetScrappers.Player;
 using UnityEditor;
@@ -28,6 +35,7 @@ namespace PlanetScrappers.EditorTools
         const float HalfDepth = 75f;   // z extent of the fence
 
         static Font signFont;
+        static GameDatabase db;
         static Mats m;
 
         class Mats
@@ -61,6 +69,7 @@ namespace PlanetScrappers.EditorTools
 
             signFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             signMaterial = null;
+            db = GameDataBuilder.Build();
             m = CreateMaterials();
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -78,10 +87,8 @@ namespace PlanetScrappers.EditorTools
             var player = BuildPlayer();
             BuildScrapBot(player);
 
-            var systems = new GameObject("_Systems");
-            systems.AddComponent<CursorLock>();
-            systems.AddComponent<BuildInfoOverlay>();
-            systems.AddComponent<InputDiagnostics>();
+            MakeDismantlable();
+            WireGameplay(player);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             AddSceneToBuildSettings(ScenePath);
@@ -282,19 +289,26 @@ namespace PlanetScrappers.EditorTools
             // Base: spawn, Captain Bolt's terminal, save point (Module 4).
             var basePos = MapToWorld(320, 340);
             Building(root, "Base", basePos, new Vector3(20f, 6f, 12f), m.TrimOrange, "BASE");
+            var baseCentre = new GameObject("Base Centre").transform;
+            baseCentre.SetParent(root, true);
+            baseCentre.SetPositionAndRotation(basePos + new Vector3(0f, 0.1f, 9f), Quaternion.identity);
             var terminal = Box("Bolt Terminal", root, basePos + new Vector3(-5f, 0.75f, 7.5f), new Vector3(1.2f, 1.5f, 0.6f), m.MetalDark);
+            terminal.AddComponent<StationInteractable>().Setup("terminal", "Missions terminal (Captain Bolt)");
             BoxLocal("Terminal Screen", terminal.transform, new Vector3(0f, 0.15f, 0.51f), new Vector3(0.7f, 0.35f, 0.05f), m.Screen, collider: false);
             Sign(root, "MISSIONS", basePos + new Vector3(-5f, 2f, 7.6f), 180f, 0.5f);
 
             // Upgrade Station (Nova).
             var upgradePos = MapToWorld(200, 335);
             Building(root, "Upgrade Station", upgradePos, new Vector3(14f, 5f, 10f), m.TrimTeal, "UPGRADES");
-            Box("Workbench", root, upgradePos + new Vector3(3f, 0.5f, 6.5f), new Vector3(3f, 1f, 1.2f), m.Metal);
+            var bench = Box("Workbench", root, upgradePos + new Vector3(0f, 0.5f, 6.5f), new Vector3(3f, 1f, 1.2f), m.Metal);
+            bench.AddComponent<StationInteractable>().Setup("shop", "Upgrade Station (Nova)");
+            Sign(root, "NOVA'S UPGRADES", upgradePos + new Vector3(0f, 1.6f, 7.2f), 180f, 0.45f);
 
             // Recycling Depot with sell hopper.
             var depotPos = MapToWorld(440, 335);
             Building(root, "Recycling Depot", depotPos, new Vector3(14f, 5f, 10f), m.TrimYellow, "RECYCLING");
             var hopper = new GameObject("Sell Hopper").transform;
+            hopper.gameObject.AddComponent<StationInteractable>().Setup("depot", "Sell scrap at the Recycling Depot");
             hopper.SetParent(root);
             hopper.position = depotPos + new Vector3(0f, 0f, 7.5f);
             Box("Hopper Base", hopper, hopper.position + Vector3.up * 0.6f, new Vector3(2.4f, 1.2f, 2.4f), m.MetalDark);
@@ -333,7 +347,7 @@ namespace PlanetScrappers.EditorTools
             glow.color = new Color(1f, 0.8f, 0.3f);
             glow.range = 4f;
             glow.intensity = 2f;
-            MarkStatic(crate);
+            crate.AddComponent<ToolPickup>().Setup(db.Tool("rusty_wrench"), wrench.gameObject);
         }
 
         static void Building(Transform parent, string name, Vector3 groundPos, Vector3 size, Material trim, string label)
@@ -434,6 +448,7 @@ namespace PlanetScrappers.EditorTools
             MarkStatic(Box("Fence Side W", fence, new Vector3(x0, 1.2f, (z + zBack) * 0.5f), new Vector3(0.3f, 2.4f, zBack - z), m.Fence));
             MarkStatic(Box("Fence Side E", fence, new Vector3(x1, 1.2f, (z + zBack) * 0.5f), new Vector3(0.3f, 2.4f, zBack - z), m.Fence));
             var gate = Box("Locked Gate", fence, new Vector3(0f, 1.4f, z), new Vector3(gateHalf * 2f, 2.8f, 0.35f), m.Hazard);
+            gate.AddComponent<MachineRowGate>();
             for (int s = -3; s <= 3; s++)
                 BoxLocal("Stripe", gate.transform, new Vector3(s * 0.13f, 0f, 0.51f), new Vector3(0.05f, 1f, 0.02f), m.MetalDark, collider: false)
                     .transform.localRotation = Quaternion.Euler(0f, 0f, 35f);
@@ -812,11 +827,14 @@ namespace PlanetScrappers.EditorTools
             model.SetParent(bot.transform, false);
             model.localScale = Vector3.one * 0.8f;
 
-            Part(PrimitiveType.Sphere, "Head", model, new Vector3(0f, 0.18f, 0f), new Vector3(0.58f, 0.5f, 0.52f), m.BotWhite);
-            Part(PrimitiveType.Cylinder, "Head Crest", model, new Vector3(0f, 0.43f, -0.02f), new Vector3(0.22f, 0.025f, 0.26f), m.BotYellow);
-            Part(PrimitiveType.Sphere, "Face Screen", model, new Vector3(0f, 0.17f, 0.17f), new Vector3(0.46f, 0.34f, 0.22f), m.VisorBlack);
-            Part(PrimitiveType.Cube, "Eye L", model, new Vector3(-0.09f, 0.19f, 0.285f), new Vector3(0.12f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, -20f));
-            Part(PrimitiveType.Cube, "Eye R", model, new Vector3(0.09f, 0.19f, 0.285f), new Vector3(0.12f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, 20f));
+            // Rounded-box head like the reference: a cube core softened by a sphere.
+            Part(PrimitiveType.Sphere, "Head", model, new Vector3(0f, 0.18f, 0f), new Vector3(0.6f, 0.5f, 0.5f), m.BotWhite);
+            Part(PrimitiveType.Cube, "Head Core", model, new Vector3(0f, 0.18f, -0.02f), new Vector3(0.5f, 0.4f, 0.42f), m.BotWhite);
+            Part(PrimitiveType.Cube, "Head Crest", model, new Vector3(0f, 0.43f, 0.02f), new Vector3(0.16f, 0.04f, 0.3f), m.BotYellow);
+            // Flat black screen set into the front of the head.
+            Part(PrimitiveType.Cube, "Face Screen", model, new Vector3(0f, 0.18f, 0.2f), new Vector3(0.4f, 0.28f, 0.06f), m.VisorBlack);
+            Part(PrimitiveType.Cube, "Eye L", model, new Vector3(-0.085f, 0.2f, 0.235f), new Vector3(0.11f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, -18f));
+            Part(PrimitiveType.Cube, "Eye R", model, new Vector3(0.085f, 0.2f, 0.235f), new Vector3(0.11f, 0.045f, 0.02f), m.BotEye, new Vector3(0f, 0f, 18f));
             foreach (float x in new[] { -0.29f, 0.29f })
             {
                 Part(PrimitiveType.Cylinder, "Ear Disc", model, new Vector3(x, 0.18f, 0f), new Vector3(0.19f, 0.04f, 0.19f), m.BotYellow, new Vector3(0f, 0f, 90f));
@@ -828,19 +846,126 @@ namespace PlanetScrappers.EditorTools
             Part(PrimitiveType.Sphere, "Core Light", model, new Vector3(0f, -0.16f, 0.17f), Vector3.one * 0.1f, m.BotEye);
             Part(PrimitiveType.Capsule, "Lower Body", model, new Vector3(0f, -0.42f, 0f), new Vector3(0.3f, 0.18f, 0.28f), m.BotWhite);
 
-            var light = new GameObject("Core Glow").AddComponent<Light>();
-            light.transform.SetParent(model, false);
-            light.transform.localPosition = new Vector3(0f, -0.1f, 0.4f);
-            light.type = LightType.Point;
-            light.color = new Color(0.34f, 0.78f, 1f);
-            light.range = 2.5f;
-            light.intensity = 1f;
-
             var follower = bot.AddComponent<ScrapBotFollower>();
             var camTransform = player.Camera != null ? player.Camera.transform : null;
             follower.SetTarget(player.transform, camTransform);
             SetRef(follower, "player", player.transform);
             SetRef(follower, "playerCamera", camTransform);
+        }
+
+        // ───────────────────────────── Gameplay wiring ─────────────────────────────
+
+        /// <summary>Turns every T1_/T2_/T3_ prop into a dismantlable object with a stable save id.</summary>
+        static void MakeDismantlable()
+        {
+            var map = new (string prefix, string id)[]
+            {
+                ("OilDrum", "oil_drum"), ("VendingBot", "vending_bot"), ("HoverScooter", "hover_scooter"),
+                ("CargoContainer", "cargo_container"), ("Mule7Truck", "mule7_truck"), ("GeneratorUnit", "generator_unit")
+            };
+            int count = 0;
+            foreach (var t in SalvageRoot().GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name.Length < 4 || t.name[0] != 'T' || t.name[2] != '_') continue;
+                foreach (var (prefix, id) in map)
+                {
+                    if (!t.name.Substring(3).StartsWith(prefix)) continue;
+                    t.gameObject.AddComponent<DestructibleObject>().Setup(db.Dismantlable(id), t.name);
+                    count++;
+                    break;
+                }
+            }
+            Debug.Log($"[Greybox] {count} dismantlable objects placed.");
+        }
+
+        static void WireGameplay(PlayerController player)
+        {
+            var go = player.gameObject;
+            var visual = go.GetComponentInChildren<PlayerVisual>();
+            var camera = player.Camera;
+
+            go.AddComponent<PlayerInventory>();
+            go.AddComponent<Wallet>();
+            var equipment = go.AddComponent<PlayerEquipment>();
+            SetRef(equipment, "toolMount", FindDeep(go.transform, "Tool Mount"));
+            SetRef(equipment, "rustMaterial", m.WrenchRust);
+            SetRef(equipment, "metalMaterial", m.Metal);
+            SetRef(equipment, "darkMaterial", m.MetalDark);
+            SetRef(equipment, "glowMaterial", m.BotEye);
+
+            var toolUser = go.AddComponent<ToolUser>();
+            SetRef(toolUser, "controller", player);
+            SetRef(toolUser, "visual", visual);
+            SetRef(toolUser, "equipment", equipment);
+
+            var interactor = go.AddComponent<PlayerInteractor>();
+            SetRef(interactor, "controller", player);
+
+            var suit = go.AddComponent<SuitSystems>();
+            SetRef(suit, "controller", player);
+            SetRef(suit, "baseCentre", GameObject.Find("Base Centre").transform);
+
+            var systems = new GameObject("_Systems");
+            systems.AddComponent<BuildInfoOverlay>();
+            systems.AddComponent<InputDiagnostics>();
+
+            var gm = systems.AddComponent<GameManager>();
+            SetRef(gm, "player", player);
+            systems.AddComponent<MissionManager>();
+            var autotest = systems.AddComponent<AutoPlaytest>();
+            SetRef(autotest, "player", player);
+
+            var audio = systems.AddComponent<AudioManager>();
+            var names = new[] { "hit_metal", "hit_bonk", "break_crunch", "pickup_tink", "sell_register", "purchase", "mission_complete", "ui_click", "footstep", "swing_whoosh", "ambience_loop", "warning" };
+            var so = new SerializedObject(audio);
+            var clips = so.FindProperty("clips");
+            clips.arraySize = names.Length;
+            for (int i = 0; i < names.Length; i++)
+            {
+                var el = clips.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("name").stringValue = names[i];
+                el.FindPropertyRelative("clip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>($"Assets/Audio/Generated/{names[i]}.wav");
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            var spawner = new GameObject("Scrap Pool").AddComponent<ScrapSpawner>();
+            spawner.transform.SetParent(systems.transform, false);
+            SetRef(spawner, "scrapMaterial", Lit("Scrap", Color.white, 0.45f, metallic: 0.4f, emission: Color.black));
+
+            var fxRoot = new GameObject("Destruction FX");
+            fxRoot.transform.SetParent(systems.transform, false);
+            var fx = fxRoot.AddComponent<DestructionFx>();
+            var particleBase = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/ParticlesUnlit.mat");
+            var softDot = AssetDatabase.LoadAssetAtPath<Texture2D>($"{TextureDir}/SoftDot.png");
+            var sparkMat = ParticleMaterial("Spark", particleBase, softDot, new Color(1f, 0.82f, 0.4f, 1f));
+            var sparks = Particles("Sparks", fxRoot.transform, sparkMat, lifetime: 0.45f, max: 400, horizontal: false, gravity: 0.5f);
+            var sm = sparks.main;
+            sm.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.12f);
+            var dustMat = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialDir}/RegolithDust.mat");
+            var dust = Particles("Break Dust", fxRoot.transform, dustMat, lifetime: 2f, max: 300, horizontal: false, gravity: 0.08f);
+            var dm = dust.main;
+            dm.startSize = new ParticleSystem.MinMaxCurve(0.4f, 1.1f);
+            var dsize = dust.sizeOverLifetime;
+            dsize.enabled = true;
+            dsize.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.6f, 1f, 1.8f));
+            var drag = dust.limitVelocityOverLifetime;
+            drag.enabled = true;
+            drag.drag = 1.4f;
+            SetRef(fx, "sparks", sparks);
+            SetRef(fx, "dust", dust);
+            SetRef(fx, "debrisMaterial", Lit("Debris", Color.white, 0.3f));
+
+            var ui = systems.AddComponent<UIManager>();
+            SetRef(ui, "player", player);
+            SetRef(ui, "toolUser", toolUser);
+            SetRef(ui, "interactor", interactor);
+        }
+
+        static Transform FindDeep(Transform root, string name)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == name) return t;
+            return null;
         }
 
         // ───────────────────────────── Primitive helpers ─────────────────────────────
@@ -976,7 +1101,7 @@ namespace PlanetScrappers.EditorTools
                 LockedGrey = Lit("LockedGrey", Hex("#5A626A"), 0.3f, metallic: 0.3f),
                 Hazard = Lit("Hazard", Hex("#F4C430"), 0.3f),
                 Halcyon = Lit("Halcyon", Color.white, 0.3f, tex: halcyonTex, emission: Hex("#0A1830")),
-                BotYellow = Lit("BotYellow", Hex("#F4C430"), 0.55f),
+                BotYellow = Lit("BotYellow", Hex("#F5B41C"), 0.45f),
                 BotWhite = Lit("BotWhite", Hex("#F2F2EC"), 0.6f),
                 SuitOrange = Lit("SuitOrange", Hex("#EC6E24"), 0.35f),
                 SuitOrangeDark = Lit("SuitOrangeDark", Hex("#C9561A"), 0.3f),

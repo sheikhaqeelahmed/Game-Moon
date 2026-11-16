@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission07
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 7
+  title: Expand Your Backpack
+  description: Fewer trips, more scrap. Nova sells a 50-unit backpack.
+  objectiveText: Buy a bigger backpack from Nova
+  type: 5
+  targetId: 
+  count: 1
+  rewardCredits: 100
+  botIntro: Your backpack fills fast now. Nova sells a 50-unit one for 300 credits.
+  botComplete: More pockets. Same posture.

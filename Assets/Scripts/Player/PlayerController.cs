@@ -81,6 +81,11 @@ namespace PlanetScrappers.Player
 
         public void SetCamera(PlayerCamera cam) => playerCamera = cam;
 
+        float faceCameraTimer;
+
+        /// <summary>Turns the body toward where the camera looks for a moment, e.g. while swinging a tool.</summary>
+        public void FaceCameraFor(float seconds) => faceCameraTimer = Mathf.Max(faceCameraTimer, seconds);
+
         void Update()
         {
             if (transform.position.y < fallResetY)
@@ -109,6 +114,11 @@ namespace PlanetScrappers.Player
             if (firstPerson)
             {
                 transform.rotation = cameraFlat;
+            }
+            else if (faceCameraTimer > 0f)
+            {
+                faceCameraTimer -= dt;
+                transform.rotation = Quaternion.Slerp(transform.rotation, cameraFlat, 1f - Mathf.Exp(-20f * dt));
             }
             else if (wishVelocity.sqrMagnitude > 0.01f)
             {

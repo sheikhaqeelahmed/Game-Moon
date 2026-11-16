@@ -2,6 +2,37 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.1.0] — First client QA build: complete prototype loop (Modules 2–4)
+
+### Added
+- **Dismantling (Module 2):** pick up the rusty wrench, hold the left mouse button to swing it from the salvage arm.
+  Objects lose parts at 66%, 33% and 10% durability (dented, stripped, bare frame), then break apart.
+  Tool tiers: a tool bounces off anything above its tier. Sparks, debris, dust and layered hit sounds.
+- 31 dismantlable objects in Rust Valley: oil drums, vending bots, hover scooters (tier 1), cargo containers,
+  Mule-7 trucks (tier 2) and generator units behind the Machine Row gate (tier 3). Broken objects are
+  replaced by fresh salvage after 3–6 minutes, so the valley never runs dry.
+- **Scrap:** pooled scrap pieces pop out in a low-gravity arc and fly into the backpack when you are close.
+  Rising pickup sound for streaks. SCRAP-BOT warns when the backpack is full.
+- **Economy (Module 3):** four resources (iron, copper, electronics, rare alloy), backpack capacity (30/50/80/120),
+  Recycling Depot with per-resource and sell-all, receipt and transaction log; Nova's Upgrade Station with
+  Scrap Hammer (250 cr), Electric Dismantler (1,200 cr), backpack upgrades and locked later-phase tools.
+- **Missions (Module 4):** the eight first-shift missions with rewards and SCRAP-BOT briefings; Mission 8 opens Machine Row.
+- **Screens:** main menu (Continue with save summary, New Game with confirmation), HUD (health, oxygen,
+  credits, mission tracker, target durability, interaction prompt, tool slots, backpack, SCRAP-BOT messages),
+  inventory (Tab), missions (J), pause (Esc), settings, credits. Light frosted style from the approved designs.
+- **Suit:** oxygen drains outside the base and refills near it; running out drains health; a suit failure returns
+  you to base and drops half the backpack.
+- **Save and load:** versioned JSON save with automatic backup, autosave after every sale, purchase and mission
+  and every 2 minutes; settings saved separately.
+- **Settings:** resolution, display mode, quality, frame-rate cap, V-sync, camera mode, mouse sensitivity,
+  invert look, master volume.
+- **Sound:** generated, licence-free sound effects and an ambience loop (`tools/generate_sfx.py`).
+- **SCRAP-BOT scan (F):** tier, durability and contents of the object you are aiming at.
+- **Automated playtest:** launch with `-autotest` to play the whole first shift automatically (29 checks, screenshots).
+
+### Changed
+- SCRAP-BOT: removed the cyan light that tinted its yellow parts green; flat screen face and rounded-box head.
+
 ## [0.0.2] — Module 1b: character revision
 
 ### Changed

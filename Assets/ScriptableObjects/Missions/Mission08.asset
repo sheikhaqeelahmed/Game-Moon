@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission08
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 8
+  title: Unlock Industrial Machinery
+  description: Machine Row's generators need a tier 3 tool. Nova's Electric Dismantler
+    opens the gate.
+  objectiveText: Buy the Electric Dismantler
+  type: 4
+  targetId: electric_dismantler
+  count: 1
+  rewardCredits: 300
+  botIntro: Machine Row needs a tier 3 tool. Save up 1,200 credits for Nova's Electric
+    Dismantler. Containers and trucks pay best.
+  botComplete: The gate's open. Bolt says there's a whole Iron District past this
+    one. Bolt says a lot.

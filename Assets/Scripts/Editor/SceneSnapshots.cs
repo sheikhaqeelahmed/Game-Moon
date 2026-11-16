@@ -74,6 +74,36 @@ namespace PlanetScrappers.EditorTools
             Debug.Log($"[Snapshots] Saved to {outDir}");
         }
 
+        /// <summary>Close-ups of the tier 1 junk the Rusty Wrench can break (for players and QA).</summary>
+        public static void CaptureJunk()
+        {
+            var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            string outDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Builds", "Snapshots");
+            Directory.CreateDirectory(outDir);
+            var go = new GameObject("SnapshotCamera");
+            var cam = go.AddComponent<Camera>();
+            cam.fieldOfView = 35f;
+            cam.farClipPlane = 3000f;
+            cam.clearFlags = CameraClearFlags.Skybox;
+            var all = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+            foreach (var (prefix, file) in new[] { ("T1_OilDrum", "junk_1_oil_drum.png"), ("T1_VendingBot", "junk_2_vending_bot.png"), ("T1_HoverScooter", "junk_3_hover_scooter.png") })
+            {
+                Transform t = null;
+                foreach (var x in all) if (x.name.StartsWith(prefix) && (t == null || string.CompareOrdinal(x.name, t.name) < 0)) t = x;
+                if (t == null) continue;
+                var rs = t.GetComponentsInChildren<Renderer>();
+                if (rs.Length == 0) continue;
+                var b = rs[0].bounds;
+                foreach (var r in rs) b.Encapsulate(r.bounds);
+                float dist = Mathf.Max(b.size.magnitude * 1.9f, 3.2f);
+                Vector3 dir = (new Vector3(0.75f, 0.45f, -1f)).normalized;
+                Shot(cam, b.center + dir * dist, b.center, Path.Combine(outDir, file));
+            }
+            Object.DestroyImmediate(go);
+            EditorSceneManager.CloseScene(scene, false);
+            Debug.Log($"[Snapshots] Junk close-ups saved to {outDir}");
+        }
+
         static void Shot(Camera cam, Vector3 pos, Vector3 lookAt, string path) =>
             Shot(cam, pos, Quaternion.LookRotation(lookAt - pos, Vector3.up), path);
 

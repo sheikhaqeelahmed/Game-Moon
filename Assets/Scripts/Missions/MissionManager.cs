@@ -100,6 +100,12 @@ namespace PlanetScrappers.Missions
             target = from;
             var m = Current;
             if (m == null) return false;
+
+            // No tool yet: point at the wrench pickup first, whatever needs breaking.
+            if (m.type == ObjectiveType.Dismantle && PlayerEquipment.Instance != null && PlayerEquipment.Instance.Equipped == null)
+                foreach (var pickup in UnityEngine.Object.FindObjectsByType<PlanetScrappers.Interaction.ToolPickup>(FindObjectsSortMode.None))
+                    if (pickup.CanInteract) { target = pickup.transform.position; return true; }
+
             switch (m.type)
             {
                 case ObjectiveType.Dismantle: return Nearest(from, m.targetId, out target);

@@ -84,7 +84,9 @@ namespace PlanetScrappers.Equipment
             {
                 if (noToolHintCooldown <= 0f)
                 {
-                    GameEvents.Say("Bare hands? Bold. The rusty wrench is on the crate with the warm light, west of the road. Press E to grab it.", 6f);
+                    GameEvents.Say("Bare hands? Bold. The rusty wrench is on the crate with the warm light, just ahead of the base. Press E to grab it.", 6f);
+                    if (PlanetScrappers.UI.UIManager.Instance != null)
+                        PlanetScrappers.UI.UIManager.Instance.Toast("No tool yet! Pick up the Rusty Wrench: follow the marker, press E", 5f);
                     noToolHintCooldown = 8f;
                 }
                 return;

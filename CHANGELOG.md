@@ -14,6 +14,11 @@ All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; th
   and turn their heads to watch you when you come close.
 - Models import automatically with the right materials; if a model file is missing the old placeholder is used.
 
+### Fixed
+- New players could not find the Rusty Wrench, so the left mouse button did nothing. The wrench crate now sits in
+  view just ahead of the start, the mission marker points to it until you have a tool, and clicking without a tool
+  shows a clear message at the top of the screen.
+
 ### Changed
 - **Brighter, sunlit look** from the approved screen designs: stronger sun, lighter sky and ambient light, and a
   post-processing pass (filmic tone mapping, soft bloom, more colour, light vignette).

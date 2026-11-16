@@ -77,7 +77,7 @@ namespace PlanetScrappers.EditorTools
                     "Paperwork done. Bolt says welcome. Bolt also says hurry."),
                 Mission(2, "Find Your First Scrap", "Every Scrapper starts with a rusty wrench and a barrel that has it coming.",
                     "Pick up the rusty wrench and break an oil drum", ObjectiveType.Dismantle, "oil_drum", 1, 25,
-                    "The wrench is on the crate with the warm light, just west of the road. Press E to grab it, then hold the left mouse button on a drum.",
+                    "The wrench is on the crate with the warm light, just ahead of the base. Follow the marker, press E to grab it, then hold the left mouse button on a drum.",
                     "Look at it fly. Scrap pops out of everything you break."),
                 Mission(3, "Collect 20 Iron", "Iron is cheap, but it's everywhere. Fill your pockets.",
                     "Collect 20 iron", ObjectiveType.CollectResource, "iron", 20, 40,

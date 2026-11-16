@@ -361,7 +361,7 @@ namespace PlanetScrappers.UI
             truckPanel.SetActive(false);
 
             // Toast
-            var toast = HudPanel("Toast", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -24), 360);
+            var toast = HudPanel("Toast", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -24), 560);
             toastPanel = toast.gameObject;
             toastText = UIKit.Label(toast.transform, "", 19, UIKit.Ink, FontStyle.Bold, TextAnchor.MiddleCenter);
             toastPanel.SetActive(false);

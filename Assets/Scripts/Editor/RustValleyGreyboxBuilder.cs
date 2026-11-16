@@ -417,7 +417,7 @@ namespace PlanetScrappers.EditorTools
             }
 
             // Rusty wrench pickup (becomes interactive in Module 2).
-            var wrenchPos = MapToWorld(284, 275);
+            var wrenchPos = MapToWorld(304, 279); // in view just ahead-left of the spawn
             var crate = Box("Wrench Crate", root, wrenchPos + Vector3.up * 0.4f, new Vector3(1.2f, 0.8f, 0.8f), m.Rust);
             var wrench = new GameObject("Rusty Wrench (pickup)").transform;
             wrench.SetParent(root);

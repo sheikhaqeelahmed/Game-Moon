@@ -21,6 +21,6 @@ MonoBehaviour:
   targetId: oil_drum
   count: 1
   rewardCredits: 25
-  botIntro: The wrench is on the crate with the warm light, just west of the road.
-    Press E to grab it, then hold the left mouse button on a drum.
+  botIntro: The wrench is on the crate with the warm light, just ahead of the base.
+    Follow the marker, press E to grab it, then hold the left mouse button on a drum.
   botComplete: Look at it fly. Scrap pops out of everything you break.

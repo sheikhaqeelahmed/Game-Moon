@@ -103,6 +103,7 @@ To regenerate the models (Blender 4.2 or newer):
 ```
 blender -b --factory-startup --python tools/blender/build_models.py
 blender -b --factory-startup --python tools/blender/build_props.py
+blender -b --factory-startup --python tools/blender/build_props_late.py
 ```
 
 Then rebuild the scene from the Unity menu **Planet Scrappers > Build Rust Valley Greybox**.
@@ -122,5 +123,5 @@ Then rebuild the scene from the Unity menu **Planet Scrappers > Build Rust Valle
 | Phase 5a | Mega-Factory, ending, achievements, accessibility, controller menus | Done (v0.4.0) |
 | Art pass 1 | Blender models for the Rookie, SCRAP-BOT, Nova, Captain Bolt and the SH-01 truck; bright look | Done (v0.5.0) |
 | Art pass 2a | Rust Valley junk (6 kinds) and the 4 base buildings | Done (v0.6.0) |
-| Art pass 2b | Iron District, Spaceport, Deep Core and Mega-Factory props | Next |
+| Art pass 2b | Iron District, Spaceport, Deep Core and Mega-Factory props (17 kinds) | Done (v0.7.0) |
 | Phase 5b | Steam release (store page, Steamworks, achievements on Steam, beta) | Not started (needs Steamworks account) |

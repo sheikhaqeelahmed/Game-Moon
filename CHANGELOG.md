@@ -2,6 +2,19 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.7.0] — Art pass 2b: every salvage object modelled
+
+### Added
+- **New models for the remaining 17 salvage objects** (`tools/blender/build_props_late.py`):
+  - Iron District: robot arms, hydraulic presses, assembly lines with crates and a scanner gantry, factory cranes.
+  - Spaceport Graveyard: cargo pods, the freighter's nose (with canopy and torn edge), hull sections with ribs,
+    cargo doors and a breach, the engine with four nozzles and a caged reactor, wings, and the landed shuttle.
+  - Deep Core: drilling rigs with lattice towers, ore crushers with toothed rollers, crystal veins with violet
+    crystal spikes, and mine carts on rails full of ore.
+  - Mega-Factory: power pylons with glowing caged orbs, smelters with molten crucibles, and the reactor core with
+    its striped rings and crystal heart.
+- Every object in the game now uses a real model. Damage stages and collision shapes work as before.
+
 ## [0.6.0] — Art pass 2a: Rust Valley props and buildings
 
 ### Added

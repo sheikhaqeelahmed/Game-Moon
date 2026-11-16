@@ -859,13 +859,28 @@ namespace PlanetScrappers.EditorTools
             InstantiateModel("Props/" + file, t, "Model", remapFrom, remapTo) != null;
 
         /// <summary>An invisible box collider in the prop's local space (keeps gameplay shapes unchanged).</summary>
-        static void ColliderBox(Transform t, string name, Vector3 localPos, Vector3 size, float zTilt = 0f)
+        static void ColliderBox(Transform t, string name, Vector3 localPos, Vector3 size, float zTilt = 0f) =>
+            ColliderBox(t, name, localPos, size, new Vector3(0f, 0f, zTilt));
+
+        static void ColliderBox(Transform t, string name, Vector3 localPos, Vector3 size, Vector3 euler)
         {
             var go = new GameObject(name + " Collider");
             go.transform.SetParent(t, false);
             go.transform.localPosition = localPos;
-            go.transform.localRotation = Quaternion.Euler(0f, 0f, zTilt);
+            go.transform.localRotation = Quaternion.Euler(euler);
             go.AddComponent<BoxCollider>().size = size;
+        }
+
+        /// <summary>The flat wing model on a tilted child, with a matching collider.</summary>
+        static bool WingModel(Transform p, Vector3 centre, Vector3 euler)
+        {
+            var tilt = new GameObject("Tilt").transform;
+            tilt.SetParent(p, false);
+            tilt.localPosition = centre;
+            tilt.localRotation = Quaternion.Euler(euler);
+            if (!PropModel(tilt, "ShipWing")) { Object.DestroyImmediate(tilt.gameObject); return false; }
+            ColliderBox(tilt, "Wing", Vector3.zero, new Vector3(14f, 0.8f, 9f));
+            return true;
         }
 
         static void PlaceNpc(string file, string name, Transform parent, Vector3 pos, float yaw)
@@ -1203,6 +1218,13 @@ namespace PlanetScrappers.EditorTools
         static void RobotArm(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T3_RobotArm_{index:00}", pos, yaw);
+            if (PropModel(t, "RobotArm"))
+            {
+                ColliderBox(t, "Base", new Vector3(0f, 0.3f, 0f), new Vector3(1.4f, 0.6f, 1.4f));
+                ColliderBox(t, "Turret", new Vector3(0f, 0.8f, 0f), new Vector3(0.9f, 0.5f, 0.9f));
+                ColliderBox(t, "Lower Arm", new Vector3(0f, 1.9f, 0.3f), new Vector3(0.4f, 2f, 0.4f), new Vector3(18f, 0f, 0f));
+                return;
+            }
             CylLocal("Base", t, new Vector3(0f, 0.3f, 0f), new Vector3(1.4f, 0.3f, 1.4f), m.MetalDark);
             CylLocal("Turret", t, new Vector3(0f, 0.8f, 0f), new Vector3(0.9f, 0.25f, 0.9f), m.Hazard);
             var lower = BoxLocal("Lower Arm", t, new Vector3(0f, 1.9f, 0.3f), new Vector3(0.4f, 2f, 0.4f), m.Hazard);
@@ -1219,6 +1241,14 @@ namespace PlanetScrappers.EditorTools
         static void HydraulicPress(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T3_HydraulicPress_{index:00}", pos, yaw);
+            if (PropModel(t, "HydraulicPress"))
+            {
+                ColliderBox(t, "Bed", new Vector3(0f, 0.5f, 0f), new Vector3(3.4f, 1f, 2f));
+                ColliderBox(t, "Pillar L", new Vector3(-1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f));
+                ColliderBox(t, "Pillar R", new Vector3(1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f));
+                ColliderBox(t, "Crown", new Vector3(0f, 4.9f, 0f), new Vector3(3.6f, 0.9f, 1.5f));
+                return;
+            }
             BoxLocal("Bed", t, new Vector3(0f, 0.5f, 0f), new Vector3(3.4f, 1f, 2f), m.MetalDark);
             BoxLocal("Pillar L", t, new Vector3(-1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f), m.LockedGrey);
             BoxLocal("Pillar R", t, new Vector3(1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f), m.LockedGrey);
@@ -1232,6 +1262,11 @@ namespace PlanetScrappers.EditorTools
         static void AssemblyLine(Transform parent, Vector3 pos, float yaw, int index)
         {
             var t = Prop(parent, $"T4_AssemblyLine_{index:00}", pos, yaw);
+            if (PropModel(t, "AssemblyLine"))
+            {
+                ColliderBox(t, "Conveyor", new Vector3(0f, 0.7f, 0f), new Vector3(1.8f, 0.4f, 22f));
+                return;
+            }
             BoxLocal("Conveyor", t, new Vector3(0f, 0.7f, 0f), new Vector3(1.8f, 0.4f, 22f), m.MetalDark);
             BoxLocal("Belt", t, new Vector3(0f, 0.92f, 0f), new Vector3(1.5f, 0.04f, 21.6f), m.Rubber, collider: false);
             for (int i = -5; i <= 5; i++)
@@ -1251,6 +1286,14 @@ namespace PlanetScrappers.EditorTools
         static void FactoryCrane(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T4_FactoryCrane_{index:00}", pos, 0f);
+            if (PropModel(t, "FactoryCrane"))
+            {
+                ColliderBox(t, "Main Beam", new Vector3(0f, 8.6f, 0f), new Vector3(10f, 0.8f, 1f));
+                foreach (float x in new[] { -4.6f, 4.6f })
+                foreach (float z in new[] { -3f, 3f })
+                    ColliderBox(t, "Leg", new Vector3(x, 4.3f, z), new Vector3(0.5f, 8.6f, 0.5f));
+                return;
+            }
             BoxLocal("Main Beam", t, new Vector3(0f, 8.6f, 0f), new Vector3(10f, 0.8f, 1f), m.Hazard);
             foreach (float x in new[] { -4.6f, 4.6f })
             foreach (float z in new[] { -3f, 3f })
@@ -1295,6 +1338,7 @@ namespace PlanetScrappers.EditorTools
             const float z = -26f;
             ShipPart(area, "T4_ShipNose_01", new Vector3(156f, 0f, z), p =>
             {
+                if (PropModel(p, "ShipNose")) { ColliderBox(p, "Cockpit", new Vector3(0f, 3.2f, 0f), new Vector3(7f, 7f, 7f)); return; }
                 CylLocal("Cockpit", p, new Vector3(0f, 3.2f, 0f), new Vector3(7f, 3f, 7f), m.BaseWhite).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 Part(PrimitiveType.Sphere, "Nose Cone", p, new Vector3(-3.4f, 3.2f, 0f), new Vector3(5f, 6.2f, 6.2f), m.BaseWhite);
                 BoxLocal("Canopy", p, new Vector3(-2.5f, 5.4f, 0f), new Vector3(3f, 1f, 3.6f), m.Glass, collider: false);
@@ -1306,6 +1350,7 @@ namespace PlanetScrappers.EditorTools
                 float x = 172f + i * 18f;
                 ShipPart(area, $"T5_ShipHull_{i + 1:00}", new Vector3(x, 0f, z), p =>
                 {
+                    if (PropModel(p, "ShipHull")) { ColliderBox(p, "Hull", new Vector3(0f, 3.6f, 0f), new Vector3(18f, 8f, 8f)); return; }
                     CylLocal("Hull", p, new Vector3(0f, 3.6f, 0f), new Vector3(8f, 9f, 8f), m.TruckGrey).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                     for (int k = -3; k <= 3; k++)
                         CylLocal("Rib", p, new Vector3(k * 2.4f, 3.6f, 0f), new Vector3(8.2f, 0.2f, 8.2f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
@@ -1315,6 +1360,7 @@ namespace PlanetScrappers.EditorTools
             }
             ShipPart(area, "T5_ShipEngine_01", new Vector3(208f, 0f, z), p =>
             {
+                if (PropModel(p, "ShipEngine")) { ColliderBox(p, "Engine Block", new Vector3(0f, 3.6f, 0f), new Vector3(8f, 7.4f, 7.4f)); return; }
                 CylLocal("Engine Block", p, new Vector3(0f, 3.6f, 0f), new Vector3(7.4f, 4f, 7.4f), m.LockedGrey).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 foreach (var off in new[] { new Vector2(1.8f, 1.8f), new Vector2(-1.8f, 1.8f), new Vector2(1.8f, -1.8f), new Vector2(-1.8f, -1.8f) })
                     CylLocal("Nozzle", p, new Vector3(5f, 3.6f + off.y, off.x), new Vector3(2.4f, 1.4f, 2.4f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
@@ -1323,11 +1369,13 @@ namespace PlanetScrappers.EditorTools
             });
             ShipPart(area, "T4_ShipWing_01", new Vector3(184f, 0f, z + 14f), p =>
             {
+                if (WingModel(p, new Vector3(0f, 1.6f, 0f), new Vector3(0f, 0f, -6f))) return;
                 BoxLocal("Wing", p, new Vector3(0f, 1.6f, 0f), new Vector3(14f, 0.8f, 9f), m.BaseWhite).transform.localRotation = Quaternion.Euler(0f, 0f, -6f);
                 BoxLocal("Flap", p, new Vector3(5f, 1.1f, 0f), new Vector3(3f, 0.4f, 8f), m.TrimOrange, collider: false);
             });
             ShipPart(area, "T4_ShipWing_02", new Vector3(186f, 0f, z - 15f), p =>
             {
+                if (WingModel(p, new Vector3(0f, 0.9f, 0f), new Vector3(8f, 0f, 4f))) return;
                 BoxLocal("Wing", p, new Vector3(0f, 0.9f, 0f), new Vector3(14f, 0.8f, 9f), m.BaseWhite).transform.localRotation = Quaternion.Euler(8f, 0f, 4f);
                 BoxLocal("Rust", p, new Vector3(-3f, 1.35f, 0f), new Vector3(4f, 0.05f, 5f), m.Rust, collider: false);
             });
@@ -1335,6 +1383,7 @@ namespace PlanetScrappers.EditorTools
             // A small shuttle on the north pad.
             ShipPart(area, "T4_ShuttleCabin_01", new Vector3(168f, 0f, 32f), p =>
             {
+                if (PropModel(p, "ShuttleCabin")) { ColliderBox(p, "Cabin", new Vector3(0f, 2.2f, 0f), new Vector3(8f, 3.4f, 4.4f)); return; }
                 BoxLocal("Cabin", p, new Vector3(0f, 2.2f, 0f), new Vector3(8f, 3.4f, 4.4f), m.BaseWhite);
                 BoxLocal("Windows", p, new Vector3(-4.02f, 2.6f, 0f), new Vector3(0.05f, 1f, 3.6f), m.Glass, collider: false);
                 BoxLocal("Stripe", p, new Vector3(0f, 2.2f, 2.22f), new Vector3(7.6f, 0.5f, 0.05f), m.TrimOrange, collider: false);
@@ -1347,6 +1396,7 @@ namespace PlanetScrappers.EditorTools
             {
                 ShipPart(area, $"T3_CargoPod_{n++:00}", pos, p =>
                 {
+                    if (PropModel(p, "CargoPod")) { ColliderBox(p, "Pod", new Vector3(0f, 1.2f, 0f), new Vector3(4.4f, 2.2f, 2.2f)); return; }
                     Part(PrimitiveType.Capsule, "Pod", p, new Vector3(0f, 1.2f, 0f), new Vector3(2.2f, 1.6f, 2.2f), m.ContainerBlue).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                     var col = new GameObject("Collider");
                     col.transform.SetParent(p, false);
@@ -1421,6 +1471,12 @@ namespace PlanetScrappers.EditorTools
         static void DrillingRig(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T5_DrillingRig_{index:00}", pos, 0f);
+            if (PropModel(t, "DrillingRig"))
+            {
+                ColliderBox(t, "Base", new Vector3(0f, 0.6f, 0f), new Vector3(5f, 1.2f, 5f));
+                ColliderBox(t, "Tower Top", new Vector3(0f, 9f, 0f), new Vector3(2.6f, 0.6f, 2.6f));
+                return;
+            }
             BoxLocal("Base", t, new Vector3(0f, 0.6f, 0f), new Vector3(5f, 1.2f, 5f), m.MetalDark);
             foreach (float x in new[] { -1.8f, 1.8f })
             foreach (float z in new[] { -1.8f, 1.8f })
@@ -1435,6 +1491,11 @@ namespace PlanetScrappers.EditorTools
         static void OreCrusher(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T5_OreCrusher_{index:00}", pos, 0f);
+            if (PropModel(t, "OreCrusher"))
+            {
+                ColliderBox(t, "Housing", new Vector3(0f, 2f, 0f), new Vector3(6f, 4f, 4f));
+                return;
+            }
             BoxLocal("Housing", t, new Vector3(0f, 2f, 0f), new Vector3(6f, 4f, 4f), m.LockedGrey);
             BoxLocal("Hopper", t, new Vector3(0f, 4.6f, 0f), new Vector3(4f, 1.2f, 3f), m.Hazard, collider: false);
             CylLocal("Roller", t, new Vector3(0f, 3.2f, 2.05f), new Vector3(1.2f, 2.6f, 1.2f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
@@ -1445,6 +1506,11 @@ namespace PlanetScrappers.EditorTools
         static void CrystalVein(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T4_CrystalVein_{index:00}", pos, index * 47f);
+            if (PropModel(t, "CrystalVein"))
+            {
+                ColliderBox(t, "Rock", new Vector3(0f, 0.8f, 0f), new Vector3(3f, 1.6f, 2.4f));
+                return;
+            }
             BoxLocal("Rock", t, new Vector3(0f, 0.8f, 0f), new Vector3(3f, 1.6f, 2.4f), m.CaveRock);
             var rng = new System.Random(index * 13);
             for (int i = 0; i < 6; i++)
@@ -1458,6 +1524,11 @@ namespace PlanetScrappers.EditorTools
         static void MineCart(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T3_MineCart_{index:00}", pos, 90f);
+            if (PropModel(t, "MineCart"))
+            {
+                ColliderBox(t, "Tub", new Vector3(0f, 1f, 0f), new Vector3(1.6f, 1.1f, 2.4f));
+                return;
+            }
             BoxLocal("Tub", t, new Vector3(0f, 1f, 0f), new Vector3(1.6f, 1.1f, 2.4f), m.Rust);
             BoxLocal("Ore", t, new Vector3(0f, 1.6f, 0f), new Vector3(1.4f, 0.3f, 2.2f), m.CaveRock, collider: false);
             Wheels(t, 0.7f, 0.8f, 0.3f);
@@ -1597,10 +1668,18 @@ namespace PlanetScrappers.EditorTools
             foreach (var off in new[] { new Vector3(-20f, 0f, 14f), new Vector3(20f, 0f, 14f), new Vector3(-20f, 0f, -14f), new Vector3(20f, 0f, -14f) })
             {
                 var p = Prop(area, $"T5_FactoryPylon_{pi + 1:00}", corePos + off, 0f);
-                BoxLocal("Pylon Base", p, new Vector3(0f, 1f, 0f), new Vector3(3.6f, 2f, 3.6f), m.MetalDark);
-                BoxLocal("Pylon Column", p, new Vector3(0f, 6f, 0f), new Vector3(1.6f, 8f, 1.6f), m.LockedGrey);
-                Part(PrimitiveType.Sphere, "Pylon Orb", p, new Vector3(0f, 10.6f, 0f), Vector3.one * 2f, m.BotEye);
-                BoxLocal("Hazard", p, new Vector3(0f, 2.2f, 1.82f), new Vector3(3f, 0.6f, 0.05f), m.Hazard, collider: false);
+                if (PropModel(p, "FactoryPylon"))
+                {
+                    ColliderBox(p, "Pylon Base", new Vector3(0f, 1f, 0f), new Vector3(3.6f, 2f, 3.6f));
+                    ColliderBox(p, "Pylon Column", new Vector3(0f, 6f, 0f), new Vector3(1.6f, 8f, 1.6f));
+                }
+                else
+                {
+                    BoxLocal("Pylon Base", p, new Vector3(0f, 1f, 0f), new Vector3(3.6f, 2f, 3.6f), m.MetalDark);
+                    BoxLocal("Pylon Column", p, new Vector3(0f, 6f, 0f), new Vector3(1.6f, 8f, 1.6f), m.LockedGrey);
+                    Part(PrimitiveType.Sphere, "Pylon Orb", p, new Vector3(0f, 10.6f, 0f), Vector3.one * 2f, m.BotEye);
+                    BoxLocal("Hazard", p, new Vector3(0f, 2.2f, 1.82f), new Vector3(3f, 0.6f, 0.05f), m.Hazard, collider: false);
+                }
                 var cable = BoxLocal("Cable", p, new Vector3(-off.x * 0.25f, 0.3f, -off.z * 0.25f), new Vector3(0.4f, 0.3f, off.magnitude * 0.5f), m.Rubber, collider: false);
                 cable.transform.localRotation = Quaternion.LookRotation(-off);
                 pylons[pi++] = p.gameObject.AddComponent<DestructibleObject>();
@@ -1608,12 +1687,20 @@ namespace PlanetScrappers.EditorTools
             }
 
             var core = Prop(area, "T5_ReactorCore_01", corePos, 0f);
+            if (PropModel(core, "ReactorCore"))
+            {
+                ColliderBox(core, "Core Base", new Vector3(0f, 1.5f, 0f), new Vector3(14f, 3f, 14f));
+                ColliderBox(core, "Core Body", new Vector3(0f, 5.5f, 0f), new Vector3(9f, 5f, 9f));
+            }
+            else
+            {
             CylLocal("Core Base", core, new Vector3(0f, 1.5f, 0f), new Vector3(14f, 1.5f, 14f), m.MetalDark);
             CylLocal("Core Body", core, new Vector3(0f, 7f, 0f), new Vector3(9f, 5f, 9f), m.LockedGrey, collider: false);
             for (int i = 0; i < 4; i++)
                 CylLocal("Core Ring", core, new Vector3(0f, 4f + i * 2.4f, 0f), new Vector3(10f, 0.3f, 10f), i % 2 == 0 ? m.Hazard : m.TrimOrange, collider: false);
             Part(PrimitiveType.Sphere, "Core Heart", core, new Vector3(0f, 13.5f, 0f), Vector3.one * 5f, m.Crystal);
             CylLocal("Core Cap", core, new Vector3(0f, 12.2f, 0f), new Vector3(6f, 0.5f, 6f), m.MetalDark, collider: false);
+            }
             var coreObj = core.gameObject.AddComponent<DestructibleObject>();
             coreObj.Setup(db.Dismantlable("reactor_core"), core.name);
 
@@ -1648,6 +1735,11 @@ namespace PlanetScrappers.EditorTools
         static void Smelter(Transform parent, Vector3 pos, int index)
         {
             var t = Prop(parent, $"T5_Smelter_{index:00}", pos, 0f);
+            if (PropModel(t, "Smelter"))
+            {
+                ColliderBox(t, "Furnace", new Vector3(0f, 3.5f, 0f), new Vector3(6f, 7f, 6f));
+                return;
+            }
             CylLocal("Furnace", t, new Vector3(0f, 3.5f, 0f), new Vector3(6f, 3.5f, 6f), m.MetalDark);
             CylLocal("Crucible", t, new Vector3(0f, 7.6f, 0f), new Vector3(4.4f, 0.8f, 4.4f), m.Rust, collider: false);
             Part(PrimitiveType.Sphere, "Molten Glow", t, new Vector3(0f, 8.2f, 0f), new Vector3(3.6f, 0.6f, 3.6f), m.TrimOrange);

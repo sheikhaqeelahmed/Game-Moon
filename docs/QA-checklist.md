@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.6.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.7.0)
 ========================================
 
 How to test
@@ -71,6 +71,8 @@ QA-051  Brighter look                         Scene looks sunlit, not dark; noth
 QA-052  New junk models                        Drums, vending bots, scooters, containers, Mule-7 trucks and generators lose pieces as you hit them.
 QA-053  Collisions on new models              You can't walk through any prop or building; nothing blocks you where nothing is visible.
 QA-054  Base buildings                       Base, Upgrade Station, Depot and Warehouse look finished; signs are readable.
+QA-055  Later-zone models                     Iron District, Spaceport, Deep Core and Mega-Factory objects look finished and lose pieces when hit.
+QA-056  Reactor core and pylons               Pylons and core still work: shield drops after four pylons, core breaks after.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

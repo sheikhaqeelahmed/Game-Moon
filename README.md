@@ -44,6 +44,8 @@ collect the scrap, sell it, buy better tools and grow a salvage operation.
 | Missions | J | — |
 | Switch third / first person | V | Right stick press |
 | Pause / close | Esc | Start |
+| Get in / out of truck | E | X / Square |
+| Drive | W/S speed, A/D steer, Space brake | Left stick, A to brake |
 
 ## Game data
 
@@ -104,3 +106,4 @@ docs/             Concept, licences, QA material
 | 2 | Wrench, destruction, scrap collection | Done (v0.1.0) |
 | 3 | Inventory, selling, credits, upgrades | Done (v0.1.0) |
 | 4 | Missions, UI, save/load, QA package | Done (v0.1.0); Blender art pass still to do |
+| Phase 2 | Salvage truck, Iron District, Plasma Cutter, collectors, warehouse, missions 9–14 | Done (v0.2.0) |

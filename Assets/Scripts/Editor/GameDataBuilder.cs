@@ -37,7 +37,7 @@ namespace PlanetScrappers.EditorTools
                 Tool("rusty_wrench", "Rusty Wrench", 1, 1, 10f, 1.2f, 2.2f, 0f, 0, true, "Small objects. Heavy, loyal, rusty."),
                 Tool("scrap_hammer", "Scrap Hammer", 2, 2, 22f, 1.0f, 2.4f, 0.10f, 250, true, "Metal components, trucks and containers."),
                 Tool("electric_dismantler", "Electric Dismantler", 3, 3, 14f, 3.0f, 2.6f, 0.20f, 1200, true, "Fast pulses. Opens Machine Row."),
-                Tool("plasma_cutter", "Plasma Cutter", 4, 4, 25f, 3.0f, 3.0f, 0.30f, 4500, false, "Large machinery.", "Iron District, Phase 2"),
+                Tool("plasma_cutter", "Plasma Cutter", 4, 4, 25f, 3.0f, 3.0f, 0.30f, 4500, true, "Large machinery and assembly lines."),
                 Tool("industrial_crusher", "Industrial Crusher", 5, 5, 260f, 0.5f, 3.2f, 0.40f, 12000, false, "Vehicles and heavy structures.", "Phase 3"),
                 Tool("salvage_robot", "Automated Salvage Robot", 6, 5, 25f, 1.0f, 3.0f, 0f, 30000, false, "Collects on its own.", "Phase 3")
             };
@@ -49,7 +49,11 @@ namespace PlanetScrappers.EditorTools
                 Obj("hover_scooter", "Zipline-50 Hover Scooter", 1, 120f, 240f, Y(iron, 6), Y(copper, 3), Y(elec, 1)),
                 Obj("cargo_container", "Cargo Container", 2, 300f, 300f, Y(iron, 18), Y(copper, 2)),
                 Obj("mule7_truck", "Mule-7 Hauler Truck", 2, 450f, 300f, Y(iron, 20), Y(copper, 8), Y(elec, 3), Y(alloy, 1, 0.25f)),
-                Obj("generator_unit", "Generator Unit", 3, 600f, 360f, Y(copper, 14), Y(elec, 6), Y(alloy, 1))
+                Obj("generator_unit", "Generator Unit", 3, 600f, 360f, Y(copper, 14), Y(elec, 6), Y(alloy, 1)),
+                Obj("robot_arm", "Robot Arm", 3, 500f, 300f, Y(copper, 8), Y(elec, 8), Y(alloy, 1, 0.5f)),
+                Obj("hydraulic_press", "Hydraulic Press", 3, 800f, 360f, Y(iron, 25), Y(copper, 10), Y(elec, 4)),
+                Obj("assembly_line", "Assembly Line", 4, 1400f, 420f, Y(iron, 40), Y(copper, 16), Y(elec, 10), Y(alloy, 2)),
+                Obj("factory_crane", "Factory Crane", 4, 2000f, 480f, Y(iron, 70), Y(copper, 12), Y(alloy, 3))
             };
 
             var missions = new[]
@@ -85,7 +89,31 @@ namespace PlanetScrappers.EditorTools
                 Mission(8, "Unlock Industrial Machinery", "Machine Row's generators need a tier 3 tool. Nova's Electric Dismantler opens the gate.",
                     "Buy the Electric Dismantler", ObjectiveType.BuyTool, "electric_dismantler", 1, 300,
                     "Machine Row needs a tier 3 tool. Save up 1,200 credits for Nova's Electric Dismantler. Containers and trucks pay best.",
-                    "The gate's open. Bolt says there's a whole Iron District past this one. Bolt says a lot.")
+                    "The gate's open. Bolt says there's a whole Iron District past this one. Bolt says a lot."),
+                Mission(9, "Take the Wheel", "The SH-01 salvage truck carries 150 units and vacuums scrap as you drive.",
+                    "Get in the salvage truck parked by the base", ObjectiveType.Interact, "truck", 1, 100,
+                    "New contract from Bolt: use the company truck. It's parked east of the base road. Walk up and press E.",
+                    "Seatbelt optional. Physics, sadly, is not."),
+                Mission(10, "Haul Day", "Fill the truck's bin by driving over loose scrap, then sell the load at the depot.",
+                    "Collect 40 units of scrap in the truck bin", ObjectiveType.CollectToStorage, "truck", 40, 150,
+                    "Break things, then drive over the scrap. The bin pulls it in. Park within 40 metres of the depot to sell the load.",
+                    "Forty units without bending over once. Progress."),
+                Mission(11, "Set Up a Collector", "Scrap Collectors pull in loose scrap on their own. They are the start of your automated operation.",
+                    "Build a Scrap Collector on a collector pad", ObjectiveType.Interact, "build_collector", 1, 200,
+                    "There are collector pads in the Vehicle Graveyard, the Container Yard and the debris field. A collector costs 800 credits.",
+                    "It works while you don't. Bolt calls that management."),
+                Mission(12, "Into the Iron District", "North of Machine Row, through the gap in the fence, the old factories are full of robot arms and presses.",
+                    "Dismantle a robot arm in the Iron District", ObjectiveType.Dismantle, "robot_arm", 1, 250,
+                    "Walk through Machine Row and out the north gap in the fence. Robot arms need your Electric Dismantler.",
+                    "Welcome to the Iron District. Mind the presses."),
+                Mission(13, "Cutting Edge", "Assembly lines and factory cranes are tier 4. Nova's Plasma Cutter slices through them.",
+                    "Buy the Plasma Cutter from Nova", ObjectiveType.BuyTool, "plasma_cutter", 1, 300,
+                    "Tier 4 machines need the Plasma Cutter: 4,500 credits at Nova's. Presses and robot arms pay well.",
+                    "Plasma. Now we're cooking. Literally, a little."),
+                Mission(14, "Line Break", "Take apart a full assembly line to prove the Iron District can be cleared.",
+                    "Dismantle an assembly line", ObjectiveType.Dismantle, "assembly_line", 1, 600,
+                    "Assembly lines run along the big factory halls. Bring the Plasma Cutter.",
+                    "That's the Iron District open for business. Spaceport Graveyard is next. Bolt's already counting.")
             };
 
             var db = Load<GameDatabase>("Assets/Resources/GameDatabase.asset");

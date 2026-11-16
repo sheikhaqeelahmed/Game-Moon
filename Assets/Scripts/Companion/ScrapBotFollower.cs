@@ -28,10 +28,13 @@ namespace PlanetScrappers.Companion
         Vector3 lastPlayerPosition;
         Vector3 playerVelocity;
 
-        public void SetTarget(Transform target, Transform cameraTransform)
+        float offsetScale = 1f;
+
+        public void SetTarget(Transform target, Transform cameraTransform, float scale = 1f)
         {
             player = target;
             playerCamera = cameraTransform;
+            offsetScale = scale;
         }
 
         void OnEnable()
@@ -57,7 +60,7 @@ namespace PlanetScrappers.Companion
             Quaternion yaw = Quaternion.Euler(0f, viewYaw, 0f);
             if (cameraRig == null && playerCamera != null) cameraRig = playerCamera.GetComponent<PlanetScrappers.Player.PlayerCamera>();
             bool firstPerson = cameraRig != null && cameraRig.Mode == PlanetScrappers.Player.CameraMode.FirstPerson;
-            Vector3 offset = firstPerson ? firstPersonOffset : this.offset;
+            Vector3 offset = (firstPerson ? firstPersonOffset : this.offset) * offsetScale;
             float bob = Mathf.Sin(Time.time * bobFrequency * Mathf.PI * 2f) * bobAmplitude;
             Vector3 desired = player.position + yaw * offset + playerVelocity * followSmoothTime + Vector3.up * bob;
 

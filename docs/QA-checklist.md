@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.1.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.2.0)
 ========================================
 
 How to test
@@ -39,6 +39,15 @@ QA-019  Pause (Esc) and resume                     Game freezes while paused and
 QA-020  Save Game, Exit, relaunch, Continue        Position, credits, backpack, tools, missions and broken objects are restored.
 QA-021  Settings: change each option               Each change applies; settings are kept after restarting.
 QA-022  Lowest graphics quality                    Game stays playable and readable.
+QA-024  Get in the truck (E) and drive         Camera follows the truck; W/S/A/D/Space work; E gets out beside it.
+QA-025  Drive over loose scrap                 Scrap flies into the truck bin; HUD shows bin count.
+QA-026  Park near the depot and sell the load  Depot shows the truck bin and sells it.
+QA-027  Build a Scrap Collector on a pad       Costs 800 cr; collector appears and pulls in scrap within 15 m.
+QA-028  Store backpack at the warehouse        Backpack empties into the warehouse; depot can sell the warehouse.
+QA-029  Enter the Iron District                Only reachable through Machine Row and the north gap.
+QA-030  Dismantle a robot arm, then an         Robot arm needs tier 3; assembly line needs the Plasma Cutter (tier 4).
+        assembly line
+QA-031  Complete missions 9-14                 Each pays its reward; the last one ends all current contracts.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

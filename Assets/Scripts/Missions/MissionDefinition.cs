@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace PlanetScrappers.Missions
 {
-    public enum ObjectiveType { Interact, Dismantle, CollectResource, SellAny, BuyTool, BuyBackpack }
+    public enum ObjectiveType { Interact, Dismantle, CollectResource, SellAny, BuyTool, BuyBackpack, CollectToStorage }
 
     /// <summary>One tutorial or contract mission. Text and rewards live in the asset.</summary>
     [CreateAssetMenu(menuName = "Planet Scrappers/Mission", fileName = "Mission")]

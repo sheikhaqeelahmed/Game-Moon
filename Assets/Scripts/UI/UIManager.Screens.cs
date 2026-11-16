@@ -5,6 +5,7 @@ using PlanetScrappers.Inventory;
 using PlanetScrappers.Missions;
 using PlanetScrappers.Player;
 using PlanetScrappers.Save;
+using PlanetScrappers.Vehicles;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -224,12 +225,32 @@ namespace PlanetScrappers.UI
             UIKit.Label(r3, $"{wallet.Credits + grand:N0} cr", 30, UIKit.Amber, FontStyle.Bold, TextAnchor.MiddleRight).Width(200);
             UIKit.Button(right, grand > 0 ? $"Sell all for {grand:N0} cr" : "Backpack is empty", () => { Trading.SellAll(); Refresh(); }, true, 24, 64, grand > 0);
 
+            // Stored loads: warehouse always, truck bin when parked nearby.
+            var loads = new System.Collections.Generic.List<PlanetScrappers.Inventory.ScrapStorage>();
+            var warehouse = PlanetScrappers.Inventory.ScrapStorage.Find("warehouse");
+            if (warehouse != null) loads.Add(warehouse);
+            var truck = SalvageTruck.Instance;
+            var hopperPos = interactor != null && interactor.Current != null ? interactor.Current.transform.position : player.transform.position;
+            bool truckNear = truck != null && (truck.transform.position - hopperPos).magnitude < 40f;
+            if (truck != null) loads.Add(truck.Bin);
+            foreach (var store in loads)
+            {
+                bool isTruck = truck != null && store == truck.Bin;
+                bool canSell = store.TotalUnits > 0 && (!isTruck || truckNear);
+                var row = UIKit.Row(right, 10f, 50);
+                string note = isTruck && !truckNear ? "  (park within 40 m)" : "";
+                UIKit.Label(row, $"{store.DisplayName}: {store.TotalUnits}/{store.Capacity} units · {store.TotalValue():N0} cr{note}", 17, UIKit.Ink, FontStyle.Bold).Flex();
+                var s1 = store;
+                var b = UIKit.Button(row, "Sell load", () => { Trading.SellStorage(s1); Refresh(); }, false, 16, 44, canSell);
+                UIKit.Size(b.gameObject, 130, 44, 130, 44, 0f);
+            }
+
             Spacer(right, 8);
             UIKit.Label(right, "RECENT TRANSACTIONS", 15, UIKit.Muted, FontStyle.Bold);
             int shown = 0;
             foreach (var t in wallet.Log)
             {
-                if (shown++ >= 6) break;
+                if (shown++ >= 4) break;
                 var row = UIKit.Row(right, 8f);
                 UIKit.Label(row, $"{t.when}  {t.label}", 16, UIKit.Ink).Flex();
                 UIKit.Label(row, (t.amount > 0 ? "+" : "") + t.amount.ToString("N0") + " cr", 16, t.amount > 0 ? UIKit.Amber : UIKit.Muted, FontStyle.Bold, TextAnchor.MiddleRight).Width(120);
@@ -309,12 +330,15 @@ namespace PlanetScrappers.UI
         {
             var mm = MissionManager.Instance;
             var list = GameDatabase.Instance.missions;
-            var card = Card(1240, 780, $"First shift · {mm.CompletedCount} of {list.Length} done", "Missions", UIKit.AccentText);
+            int chapterEnd = 8, chapterStart = 0;
+            string chapterName = "First shift";
+            if (mm.Index >= 8) { chapterStart = 8; chapterEnd = list.Length; chapterName = "Phase 2 contracts"; }
+            var card = Card(1240, 780, $"{chapterName} · {mm.CompletedCount} of {list.Length} missions done", "Missions", UIKit.AccentText);
             var cols = Columns(card);
             var left = Column(cols, 1f, 8f);
             var right = Column(cols, 1.3f, 12f);
 
-            for (int i = 0; i < list.Length; i++)
+            for (int i = chapterStart; i < Mathf.Min(chapterEnd, list.Length); i++)
             {
                 var m = list[i];
                 bool done = i < mm.Index, active = i == mm.Index;
@@ -329,9 +353,9 @@ namespace PlanetScrappers.UI
             var cur = mm.Current;
             if (cur == null)
             {
-                UIKit.Label(right, "FIRST SHIFT COMPLETE", 15, UIKit.Green, FontStyle.Bold);
-                UIKit.Label(right, "All eight missions done", 36, UIKit.Ink, FontStyle.Bold);
-                UIKit.Label(right, "Keep salvaging Rust Valley. Captain Bolt drops fresh junk every few minutes, and the Iron District opens in the next phase.", 19, UIKit.Muted);
+                UIKit.Label(right, "ALL CONTRACTS COMPLETE", 15, UIKit.Green, FontStyle.Bold);
+                UIKit.Label(right, $"All {list.Length} missions done", 36, UIKit.Ink, FontStyle.Bold);
+                UIKit.Label(right, "Keep salvaging Rust Valley and the Iron District. Captain Bolt drops fresh junk every few minutes. The Spaceport Graveyard opens in the next phase.", 19, UIKit.Muted);
                 return;
             }
             UIKit.Label(right, $"MISSION {cur.number} · ACTIVE", 15, UIKit.Muted, FontStyle.Bold);

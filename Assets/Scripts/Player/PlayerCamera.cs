@@ -83,6 +83,18 @@ namespace PlanetScrappers.Player
             if (target != null) yaw = target.eulerAngles.y;
         }
 
+        float defaultDistance = -1f, defaultPivot, defaultShoulder;
+
+        /// <summary>Changes follow distance, pivot height and shoulder offset (e.g. for the truck). Pass -1 to restore defaults.</summary>
+        public void SetFollowProfile(float newDistance, float newPivotHeight, float newShoulder)
+        {
+            if (defaultDistance < 0f) { defaultDistance = distance; defaultPivot = pivotHeight; defaultShoulder = shoulderOffset; }
+            distance = newDistance >= 0f ? newDistance : defaultDistance;
+            pivotHeight = newPivotHeight >= 0f ? newPivotHeight : defaultPivot;
+            shoulderOffset = newShoulder >= 0f ? newShoulder : defaultShoulder;
+            currentDistance = distance;
+        }
+
         public void SetMode(CameraMode newMode)
         {
             mode = newMode;

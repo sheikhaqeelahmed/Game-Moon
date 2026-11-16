@@ -8,6 +8,8 @@ using PlanetScrappers.Interaction;
 using PlanetScrappers.Inventory;
 using PlanetScrappers.Missions;
 using PlanetScrappers.UI;
+using PlanetScrappers.Vehicles;
+using PlanetScrappers.Automation;
 using PlanetScrappers.Environment;
 using PlanetScrappers.Player;
 using UnityEditor;
@@ -33,6 +35,8 @@ namespace PlanetScrappers.EditorTools
 
         const float HalfWidth = 115f;  // x extent of the fence
         const float HalfDepth = 75f;   // z extent of the fence
+        const float IronHalfWidth = 70f; // Iron District x extent
+        const float IronNorth = 175f;    // Iron District north fence
 
         static Font signFont;
         static GameDatabase db;
@@ -83,6 +87,8 @@ namespace PlanetScrappers.EditorTools
             BuildContainerYard();
             BuildDebrisFields();
             BuildMachineRow();
+            BuildIronDistrict();
+            BuildCollectorPads();
             BuildSky();
             var player = BuildPlayer();
             BuildScrapBot(player);
@@ -170,7 +176,7 @@ namespace PlanetScrappers.EditorTools
             {
                 float a = i / (float)count * Mathf.PI * 2f;
                 float rx = 180f + (float)rng.NextDouble() * 25f;
-                float rz = 130f + (float)rng.NextDouble() * 20f;
+                float rz = (Mathf.Sin(a) > 0.2f ? 215f : 130f) + (float)rng.NextDouble() * 20f;
                 var pos = new Vector3(Mathf.Cos(a) * rx, -1f, Mathf.Sin(a) * rz);
                 float s = 16f + (float)rng.NextDouble() * 16f;
                 var rock = Primitive(PrimitiveType.Cube, "RimRock", rim, pos,
@@ -188,7 +194,7 @@ namespace PlanetScrappers.EditorTools
             // Larger craters outside the fence for the view.
             BuildCrater(root, new Vector3(-150f, 0f, 40f), 22f);
             BuildCrater(root, new Vector3(140f, 0f, -90f), 18f);
-            BuildCrater(root, new Vector3(30f, 0f, 110f), 26f);
+            BuildCrater(root, new Vector3(-165f, 0f, 120f), 26f);
         }
 
         static void BuildCrater(Transform parent, Vector3 centre, float radius)
@@ -252,7 +258,12 @@ namespace PlanetScrappers.EditorTools
             var nw = new Vector3(-HalfWidth, 0f, HalfDepth);
             Side(sw, se);
             Side(se, ne);
-            Side(ne, nw);
+            // North side has a gap behind Machine Row that leads into the Iron District.
+            Side(ne, new Vector3(6f, 0f, HalfDepth));
+            Side(new Vector3(-6f, 0f, HalfDepth), nw);
+            Side(new Vector3(-IronHalfWidth, 0f, HalfDepth), new Vector3(-IronHalfWidth, 0f, IronNorth));
+            Side(new Vector3(-IronHalfWidth, 0f, IronNorth), new Vector3(IronHalfWidth, 0f, IronNorth));
+            Side(new Vector3(IronHalfWidth, 0f, IronNorth), new Vector3(IronHalfWidth, 0f, HalfDepth));
             Side(nw, sw);
         }
 
@@ -318,17 +329,26 @@ namespace PlanetScrappers.EditorTools
             // Warehouse (storage later).
             var warehousePos = MapToWorld(550, 330);
             Building(root, "Warehouse", warehousePos, new Vector3(18f, 8f, 16f), m.TrimOrange, "STORAGE");
+            var door = new GameObject("Warehouse Drop-off");
+            door.transform.SetParent(root, true);
+            door.transform.position = warehousePos + new Vector3(0f, 0f, 9f);
+            var warehouse = door.AddComponent<ScrapStorage>();
+            warehouse.Setup("warehouse", "Warehouse", 600);
+            door.AddComponent<WarehouseDeposit>().Setup(warehouse);
+            Box("Drop-off Bay", root, warehousePos + new Vector3(0f, 0.15f, 9f), new Vector3(4f, 0.3f, 2.5f), m.Hazard, collider: false);
 
             // Starter salvage truck (drivable in a later milestone).
             var truck = new GameObject("Starter Salvage Truck").transform;
             truck.SetParent(root);
             truck.position = MapToWorld(347, 274);
             truck.rotation = Quaternion.Euler(0f, 90f, 0f);
-            BoxLocal("Body", truck, new Vector3(0f, 1.4f, 0f), new Vector3(2.3f, 1.8f, 4.8f), m.BaseWhite);
+            BoxLocal("Body", truck, new Vector3(0f, 1.4f, 0f), new Vector3(2.3f, 1.8f, 4.8f), m.BaseWhite, collider: false);
+            BoxLocal("Scrap Bin", truck, new Vector3(0f, 2.55f, -1.2f), new Vector3(2.1f, 0.5f, 2.2f), m.Rust, collider: false);
             BoxLocal("Stripe", truck, new Vector3(0f, 1.2f, 0f), new Vector3(2.34f, 0.35f, 4.84f), m.TrimOrange, collider: false);
             BoxLocal("Windscreen", truck, new Vector3(0f, 1.9f, 2.41f), new Vector3(2f, 0.6f, 0.02f), m.Glass, collider: false);
             BoxLocal("Roof Rack", truck, new Vector3(0f, 2.4f, -0.3f), new Vector3(2f, 0.15f, 3.4f), m.MetalDark, collider: false);
-            Wheels(truck, 1.15f, 1.6f, 0.45f);
+            var truckWheels = Wheels(truck, 1.15f, 1.6f, 0.45f);
+            SetupTruck(truck, truckWheels);
 
             // Rusty wrench pickup (becomes interactive in Module 2).
             var wrenchPos = MapToWorld(284, 275);
@@ -444,7 +464,7 @@ namespace PlanetScrappers.EditorTools
             float gateHalf = 4f;
             MarkStatic(Box("Fence West", fence, new Vector3((x0 - gateHalf) * 0.5f, 1.2f, z), new Vector3(-gateHalf - x0, 2.4f, 0.3f), m.Fence));
             MarkStatic(Box("Fence East", fence, new Vector3((x1 + gateHalf) * 0.5f, 1.2f, z), new Vector3(x1 - gateHalf, 2.4f, 0.3f), m.Fence));
-            float zBack = MapToWorld(0, 38).z;
+            float zBack = HalfDepth;
             MarkStatic(Box("Fence Side W", fence, new Vector3(x0, 1.2f, (z + zBack) * 0.5f), new Vector3(0.3f, 2.4f, zBack - z), m.Fence));
             MarkStatic(Box("Fence Side E", fence, new Vector3(x1, 1.2f, (z + zBack) * 0.5f), new Vector3(0.3f, 2.4f, zBack - z), m.Fence));
             var gate = Box("Locked Gate", fence, new Vector3(0f, 1.4f, z), new Vector3(gateHalf * 2f, 2.8f, 0.35f), m.Hazard);
@@ -853,6 +873,200 @@ namespace PlanetScrappers.EditorTools
             SetRef(follower, "playerCamera", camTransform);
         }
 
+        // ───────────────────────────── Phase 2: truck, collectors, Iron District ─────────────────────────────
+
+        static void SetupTruck(Transform truck, GameObject[] wheels)
+        {
+            var cc = truck.gameObject.AddComponent<CharacterController>();
+            cc.height = 2.6f;
+            cc.radius = 1.25f;
+            cc.center = new Vector3(0f, 1.3f, 0f);
+            cc.stepOffset = 0.5f;
+            cc.slopeLimit = 40f;
+
+            var bin = truck.gameObject.AddComponent<ScrapStorage>();
+            bin.Setup("truck", "Truck bin", 150);
+
+            var binTop = new GameObject("Bin Intake").transform;
+            binTop.SetParent(truck, false);
+            binTop.localPosition = new Vector3(0f, 2.9f, -1.2f);
+            var sink = truck.gameObject.AddComponent<StorageScrapSink>();
+            sink.Setup(bin, binTop, 7f);
+
+            var exit = new GameObject("Exit Point").transform;
+            exit.SetParent(truck, false);
+            exit.localPosition = new Vector3(-2.6f, 0.1f, 0.8f);
+
+            var t = truck.gameObject.AddComponent<SalvageTruck>();
+            SetRef(t, "bin", bin);
+            SetRef(t, "binMagnet", sink);
+            SetRef(t, "exitPoint", exit);
+            var so = new SerializedObject(t);
+            var w = so.FindProperty("wheels");
+            int alive = 0;
+            foreach (var g in wheels) if (g != null) alive++;
+            w.arraySize = alive;
+            int k = 0;
+            foreach (var g in wheels) if (g != null) w.GetArrayElementAtIndex(k++).objectReferenceValue = g.transform;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void BuildCollectorPads()
+        {
+            var root = new GameObject("Collector Pads").transform;
+            Pad(root, "collector_graveyard", MapToWorld(190, 178));
+            Pad(root, "collector_containers", MapToWorld(470, 178));
+            Pad(root, "collector_debris", MapToWorld(165, 268));
+        }
+
+        static void Pad(Transform parent, string id, Vector3 pos)
+        {
+            var pad = new GameObject("Collector Pad " + id);
+            pad.transform.SetParent(parent, true);
+            pad.transform.position = pos;
+            Primitive(PrimitiveType.Cylinder, "Pad Base", pad.transform, pos + Vector3.up * 0.05f, new Vector3(3.2f, 0.05f, 3.2f), m.MetalDark, collider: false);
+            Primitive(PrimitiveType.Cylinder, "Pad Ring", pad.transform, pos + Vector3.up * 0.06f, new Vector3(3.4f, 0.04f, 3.4f), m.Hazard, collider: false);
+
+            var model = new GameObject("Collector");
+            model.transform.SetParent(pad.transform, false);
+            Part(PrimitiveType.Cylinder, "Tower", model.transform, new Vector3(0f, 1.2f, 0f), new Vector3(0.9f, 1.2f, 0.9f), m.MetalDark);
+            Part(PrimitiveType.Cube, "Hopper", model.transform, new Vector3(0f, 0.6f, 0.9f), new Vector3(1.2f, 0.8f, 0.8f), m.Hazard);
+            var dish = new GameObject("Dish").transform;
+            dish.SetParent(model.transform, false);
+            dish.localPosition = new Vector3(0f, 2.7f, 0f);
+            Part(PrimitiveType.Cylinder, "Dish Plate", dish, Vector3.zero, new Vector3(2f, 0.06f, 2f), m.Metal);
+            Part(PrimitiveType.Sphere, "Core", dish, new Vector3(0f, 0.2f, 0f), Vector3.one * 0.35f, m.BotEye);
+            Part(PrimitiveType.Cube, "Vane A", dish, new Vector3(0.7f, 0.1f, 0f), new Vector3(0.6f, 0.08f, 0.15f), m.Hazard);
+            Part(PrimitiveType.Cube, "Vane B", dish, new Vector3(-0.7f, 0.1f, 0f), new Vector3(0.6f, 0.08f, 0.15f), m.Hazard);
+
+            var hopper = pad.AddComponent<ScrapStorage>();
+            hopper.Setup(id, "Scrap Collector", 120);
+            var sink = pad.AddComponent<StorageScrapSink>();
+            sink.Setup(hopper, dish, 15f);
+            var c = pad.AddComponent<CollectorPad>();
+            SetRef(c, "model", model);
+            SetRef(c, "dish", dish);
+            SetRef(c, "hopper", hopper);
+            SetRef(c, "magnet", sink);
+            var so = new SerializedObject(c);
+            so.FindProperty("padId").stringValue = id;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void BuildIronDistrict()
+        {
+            var area = new GameObject("Iron District").transform;
+            area.SetParent(SalvageRoot());
+            Sign(area, "IRON DISTRICT", new Vector3(0f, 4.2f, HalfDepth + 4f), 0f, 1.2f);
+            Sign(area, "MACHINE ROW → IRON DISTRICT", new Vector3(0f, 3.2f, HalfDepth - 1.5f), 0f, 0.5f);
+
+            // Road from the gap up the middle of the district.
+            var road = Box("District Road", area, new Vector3(0f, 0.02f, (HalfDepth + IronNorth) * 0.5f), new Vector3(9f, 0.04f, IronNorth - HalfDepth), m.Road, collider: false);
+            MarkStatic(road);
+
+            Hall(area, "Hall West", new Vector3(-42f, 0f, 125f), 34f, 52f);
+            Hall(area, "Hall East", new Vector3(42f, 0f, 125f), 34f, 52f);
+
+            int n = 1;
+            foreach (float x in new[] { -42f, 42f })
+            {
+                AssemblyLine(area, new Vector3(x, 0f, 130f), 0f, n);
+                RobotArm(area, new Vector3(x - 6f, 0f, 112f), 30f, n * 10 + 1);
+                RobotArm(area, new Vector3(x + 6f, 0f, 112f), -30f, n * 10 + 2);
+                RobotArm(area, new Vector3(x - 6f, 0f, 146f), 150f, n * 10 + 3);
+                HydraulicPress(area, new Vector3(x - 10f, 0f, 102f), 0f, n * 10 + 1);
+                HydraulicPress(area, new Vector3(x + 10f, 0f, 146f), 0f, n * 10 + 2);
+                n++;
+            }
+            FactoryCrane(area, new Vector3(0f, 0f, 118f), 1);
+            FactoryCrane(area, new Vector3(0f, 0f, 158f), 2);
+            Container(area, new Vector3(-12f, 0f, 92f), 0f, m.ContainerBlue, 21);
+            Container(area, new Vector3(12f, 0f, 96f), 15f, m.ContainerRed, 22);
+            Drum(area, new Vector3(-8f, 0f, 165f), 31);
+            Drum(area, new Vector3(9f, 0f, 168f), 32);
+            Drum(area, new Vector3(20f, 0f, 84f), 33);
+        }
+
+        /// <summary>A roofless factory hall: three walls and a front wall with a wide doorway.</summary>
+        static void Hall(Transform parent, string name, Vector3 centre, float width, float depth)
+        {
+            var hall = new GameObject(name).transform;
+            hall.SetParent(parent, true);
+            const float h = 7f, t = 0.6f;
+            void Wall(Vector3 pos, Vector3 size) => MarkStatic(Box("Wall", hall, centre + pos + Vector3.up * h * 0.5f, size, m.LockedGrey));
+            Wall(new Vector3(-width * 0.5f, 0f, 0f), new Vector3(t, h, depth));
+            Wall(new Vector3(width * 0.5f, 0f, 0f), new Vector3(t, h, depth));
+            Wall(new Vector3(0f, 0f, depth * 0.5f), new Vector3(width, h, t));
+            float side = (width - 10f) * 0.5f;
+            Wall(new Vector3(-(10f + side) * 0.5f, 0f, -depth * 0.5f), new Vector3(side, h, t));
+            Wall(new Vector3((10f + side) * 0.5f, 0f, -depth * 0.5f), new Vector3(side, h, t));
+            MarkStatic(Box("Rust Stripe", hall, centre + new Vector3(0f, h - 0.6f, -depth * 0.5f - 0.32f), new Vector3(width, 0.5f, 0.05f), m.Rust, collider: false));
+            Sign(hall, name.ToUpperInvariant(), centre + new Vector3(0f, h + 0.8f, -depth * 0.5f - 0.4f), 0f, 0.8f);
+        }
+
+        static void RobotArm(Transform parent, Vector3 pos, float yaw, int index)
+        {
+            var t = Prop(parent, $"T3_RobotArm_{index:00}", pos, yaw);
+            CylLocal("Base", t, new Vector3(0f, 0.3f, 0f), new Vector3(1.4f, 0.3f, 1.4f), m.MetalDark);
+            CylLocal("Turret", t, new Vector3(0f, 0.8f, 0f), new Vector3(0.9f, 0.25f, 0.9f), m.Hazard);
+            var lower = BoxLocal("Lower Arm", t, new Vector3(0f, 1.9f, 0.3f), new Vector3(0.4f, 2f, 0.4f), m.Hazard);
+            lower.transform.localRotation = Quaternion.Euler(18f, 0f, 0f);
+            var elbow = Part(PrimitiveType.Sphere, "Elbow", t, new Vector3(0f, 2.9f, 0.65f), Vector3.one * 0.55f, m.MetalDark);
+            var upper = BoxLocal("Upper Arm", t, new Vector3(0f, 2.75f, 1.45f), new Vector3(0.32f, 0.32f, 1.6f), m.Hazard, collider: false);
+            upper.transform.localRotation = Quaternion.Euler(-12f, 0f, 0f);
+            BoxLocal("Gripper L", t, new Vector3(-0.15f, 2.45f, 2.25f), new Vector3(0.08f, 0.35f, 0.12f), m.MetalDark, collider: false);
+            BoxLocal("Gripper R", t, new Vector3(0.15f, 2.45f, 2.25f), new Vector3(0.08f, 0.35f, 0.12f), m.MetalDark, collider: false);
+            BoxLocal("Cable", t, new Vector3(0.25f, 1.5f, 0f), new Vector3(0.08f, 1.4f, 0.08f), m.Rubber, collider: false);
+            BoxLocal("Rust", t, new Vector3(0.21f, 1.6f, 0.35f), new Vector3(0.02f, 0.6f, 0.3f), m.Rust, collider: false);
+        }
+
+        static void HydraulicPress(Transform parent, Vector3 pos, float yaw, int index)
+        {
+            var t = Prop(parent, $"T3_HydraulicPress_{index:00}", pos, yaw);
+            BoxLocal("Bed", t, new Vector3(0f, 0.5f, 0f), new Vector3(3.4f, 1f, 2f), m.MetalDark);
+            BoxLocal("Pillar L", t, new Vector3(-1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f), m.LockedGrey);
+            BoxLocal("Pillar R", t, new Vector3(1.5f, 2.6f, 0f), new Vector3(0.5f, 4.2f, 1.2f), m.LockedGrey);
+            BoxLocal("Crown", t, new Vector3(0f, 4.9f, 0f), new Vector3(3.6f, 0.9f, 1.5f), m.LockedGrey);
+            BoxLocal("Ram", t, new Vector3(0f, 3.4f, 0f), new Vector3(2.2f, 1.2f, 1.1f), m.Hazard, collider: false);
+            CylLocal("Piston", t, new Vector3(0f, 4.2f, 0f), new Vector3(0.5f, 0.5f, 0.5f), m.Metal, collider: false);
+            BoxLocal("Control Box", t, new Vector3(2.3f, 1.4f, 0.6f), new Vector3(0.6f, 0.9f, 0.4f), m.VendingRed, collider: false);
+            BoxLocal("Rust", t, new Vector3(-1.76f, 2.0f, 0f), new Vector3(0.02f, 1.6f, 0.8f), m.Rust, collider: false);
+        }
+
+        static void AssemblyLine(Transform parent, Vector3 pos, float yaw, int index)
+        {
+            var t = Prop(parent, $"T4_AssemblyLine_{index:00}", pos, yaw);
+            BoxLocal("Conveyor", t, new Vector3(0f, 0.7f, 0f), new Vector3(1.8f, 0.4f, 22f), m.MetalDark);
+            BoxLocal("Belt", t, new Vector3(0f, 0.92f, 0f), new Vector3(1.5f, 0.04f, 21.6f), m.Rubber, collider: false);
+            for (int i = -5; i <= 5; i++)
+            {
+                BoxLocal("Leg", t, new Vector3(-0.8f, 0.25f, i * 2f), new Vector3(0.12f, 0.5f, 0.12f), m.Metal, collider: false);
+                BoxLocal("Leg", t, new Vector3(0.8f, 0.25f, i * 2f), new Vector3(0.12f, 0.5f, 0.12f), m.Metal, collider: false);
+            }
+            for (int i = -2; i <= 2; i++)
+                BoxLocal("Crate", t, new Vector3(0f, 1.2f, i * 4f + 1f), new Vector3(0.9f, 0.55f, 0.9f), i % 2 == 0 ? m.Rust : m.ContainerTeal, collider: false);
+            BoxLocal("Gantry L", t, new Vector3(-1.4f, 2f, -4f), new Vector3(0.3f, 4f, 0.3f), m.Hazard, collider: false);
+            BoxLocal("Gantry R", t, new Vector3(1.4f, 2f, -4f), new Vector3(0.3f, 4f, 0.3f), m.Hazard, collider: false);
+            BoxLocal("Gantry Top", t, new Vector3(0f, 4f, -4f), new Vector3(3.1f, 0.35f, 0.4f), m.Hazard, collider: false);
+            BoxLocal("Scanner", t, new Vector3(0f, 3.5f, -4f), new Vector3(0.7f, 0.5f, 0.5f), m.Screen, collider: false);
+            BoxLocal("Rust", t, new Vector3(0.91f, 0.7f, 5f), new Vector3(0.02f, 0.3f, 4f), m.Rust, collider: false);
+        }
+
+        static void FactoryCrane(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T4_FactoryCrane_{index:00}", pos, 0f);
+            BoxLocal("Main Beam", t, new Vector3(0f, 8.6f, 0f), new Vector3(10f, 0.8f, 1f), m.Hazard);
+            foreach (float x in new[] { -4.6f, 4.6f })
+            foreach (float z in new[] { -3f, 3f })
+                BoxLocal("Leg", t, new Vector3(x, 4.3f, z), new Vector3(0.5f, 8.6f, 0.5f), m.LockedGrey);
+            BoxLocal("Side Beam L", t, new Vector3(-4.6f, 8.6f, 0f), new Vector3(0.6f, 0.6f, 6.5f), m.LockedGrey, collider: false);
+            BoxLocal("Side Beam R", t, new Vector3(4.6f, 8.6f, 0f), new Vector3(0.6f, 0.6f, 6.5f), m.LockedGrey, collider: false);
+            BoxLocal("Trolley", t, new Vector3(1.2f, 8f, 0f), new Vector3(1.4f, 0.8f, 1.4f), m.MetalDark, collider: false);
+            CylLocal("Cable", t, new Vector3(1.2f, 5.6f, 0f), new Vector3(0.08f, 2.4f, 0.08f), m.Rubber, collider: false);
+            BoxLocal("Hook Block", t, new Vector3(1.2f, 3f, 0f), new Vector3(0.6f, 0.7f, 0.4f), m.Hazard, collider: false);
+            BoxLocal("Rust", t, new Vector3(0f, 8.6f, -0.51f), new Vector3(4f, 0.4f, 0.02f), m.Rust, collider: false);
+        }
+
         // ───────────────────────────── Gameplay wiring ─────────────────────────────
 
         /// <summary>Turns every T1_/T2_/T3_ prop into a dismantlable object with a stable save id.</summary>
@@ -861,7 +1075,8 @@ namespace PlanetScrappers.EditorTools
             var map = new (string prefix, string id)[]
             {
                 ("OilDrum", "oil_drum"), ("VendingBot", "vending_bot"), ("HoverScooter", "hover_scooter"),
-                ("CargoContainer", "cargo_container"), ("Mule7Truck", "mule7_truck"), ("GeneratorUnit", "generator_unit")
+                ("CargoContainer", "cargo_container"), ("Mule7Truck", "mule7_truck"), ("GeneratorUnit", "generator_unit"),
+                ("RobotArm", "robot_arm"), ("HydraulicPress", "hydraulic_press"), ("AssemblyLine", "assembly_line"), ("FactoryCrane", "factory_crane")
             };
             int count = 0;
             foreach (var t in SalvageRoot().GetComponentsInChildren<Transform>(true))
@@ -884,7 +1099,11 @@ namespace PlanetScrappers.EditorTools
             var visual = go.GetComponentInChildren<PlayerVisual>();
             var camera = player.Camera;
 
-            go.AddComponent<PlayerInventory>();
+            var inventory = go.AddComponent<PlayerInventory>();
+            var playerSink = go.AddComponent<PlayerScrapSink>();
+            SetRef(playerSink, "inventory", inventory);
+            var truck = Object.FindAnyObjectByType<SalvageTruck>();
+            if (truck != null) SetRef(truck, "player", player);
             go.AddComponent<Wallet>();
             var equipment = go.AddComponent<PlayerEquipment>();
             SetRef(equipment, "toolMount", FindDeep(go.transform, "Tool Mount"));
@@ -1188,8 +1407,14 @@ namespace PlanetScrappers.EditorTools
             const int w = 4096, h = 2048;
             var tex = new Texture2D(w, h, TextureFormat.RGB24, false);
             var px = new Color32[w * h];
-            var bg = new Color32(3, 5, 10, 255);
-            for (int i = 0; i < px.Length; i++) px[i] = bg;
+            // Deep navy overhead fading to a brighter blue haze at the horizon (client asked for a less black sky).
+            for (int y = 0; y < h; y++)
+            {
+                float up = Mathf.Abs(y / (float)(h - 1) - 0.5f) * 2f; // 0 at horizon, 1 at zenith/nadir
+                float k = Mathf.Pow(1f - up, 3f);
+                var c = new Color32((byte)Mathf.Lerp(14, 70, k), (byte)Mathf.Lerp(20, 92, k), (byte)Mathf.Lerp(40, 140, k), 255);
+                for (int x = 0; x < w; x++) px[y * w + x] = c;
+            }
 
             var rng = new System.Random(2026);
             for (int s = 0; s < 9000; s++)

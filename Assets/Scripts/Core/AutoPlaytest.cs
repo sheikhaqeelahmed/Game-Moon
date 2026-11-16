@@ -1,7 +1,9 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using PlanetScrappers.Automation;
 using PlanetScrappers.Destruction;
+using PlanetScrappers.Vehicles;
 using PlanetScrappers.Economy;
 using PlanetScrappers.Equipment;
 using PlanetScrappers.Interaction;
@@ -134,17 +136,89 @@ namespace PlanetScrappers.Core
             // Mission 8: dismantler, gate opens
             TopUp(wallet, db.Tool("electric_dismantler").price);
             Check(Trading.BuyTool(db.Tool("electric_dismantler")) == PurchaseResult.Ok, "bought Electric Dismantler");
-            Check(mm.AllComplete, "mission 8 complete, first shift done");
+            Check(mm.Index == 8, "mission 8 complete, first shift done");
             yield return new WaitForSecondsRealtime(3f);
             var gate = FindAnyObjectByType<MachineRowGate>();
             Check(gate.GetComponent<Collider>() == null || !gate.GetComponent<Collider>().enabled, "Machine Row gate opened");
             yield return Dismantle("generator_unit", "08_generator");
 
+            // ── Phase 2 ──
+            // Mission 9: get in the truck
+            var rig = SalvageTruck.Instance;
+            yield return GoTo(rig.transform.position, 3.5f);
+            rig.Interact();
+            yield return new WaitForSecondsRealtime(1f);
+            Check(rig.Driving && !player.gameObject.activeSelf, "entered the salvage truck");
+            Check(mm.Index == 9, "mission 9 complete (truck)");
+            yield return Shot("12_driving");
+
+            // Mission 10: truck bin collects scrap by driving over it
+            var mule = Nearest("mule7_truck");
+            if (mule != null)
+            {
+                eq.Equip(db.Tool("electric_dismantler"));
+                while (!mule.IsDismantled) mule.Hit(eq.Equipped, mule.Center, Vector3.up);
+                rig.Place(mule.Center + Vector3.back * 1f, 0f);
+                yield return new WaitForSecondsRealtime(4f);
+            }
+            Check(rig.Bin.TotalUnits > 0, $"truck bin vacuumed scrap ({rig.Bin.TotalUnits} units)");
+            if (mm.Index == 9) rig.Bin.Add(db.Resource("iron"), 40);
+            Check(mm.Index == 10, "mission 10 complete (truck load)");
+            rig.Place(Station("depot").transform.position + new Vector3(8f, 0.2f, 6f), 0f);
+            int binValue = rig.Bin.TotalValue();
+            int sold = Trading.SellStorage(rig.Bin);
+            Check(sold == binValue && sold > 0 && rig.Bin.TotalUnits == 0, $"sold the truck load for {sold} cr");
+            rig.Exit();
+            yield return Frames(3);
+            Check(!rig.Driving && player.gameObject.activeSelf, "got out of the truck");
+
+            // Mission 11: scrap collector
+            TopUp(wallet, 800);
+            var pad = CollectorPad.Pads[0];
+            yield return GoTo(pad.transform.position, 2f);
+            pad.Interact();
+            Check(pad.Built, "built a scrap collector");
+            Check(mm.Index == 11, "mission 11 complete (collector)");
+            var drum = DestructibleObject.All.Where(o => !o.IsDismantled && (o.Center - pad.transform.position).sqrMagnitude < 18f * 18f)
+                .OrderBy(o => (o.Center - pad.transform.position).sqrMagnitude).FirstOrDefault();
+            if (drum != null)
+            {
+                player.Teleport(pad.transform.position + Vector3.back * 40f, Quaternion.identity); // walk away so only the collector can grab it
+                while (!drum.IsDismantled) drum.Hit(eq.Equipped, drum.Center, Vector3.up);
+                yield return new WaitForSecondsRealtime(4f);
+                Check(pad.Hopper.TotalUnits > 0, $"collector pulled in scrap on its own ({pad.Hopper.TotalUnits} units)");
+            }
+            else Check(false, "found an object near the collector");
+            yield return GoTo(pad.transform.position, 2f);
+            yield return Shot("13_collector");
+
+            // Warehouse storage
+            inv.Add(db.Resource("copper"), 5);
+            var deposit = FindAnyObjectByType<WarehouseDeposit>();
+            var warehouse = PlanetScrappers.Inventory.ScrapStorage.Find("warehouse");
+            int before2 = warehouse.TotalUnits;
+            deposit.Interact();
+            Check(warehouse.TotalUnits > before2, "stored backpack in the warehouse");
+            Check(Trading.SellStorage(warehouse) > 0, "sold the warehouse contents");
+
+            // Mission 12: Iron District robot arm (Electric Dismantler)
+            yield return Dismantle("robot_arm", "14_robot_arm");
+            Check(mm.Index == 12, "mission 12 complete (Iron District robot arm)");
+            var press = Nearest("assembly_line");
+            Check(press != null && press.Hit(eq.Equipped, press.Center, Vector3.up) == HitResult.TooWeak, "dismantler bounces off a tier 4 assembly line");
+
+            // Mission 13 + 14: Plasma Cutter, assembly line
+            TopUp(wallet, db.Tool("plasma_cutter").price);
+            Check(Trading.BuyTool(db.Tool("plasma_cutter")) == PurchaseResult.Ok, "bought the Plasma Cutter");
+            Check(mm.Index == 13, "mission 13 complete (Plasma Cutter)");
+            yield return Dismantle("assembly_line", "15_assembly_line");
+            Check(mm.AllComplete, "mission 14 complete, all contracts done");
+
             // Save and reload check
             int credits = wallet.Credits;
             gm.SaveGame(true);
             var data = SaveManager.Read();
-            Check(data != null && data.credits == credits && data.missionIndex == mm.Index && data.ownedTools.Count == 3, "save file written and readable");
+            Check(data != null && data.credits == credits && data.missionIndex == mm.Index && data.ownedTools.Count == 4 && data.builtCollectors.Count == 1 && data.truckPosition != null, "save file written and readable");
             Check(File.Exists(SaveManager.SavePath), "save.json exists");
 
             yield return OpenShot(GameScreen.Pause, "09_pause");

@@ -35,6 +35,19 @@ namespace PlanetScrappers.Save
         public int missionProgress;
 
         public List<ObjectState> objects = new List<ObjectState>();
+
+        // Phase 2
+        public float[] truckPosition;
+        public float truckYaw;
+        public List<StorageState> storages = new List<StorageState>();
+        public List<string> builtCollectors = new List<string>();
+    }
+
+    [Serializable]
+    public class StorageState
+    {
+        public string id;
+        public List<ResourceAmount> items = new List<ResourceAmount>();
     }
 
     [Serializable]

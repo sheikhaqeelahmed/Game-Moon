@@ -5,6 +5,7 @@ using PlanetScrappers.Interaction;
 using PlanetScrappers.Inventory;
 using PlanetScrappers.Missions;
 using PlanetScrappers.Player;
+using PlanetScrappers.Vehicles;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -36,7 +37,8 @@ namespace PlanetScrappers.UI
         Image healthFill, oxygenFill, backpackFill, targetFill, crosshair;
         Text healthValue, oxygenValue, creditsText, gainText, missionHead, missionObjective, missionProgress;
         Text targetName, targetInfo, promptText, botText, backpackText, backpackCounts, toastText;
-        GameObject targetPanel, promptPanel, botPanel, toastPanel, gainPanel, missionPanel;
+        GameObject targetPanel, promptPanel, botPanel, toastPanel, gainPanel, missionPanel, truckPanel;
+        Text truckText;
         readonly Image[] slotBg = new Image[3];
         readonly Text[] slotText = new Text[3];
         float botTimer, toastTimer, gainTimer;
@@ -303,6 +305,12 @@ namespace PlanetScrappers.UI
             botText = UIKit.Label(bot.transform, "", 19, UIKit.Ink);
             botPanel.SetActive(false);
 
+            // Truck
+            var truck = HudPanel("Truck", new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 120), 620);
+            truckPanel = truck.gameObject;
+            truckText = UIKit.Label(truck.transform, "", 19, UIKit.Ink, FontStyle.Bold, TextAnchor.MiddleCenter);
+            truckPanel.SetActive(false);
+
             // Toast
             var toast = HudPanel("Toast", new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -24), 360);
             toastPanel = toast.gameObject;
@@ -332,13 +340,13 @@ namespace PlanetScrappers.UI
                 var m = mm.Current;
                 if (m != null)
                 {
-                    missionHead.text = $"MISSION {m.number} OF {GameDatabase.Instance.missions.Length}";
+                    missionHead.text = $"MISSION {m.number} OF {GameDatabase.Instance.missions.Length}" + (m.number > 8 ? "   ·   CONTRACTS" : "");
                     missionObjective.text = m.objectiveText;
                     missionProgress.text = m.count > 1 ? $"{Mathf.Min(mm.Progress, m.count)} / {m.count}   ·   reward {m.rewardCredits} cr" : $"Reward {m.rewardCredits} cr   ·   J for details";
                 }
                 else
                 {
-                    missionHead.text = "FIRST SHIFT COMPLETE";
+                    missionHead.text = "ALL CONTRACTS COMPLETE";
                     missionObjective.text = "Free salvage";
                     missionProgress.text = "Keep dismantling and selling. Fresh junk arrives every few minutes.";
                 }
@@ -391,6 +399,13 @@ namespace PlanetScrappers.UI
                 }
                 backpackCounts.text = sb.ToString();
             }
+
+            var tr = SalvageTruck.Instance;
+            bool driving = tr != null && tr.Driving;
+            truckPanel.SetActive(driving);
+            if (driving)
+                truckText.text = $"SALVAGE TRUCK   ·   {Mathf.Abs(tr.Speed) * 3.6f:0} km/h   ·   bin {tr.Bin.TotalUnits}/{tr.Bin.Capacity}\n<size=15>W/S speed · A/D steer · Space brake · E get out · drive over scrap to collect it</size>";
+            crosshair.enabled = !driving;
 
             // Timed panels
             botTimer -= dt;

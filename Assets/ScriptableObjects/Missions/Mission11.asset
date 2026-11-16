@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission11
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 11
+  title: Set Up a Collector
+  description: Scrap Collectors pull in loose scrap on their own. They are the start
+    of your automated operation.
+  objectiveText: Build a Scrap Collector on a collector pad
+  type: 0
+  targetId: build_collector
+  count: 1
+  rewardCredits: 200
+  botIntro: There are collector pads in the Vehicle Graveyard, the Container Yard
+    and the debris field. A collector costs 800 credits.
+  botComplete: It works while you don't. Bolt calls that management.

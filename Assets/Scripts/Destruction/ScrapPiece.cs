@@ -1,19 +1,17 @@
-using PlanetScrappers.Core;
 using PlanetScrappers.Economy;
-using PlanetScrappers.Inventory;
 using UnityEngine;
 
 namespace PlanetScrappers.Destruction
 {
     /// <summary>
     /// A pooled chunk of scrap carrying some units of one resource. It pops out in a low-gravity
-    /// arc, rests on the ground, then flies into the backpack when the player comes close.
+    /// arc, rests on the ground, then flies to the nearest scrap magnet in range: the player's
+    /// backpack, the truck bin while driving, or a scrap collector.
     /// </summary>
     public class ScrapPiece : MonoBehaviour
     {
         const float Gravity = 4.5f;
-        const float MagnetRadius = 5.5f;
-        const float CollectRadius = 0.6f;
+        const float CollectRadius = 0.7f;
 
         enum State { Flying, Resting, Magnet }
 
@@ -23,6 +21,8 @@ namespace PlanetScrappers.Destruction
         Vector3 spin;
         State state;
         float restTimer;
+        float searchTimer;
+        ScrapSink target;
         ScrapSpawner owner;
 
         public bool Active => gameObject.activeSelf;
@@ -37,14 +37,13 @@ namespace PlanetScrappers.Destruction
             spin = Random.insideUnitSphere * 360f;
             state = State.Flying;
             restTimer = 0.35f;
+            target = null;
             gameObject.SetActive(true);
         }
 
         void Update()
         {
             float dt = Time.deltaTime;
-            var inv = PlayerInventory.Instance;
-            Vector3 chest = inv != null ? inv.transform.position + Vector3.up * 1.1f : Vector3.zero;
 
             switch (state)
             {
@@ -63,7 +62,11 @@ namespace PlanetScrappers.Destruction
 
                 case State.Resting:
                     restTimer -= dt;
-                    if (inv != null && restTimer <= 0f && !inv.IsFull && (chest - transform.position).sqrMagnitude < MagnetRadius * MagnetRadius)
+                    searchTimer -= dt;
+                    if (restTimer > 0f || searchTimer > 0f) break;
+                    searchTimer = 0.15f; // cheap: look for a magnet a few times a second
+                    target = ScrapSink.Nearest(transform.position);
+                    if (target != null)
                     {
                         state = State.Magnet;
                         velocity = Vector3.up * 2f;
@@ -71,19 +74,19 @@ namespace PlanetScrappers.Destruction
                     break;
 
                 case State.Magnet:
-                    if (inv == null || inv.IsFull) { state = State.Resting; break; }
-                    Vector3 to = chest - transform.position;
-                    velocity = Vector3.Lerp(velocity, to.normalized * 14f, 1f - Mathf.Exp(-8f * dt));
+                    if (target == null || !target.CanAccept) { state = State.Resting; target = null; break; }
+                    Vector3 to = target.AttractPoint - transform.position;
+                    velocity = Vector3.Lerp(velocity, to.normalized * 16f, 1f - Mathf.Exp(-8f * dt));
                     transform.position += velocity * dt;
                     transform.localScale = Vector3.Lerp(transform.localScale, owner.ScaleFor(resource) * 0.6f, dt * 4f);
-                    if (to.magnitude < CollectRadius) Collect(inv);
+                    if (to.magnitude < CollectRadius) Collect();
                     break;
             }
         }
 
-        void Collect(PlayerInventory inv)
+        void Collect()
         {
-            int added = inv.Add(resource, amount);
+            int added = target.Accept(resource, amount);
             amount -= added;
             if (added > 0) owner.OnCollected();
             if (amount <= 0) owner.Release(this);
@@ -91,6 +94,7 @@ namespace PlanetScrappers.Destruction
             {
                 state = State.Resting;
                 restTimer = 1f;
+                target = null;
             }
         }
     }

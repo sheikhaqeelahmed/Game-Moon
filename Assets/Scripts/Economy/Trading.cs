@@ -36,6 +36,17 @@ namespace PlanetScrappers.Economy
             return total;
         }
 
+        /// <summary>Sells everything in a storage (truck bin, warehouse).</summary>
+        public static int SellStorage(ScrapStorage storage)
+        {
+            if (storage == null) return 0;
+            int units = storage.TotalUnits;
+            int total = 0;
+            foreach (var kv in storage.TakeAll()) total += kv.Key.unitValue * kv.Value;
+            Complete(total, units, "from the " + storage.DisplayName.ToLowerInvariant());
+            return total;
+        }
+
         static void Complete(int total, int units, string what = null)
         {
             if (total <= 0) return;

@@ -21,6 +21,8 @@ namespace PlanetScrappers.Core
         public static event Action<MissionDefinition> MissionCompleted;
         public static event Action<string, float> BotSays;
         public static event Action<int, string> CreditsGained;
+        public static event Action<string, ResourceDefinition, int> ScrapStored;
+        public static event Action<string> VehicleEntered;
 
         public static void RaiseObjectDismantled(DestructibleObject o) => ObjectDismantled?.Invoke(o);
         public static void RaiseScrapCollected(ResourceDefinition r, int amount) => ScrapCollected?.Invoke(r, amount);
@@ -32,11 +34,13 @@ namespace PlanetScrappers.Core
         /// <summary>Shows a SCRAP-BOT line on the HUD for the given number of seconds.</summary>
         public static void Say(string line, float seconds = 5f) => BotSays?.Invoke(line, seconds);
         public static void RaiseCreditsGained(int amount, string label) => CreditsGained?.Invoke(amount, label);
+        public static void RaiseScrapStored(string storageId, ResourceDefinition r, int amount) => ScrapStored?.Invoke(storageId, r, amount);
+        public static void RaiseVehicleEntered(string id) => VehicleEntered?.Invoke(id);
 
         public static void ClearAll()
         {
             ObjectDismantled = null; ScrapCollected = null; ScrapSold = null; ToolPurchased = null;
-            BackpackUpgraded = null; Interacted = null; MissionCompleted = null; BotSays = null; CreditsGained = null;
+            BackpackUpgraded = null; Interacted = null; MissionCompleted = null; BotSays = null; CreditsGained = null; ScrapStored = null; VehicleEntered = null;
         }
     }
 }

@@ -35,6 +35,7 @@ namespace PlanetScrappers.Missions
             GameEvents.ScrapSold += OnSold;
             GameEvents.ToolPurchased += OnToolBought;
             GameEvents.BackpackUpgraded += OnBackpack;
+            GameEvents.ScrapStored += OnStored;
         }
 
         void OnDisable()
@@ -45,6 +46,7 @@ namespace PlanetScrappers.Missions
             GameEvents.ScrapSold -= OnSold;
             GameEvents.ToolPurchased -= OnToolBought;
             GameEvents.BackpackUpgraded -= OnBackpack;
+            GameEvents.ScrapStored -= OnStored;
         }
 
         public void SetState(int index, int progress)
@@ -66,6 +68,7 @@ namespace PlanetScrappers.Missions
         void OnSold(int credits) => Count(ObjectiveType.SellAny, "", 1);
         void OnToolBought(ToolDefinition t) => Count(ObjectiveType.BuyTool, t.id, 1);
         void OnBackpack(int level) => Count(ObjectiveType.BuyBackpack, "", 1);
+        void OnStored(string storageId, ResourceDefinition r, int amount) => Count(ObjectiveType.CollectToStorage, storageId, amount);
 
         void Count(ObjectiveType type, string id, int amount)
         {
@@ -88,7 +91,7 @@ namespace PlanetScrappers.Missions
             GameEvents.RaiseMissionCompleted(m);
 
             if (Current != null) StartCoroutine(SayLater(Current.botIntro, 6.5f, 9f));
-            else StartCoroutine(SayLater("That's your first shift done. Keep salvaging, keep earning. Captain Bolt drops fresh junk every few minutes.", 6.5f, 9f));
+            else StartCoroutine(SayLater("Every contract done. Keep salvaging, keep earning. Captain Bolt drops fresh junk every few minutes.", 6.5f, 9f));
         }
 
         IEnumerator SayLater(string line, float delay, float seconds)

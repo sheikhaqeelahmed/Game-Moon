@@ -2,6 +2,27 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.2.0] — Phase 2 start: salvage truck, Iron District, first automation
+
+### Added
+- **Drivable SH-01 salvage truck:** E to get in and out, W/S speed, A/D steer, Space brake. Its 150-unit bin
+  vacuums loose scrap while you drive; sell the load at the Recycling Depot when parked within 40 m.
+  The cabin is pressurised, so oxygen does not drain while driving.
+- **Iron District:** a new zone north of Machine Row (through the gap in the fence), with two factory halls.
+  New tier 3 and tier 4 machines: robot arms, hydraulic presses, assembly lines and factory cranes (19 more objects).
+- **Plasma Cutter** (tier 4, 4,500 cr) now on sale at Nova's.
+- **First automation:** three collector pads (Vehicle Graveyard, Container Yard, debris field). A Scrap Collector
+  (800 cr) pulls in loose scrap within 15 m on its own; press E to empty it into your backpack.
+- **Warehouse:** store your backpack at the warehouse drop-off (600 units) and sell the stored load at the depot.
+- **Missions 9–14:** Take the Wheel, Haul Day, Set Up a Collector, Into the Iron District, Cutting Edge, Line Break.
+- Saving now includes the truck's position and bin, the warehouse, collector hoppers and which collectors are built.
+- Automated playtest extended to all 14 missions (47 checks).
+
+### Changed
+- Machine Row is fenced all the way to the north fence; its gate is the only way to the Iron District.
+- The sky is a navy-to-blue gradient instead of near black.
+- Scrap pieces now fly to the nearest scrap magnet (backpack, truck bin or collector).
+
 ## [0.1.0] — First client QA build: complete prototype loop (Modules 2–4)
 
 ### Added

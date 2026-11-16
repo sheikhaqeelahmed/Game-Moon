@@ -1,4 +1,6 @@
+using PlanetScrappers.Automation;
 using PlanetScrappers.Destruction;
+using PlanetScrappers.Vehicles;
 using PlanetScrappers.Economy;
 using PlanetScrappers.Equipment;
 using PlanetScrappers.Inventory;
@@ -137,6 +139,18 @@ namespace PlanetScrappers.Core
                 if (o != null) o.LoadState(s.dismantled, s.durability, s.respawn);
             }
 
+            var truck = SalvageTruck.Instance;
+            if (truck != null && data.truckPosition != null && data.truckPosition.Length == 3)
+                truck.Place(new Vector3(data.truckPosition[0], data.truckPosition[1], data.truckPosition[2]), data.truckYaw);
+            foreach (var st in data.storages)
+            {
+                var store = ScrapStorage.Find(st.id);
+                if (store == null) continue;
+                store.Clear();
+                foreach (var a in st.items) store.SetCount(db.Resource(a.id), a.amount);
+            }
+            foreach (var pad in CollectorPad.Pads) pad.SetBuilt(data.builtCollectors.Contains(pad.PadId));
+
             PlaySeconds = data.playSeconds;
             LastSavedAt = data.savedAt;
             InGame = true;
@@ -176,6 +190,26 @@ namespace PlanetScrappers.Core
                 if (o.IsDismantled || o.Fraction < 1f)
                     data.objects.Add(new ObjectState { id = o.UniqueId, dismantled = o.IsDismantled, durability = o.Durability, respawn = o.RespawnTimer });
             }
+
+            var truck = SalvageTruck.Instance;
+            if (truck != null)
+            {
+                Vector3 tp = truck.transform.position;
+                data.truckPosition = new[] { tp.x, tp.y, tp.z };
+                data.truckYaw = truck.transform.eulerAngles.y;
+                if (truck.Driving) data.position = new[] { tp.x - 3f, 0.2f, tp.z };
+            }
+            foreach (var store in ScrapStorage.All)
+            {
+                var st = new StorageState { id = store.StorageId };
+                foreach (var r in GameDatabase.Instance.resources)
+                {
+                    int n = store.Count(r);
+                    if (n > 0) st.items.Add(new ResourceAmount { id = r.id, amount = n });
+                }
+                data.storages.Add(st);
+            }
+            foreach (var pad in CollectorPad.Pads) if (pad.Built) data.builtCollectors.Add(pad.PadId);
 
             if (SaveManager.Write(data))
             {

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Equipment.ToolDefinition
   id: plasma_cutter
   displayName: Plasma Cutter
-  description: Large machinery.
+  description: Large machinery and assembly lines.
   level: 4
   tier: 4
   damage: 25
@@ -22,5 +22,5 @@ MonoBehaviour:
   range: 3
   recoveryBonus: 0.3
   price: 4500
-  availableInPrototype: 0
-  lockedReason: Iron District, Phase 2
+  availableInPrototype: 1
+  lockedReason: Not available yet

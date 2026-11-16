@@ -44,7 +44,7 @@ namespace PlanetScrappers.EditorTools
 
         class Mats
         {
-            public Material Regolith, Road, Rim, CraterFloor, BaseWhite, SuitOrange, SuitOrangeDark, SuitGrey, VisorBlack, TrimOrange, TrimTeal, TrimYellow, Glass, Screen,
+            public Material Crystal, CaveRock, Regolith, Road, Rim, CraterFloor, BaseWhite, SuitOrange, SuitOrangeDark, SuitGrey, VisorBlack, TrimOrange, TrimTeal, TrimYellow, Glass, Screen,
                 Rust, RustDark, Metal, MetalDark, Rubber, ContainerRed, ContainerTeal, ContainerBlue, VendingRed,
                 ScooterOrange, TruckGrey, LockedGrey, Hazard, Halcyon, BotYellow, BotWhite, BotEye, WrenchRust, Fence;
         }
@@ -89,6 +89,9 @@ namespace PlanetScrappers.EditorTools
             BuildMachineRow();
             BuildIronDistrict();
             BuildCollectorPads();
+            BuildSpaceport();
+            BuildDeepCore();
+            BuildAutomation();
             BuildSky();
             var player = BuildPlayer();
             BuildScrapBot(player);
@@ -175,7 +178,7 @@ namespace PlanetScrappers.EditorTools
             for (int i = 0; i < count; i++)
             {
                 float a = i / (float)count * Mathf.PI * 2f;
-                float rx = 180f + (float)rng.NextDouble() * 25f;
+                float rx = 300f + (float)rng.NextDouble() * 25f;
                 float rz = (Mathf.Sin(a) > 0.2f ? 215f : 130f) + (float)rng.NextDouble() * 20f;
                 var pos = new Vector3(Mathf.Cos(a) * rx, -1f, Mathf.Sin(a) * rz);
                 float s = 16f + (float)rng.NextDouble() * 16f;
@@ -192,7 +195,7 @@ namespace PlanetScrappers.EditorTools
             BuildCrater(root, MapToWorld(250, 140), 5f);
             BuildCrater(root, MapToWorld(420, 240), 4f);
             // Larger craters outside the fence for the view.
-            BuildCrater(root, new Vector3(-150f, 0f, 40f), 22f);
+            BuildCrater(root, new Vector3(-60f, 0f, -115f), 22f);
             BuildCrater(root, new Vector3(140f, 0f, -90f), 18f);
             BuildCrater(root, new Vector3(-165f, 0f, 120f), 26f);
         }
@@ -257,14 +260,22 @@ namespace PlanetScrappers.EditorTools
             var ne = new Vector3(HalfWidth, 0f, HalfDepth);
             var nw = new Vector3(-HalfWidth, 0f, HalfDepth);
             Side(sw, se);
-            Side(se, ne);
+            Side(se, new Vector3(HalfWidth, 0f, -6f));
+            Side(new Vector3(HalfWidth, 0f, 6f), ne);
+            Side(new Vector3(HalfWidth, 0f, -ZoneHalfDepth), new Vector3(ZoneFar, 0f, -ZoneHalfDepth));
+            Side(new Vector3(ZoneFar, 0f, -ZoneHalfDepth), new Vector3(ZoneFar, 0f, ZoneHalfDepth));
+            Side(new Vector3(ZoneFar, 0f, ZoneHalfDepth), new Vector3(HalfWidth, 0f, ZoneHalfDepth));
             // North side has a gap behind Machine Row that leads into the Iron District.
             Side(ne, new Vector3(6f, 0f, HalfDepth));
             Side(new Vector3(-6f, 0f, HalfDepth), nw);
             Side(new Vector3(-IronHalfWidth, 0f, HalfDepth), new Vector3(-IronHalfWidth, 0f, IronNorth));
             Side(new Vector3(-IronHalfWidth, 0f, IronNorth), new Vector3(IronHalfWidth, 0f, IronNorth));
             Side(new Vector3(IronHalfWidth, 0f, IronNorth), new Vector3(IronHalfWidth, 0f, HalfDepth));
-            Side(nw, sw);
+            Side(nw, new Vector3(-HalfWidth, 0f, 6f));
+            Side(new Vector3(-HalfWidth, 0f, -6f), sw);
+            Side(new Vector3(-HalfWidth, 0f, ZoneHalfDepth), new Vector3(-ZoneFar, 0f, ZoneHalfDepth));
+            Side(new Vector3(-ZoneFar, 0f, ZoneHalfDepth), new Vector3(-ZoneFar, 0f, -ZoneHalfDepth));
+            Side(new Vector3(-ZoneFar, 0f, -ZoneHalfDepth), new Vector3(-HalfWidth, 0f, -ZoneHalfDepth));
         }
 
         static void BuildRoads()
@@ -1067,6 +1078,293 @@ namespace PlanetScrappers.EditorTools
             BoxLocal("Rust", t, new Vector3(0f, 8.6f, -0.51f), new Vector3(4f, 0.4f, 0.02f), m.Rust, collider: false);
         }
 
+        // ───────────────────────────── Phase 3: zones and machines ─────────────────────────────
+
+        const float ZoneHalfDepth = 60f;
+        const float ZoneFar = 245f;
+
+        static void ZoneGate(Transform parent, string name, float x, int tier, string label, float signYaw)
+        {
+            var gate = Box(name, parent, new Vector3(x, 1.4f, 0f), new Vector3(0.4f, 2.8f, 12f), m.Hazard);
+            var g = gate.AddComponent<MachineRowGate>();
+            var so = new SerializedObject(g);
+            so.FindProperty("requiredTier").intValue = tier;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Sign(parent, label, new Vector3(x + (signYaw > 0 ? 1.5f : -1.5f), 3.6f, 0f), signYaw, 0.6f);
+        }
+
+        static void BuildSpaceport()
+        {
+            var area = new GameObject("Spaceport Graveyard").transform;
+            area.SetParent(SalvageRoot());
+            ZoneGate(area, "Spaceport Gate", HalfWidth + 0.5f, 4, "SPACEPORT GRAVEYARD  ·  T4 TOOL REQUIRED", -90f);
+            MarkStatic(Box("Spaceport Road", area, new Vector3((63f + ZoneFar) * 0.5f, 0.02f, -1.75f), new Vector3(ZoneFar - 63f, 0.04f, 7f), m.Road, collider: false));
+
+            foreach (var (pos, r) in new[] { (new Vector3(195f, 0f, -26f), 26f), (new Vector3(168f, 0f, 32f), 14f), (new Vector3(222f, 0f, 30f), 11f) })
+            {
+                MarkStatic(Primitive(PrimitiveType.Cylinder, "Landing Pad", area, pos + Vector3.up * 0.04f, new Vector3(r * 2f, 0.04f, r * 2f), m.LockedGrey, collider: false));
+                MarkStatic(Primitive(PrimitiveType.Cylinder, "Pad Ring", area, pos + Vector3.up * 0.05f, new Vector3(r * 2f + 1f, 0.03f, r * 2f + 1f), m.Hazard, collider: false));
+            }
+
+            // Crashed freighter, cut apart section by section.
+            const float z = -26f;
+            ShipPart(area, "T4_ShipNose_01", new Vector3(156f, 0f, z), p =>
+            {
+                CylLocal("Cockpit", p, new Vector3(0f, 3.2f, 0f), new Vector3(7f, 3f, 7f), m.BaseWhite).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                Part(PrimitiveType.Sphere, "Nose Cone", p, new Vector3(-3.4f, 3.2f, 0f), new Vector3(5f, 6.2f, 6.2f), m.BaseWhite);
+                BoxLocal("Canopy", p, new Vector3(-2.5f, 5.4f, 0f), new Vector3(3f, 1f, 3.6f), m.Glass, collider: false);
+                BoxLocal("Stripe", p, new Vector3(0f, 3.2f, 3.52f), new Vector3(6f, 0.6f, 0.05f), m.TrimOrange, collider: false);
+                BoxLocal("Rust", p, new Vector3(1f, 1.6f, -3.3f), new Vector3(3f, 1.2f, 0.4f), m.Rust, collider: false);
+            });
+            for (int i = 0; i < 2; i++)
+            {
+                float x = 172f + i * 18f;
+                ShipPart(area, $"T5_ShipHull_{i + 1:00}", new Vector3(x, 0f, z), p =>
+                {
+                    CylLocal("Hull", p, new Vector3(0f, 3.6f, 0f), new Vector3(8f, 9f, 8f), m.TruckGrey).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    for (int k = -3; k <= 3; k++)
+                        CylLocal("Rib", p, new Vector3(k * 2.4f, 3.6f, 0f), new Vector3(8.2f, 0.2f, 8.2f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    BoxLocal("Cargo Door", p, new Vector3(0f, 3f, 4.02f), new Vector3(6f, 3.6f, 0.1f), m.Rust, collider: false);
+                    BoxLocal("Breach", p, new Vector3(2f, 6.4f, 2f), new Vector3(3f, 1.4f, 2f), m.MetalDark, collider: false);
+                });
+            }
+            ShipPart(area, "T5_ShipEngine_01", new Vector3(208f, 0f, z), p =>
+            {
+                CylLocal("Engine Block", p, new Vector3(0f, 3.6f, 0f), new Vector3(7.4f, 4f, 7.4f), m.LockedGrey).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                foreach (var off in new[] { new Vector2(1.8f, 1.8f), new Vector2(-1.8f, 1.8f), new Vector2(1.8f, -1.8f), new Vector2(-1.8f, -1.8f) })
+                    CylLocal("Nozzle", p, new Vector3(5f, 3.6f + off.y, off.x), new Vector3(2.4f, 1.4f, 2.4f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                Part(PrimitiveType.Sphere, "Reactor Glow", p, new Vector3(0f, 6.6f, 0f), Vector3.one * 1.2f, m.Crystal);
+                BoxLocal("Rust", p, new Vector3(0f, 1.5f, 3.4f), new Vector3(4f, 1.5f, 0.6f), m.Rust, collider: false);
+            });
+            ShipPart(area, "T4_ShipWing_01", new Vector3(184f, 0f, z + 14f), p =>
+            {
+                BoxLocal("Wing", p, new Vector3(0f, 1.6f, 0f), new Vector3(14f, 0.8f, 9f), m.BaseWhite).transform.localRotation = Quaternion.Euler(0f, 0f, -6f);
+                BoxLocal("Flap", p, new Vector3(5f, 1.1f, 0f), new Vector3(3f, 0.4f, 8f), m.TrimOrange, collider: false);
+            });
+            ShipPart(area, "T4_ShipWing_02", new Vector3(186f, 0f, z - 15f), p =>
+            {
+                BoxLocal("Wing", p, new Vector3(0f, 0.9f, 0f), new Vector3(14f, 0.8f, 9f), m.BaseWhite).transform.localRotation = Quaternion.Euler(8f, 0f, 4f);
+                BoxLocal("Rust", p, new Vector3(-3f, 1.35f, 0f), new Vector3(4f, 0.05f, 5f), m.Rust, collider: false);
+            });
+
+            // A small shuttle on the north pad.
+            ShipPart(area, "T4_ShuttleCabin_01", new Vector3(168f, 0f, 32f), p =>
+            {
+                BoxLocal("Cabin", p, new Vector3(0f, 2.2f, 0f), new Vector3(8f, 3.4f, 4.4f), m.BaseWhite);
+                BoxLocal("Windows", p, new Vector3(-4.02f, 2.6f, 0f), new Vector3(0.05f, 1f, 3.6f), m.Glass, collider: false);
+                BoxLocal("Stripe", p, new Vector3(0f, 2.2f, 2.22f), new Vector3(7.6f, 0.5f, 0.05f), m.TrimOrange, collider: false);
+                foreach (float s in new[] { -1.5f, 1.5f })
+                    BoxLocal("Skid", p, new Vector3(0f, 0.25f, s), new Vector3(8.4f, 0.3f, 0.3f), m.MetalDark, collider: false);
+            });
+
+            int n = 1;
+            foreach (var pos in new[] { new Vector3(140f, 0f, 10f), new Vector3(150f, 0f, 45f), new Vector3(228f, 0f, 30f), new Vector3(232f, 0f, -50f), new Vector3(140f, 0f, -45f), new Vector3(205f, 0f, 48f) })
+            {
+                ShipPart(area, $"T3_CargoPod_{n++:00}", pos, p =>
+                {
+                    Part(PrimitiveType.Capsule, "Pod", p, new Vector3(0f, 1.2f, 0f), new Vector3(2.2f, 1.6f, 2.2f), m.ContainerBlue).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                    var col = new GameObject("Collider");
+                    col.transform.SetParent(p, false);
+                    col.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+                    col.AddComponent<BoxCollider>().size = new Vector3(4.4f, 2.2f, 2.2f);
+                    BoxLocal("Band", p, new Vector3(0f, 1.2f, 0f), new Vector3(0.4f, 2.3f, 2.3f), m.Hazard, collider: false);
+                    BoxLocal("Rust", p, new Vector3(1.2f, 2.1f, 0f), new Vector3(1.2f, 0.4f, 1.4f), m.Rust, collider: false);
+                }, Random.Range(0f, 360f));
+            }
+        }
+
+        static void ShipPart(Transform parent, string name, Vector3 pos, System.Action<Transform> build, float yaw = 0f)
+        {
+            var t = Prop(parent, name, pos, yaw);
+            build(t);
+        }
+
+        static void BuildDeepCore()
+        {
+            var area = new GameObject("Deep Core").transform;
+            area.SetParent(SalvageRoot());
+            ZoneGate(area, "Deep Core Gate", -HalfWidth - 0.5f, 5, "DEEP CORE MINE  ·  T5 TOOL REQUIRED", 90f);
+            MarkStatic(Box("Mine Road", area, new Vector3((-59.5f - ZoneFar) * 0.5f, 0.02f, -1.75f), new Vector3(ZoneFar - 59.5f, 0.04f, 7f), m.Road, collider: false));
+
+            // Cavern: tall rock walls and a roof so the mine is in shadow, lit by work lamps.
+            var cave = new GameObject("Cavern").transform;
+            cave.SetParent(area, true);
+            float x0 = -ZoneFar, x1 = -HalfWidth, cx = (x0 + x1) * 0.5f, w = x1 - x0;
+            MarkStatic(Box("Roof", cave, new Vector3(cx, 12f, 0f), new Vector3(w, 2f, ZoneHalfDepth * 2f), m.CaveRock));
+            MarkStatic(Box("Wall North", cave, new Vector3(cx, 6f, ZoneHalfDepth), new Vector3(w, 12f, 2f), m.CaveRock));
+            MarkStatic(Box("Wall South", cave, new Vector3(cx, 6f, -ZoneHalfDepth), new Vector3(w, 12f, 2f), m.CaveRock));
+            MarkStatic(Box("Wall West", cave, new Vector3(x0, 6f, 0f), new Vector3(2f, 12f, ZoneHalfDepth * 2f), m.CaveRock));
+            MarkStatic(Box("Wall East N", cave, new Vector3(x1 - 1f, 6f, (6f + ZoneHalfDepth) * 0.5f), new Vector3(2f, 12f, ZoneHalfDepth - 6f), m.CaveRock));
+            MarkStatic(Box("Wall East S", cave, new Vector3(x1 - 1f, 6f, -(6f + ZoneHalfDepth) * 0.5f), new Vector3(2f, 12f, ZoneHalfDepth - 6f), m.CaveRock));
+            MarkStatic(Box("Lintel", cave, new Vector3(x1 - 1f, 9f, 0f), new Vector3(2f, 6f, 12f), m.CaveRock));
+            MarkStatic(Box("Cave Floor", cave, new Vector3(cx, 0.015f, 0f), new Vector3(w, 0.02f, ZoneHalfDepth * 2f), m.CaveRock, collider: false));
+            var rng = new System.Random(31);
+            for (int i = 0; i < 14; i++)
+            {
+                var p = new Vector3(Mathf.Lerp(x0 + 8f, x1 - 14f, (float)rng.NextDouble()), 6f, Mathf.Lerp(-50f, 50f, (float)rng.NextDouble()));
+                if (Mathf.Abs(p.z) < 8f) continue; // keep the main tunnel clear
+                var pillar = Box("Rock Pillar", cave, p, new Vector3(3f + (float)rng.NextDouble() * 3f, 12f, 3f + (float)rng.NextDouble() * 3f), m.CaveRock, (float)rng.NextDouble() * 90f);
+                MarkStatic(pillar);
+            }
+            foreach (var lp in new[] { new Vector3(-130f, 8f, 0f), new Vector3(-160f, 8f, 25f), new Vector3(-160f, 8f, -25f), new Vector3(-195f, 8f, 0f), new Vector3(-225f, 8f, 30f), new Vector3(-225f, 8f, -30f), new Vector3(-195f, 8f, 45f), new Vector3(-195f, 8f, -45f) })
+            {
+                var l = new GameObject("Work Lamp").AddComponent<Light>();
+                l.transform.SetParent(cave, true);
+                l.transform.position = lp;
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.78f, 0.5f);
+                l.range = 30f;
+                l.intensity = 3f;
+                l.shadows = LightShadows.None;
+                Box("Lamp", cave, lp + Vector3.up * 0.6f, new Vector3(1f, 0.4f, 1f), m.TrimYellow, collider: false);
+            }
+
+            int n = 1;
+            foreach (var p in new[] { new Vector3(-150f, 0f, 30f), new Vector3(-185f, 0f, -30f), new Vector3(-222f, 0f, 12f) })
+                DrillingRig(area, p, n++);
+            n = 1;
+            foreach (var p in new[] { new Vector3(-170f, 0f, 46f), new Vector3(-210f, 0f, -46f) })
+                OreCrusher(area, p, n++);
+            n = 1;
+            foreach (var p in new[] { new Vector3(-138f, 0f, -20f), new Vector3(-176f, 0f, 14f), new Vector3(-200f, 0f, 36f), new Vector3(-232f, 0f, -24f), new Vector3(-158f, 0f, -48f), new Vector3(-214f, 0f, 50f) })
+                CrystalVein(area, p, n++);
+            n = 1;
+            foreach (var p in new[] { new Vector3(-132f, 0f, 8f), new Vector3(-165f, 0f, -10f), new Vector3(-205f, 0f, -8f), new Vector3(-238f, 0f, 4f) })
+                MineCart(area, p, n++);
+        }
+
+        static void DrillingRig(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T5_DrillingRig_{index:00}", pos, 0f);
+            BoxLocal("Base", t, new Vector3(0f, 0.6f, 0f), new Vector3(5f, 1.2f, 5f), m.MetalDark);
+            foreach (float x in new[] { -1.8f, 1.8f })
+            foreach (float z in new[] { -1.8f, 1.8f })
+                BoxLocal("Tower Leg", t, new Vector3(x * 0.6f, 5f, z * 0.6f), new Vector3(0.3f, 8f, 0.3f), m.Hazard, collider: false);
+            BoxLocal("Tower Top", t, new Vector3(0f, 9f, 0f), new Vector3(2.6f, 0.6f, 2.6f), m.Hazard);
+            CylLocal("Drill Shaft", t, new Vector3(0f, 4f, 0f), new Vector3(0.6f, 4f, 0.6f), m.Metal, collider: false);
+            CylLocal("Drill Bit", t, new Vector3(0f, 0.2f, 0f), new Vector3(1.4f, 0.4f, 1.4f), m.MetalDark, collider: false);
+            BoxLocal("Motor", t, new Vector3(1.8f, 1.8f, 1.8f), new Vector3(1.4f, 1.2f, 1.4f), m.VendingRed, collider: false);
+            BoxLocal("Rust", t, new Vector3(2.51f, 0.6f, 0f), new Vector3(0.02f, 0.8f, 3f), m.Rust, collider: false);
+        }
+
+        static void OreCrusher(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T5_OreCrusher_{index:00}", pos, 0f);
+            BoxLocal("Housing", t, new Vector3(0f, 2f, 0f), new Vector3(6f, 4f, 4f), m.LockedGrey);
+            BoxLocal("Hopper", t, new Vector3(0f, 4.6f, 0f), new Vector3(4f, 1.2f, 3f), m.Hazard, collider: false);
+            CylLocal("Roller", t, new Vector3(0f, 3.2f, 2.05f), new Vector3(1.2f, 2.6f, 1.2f), m.MetalDark, collider: false).transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            BoxLocal("Chute", t, new Vector3(3.6f, 1f, 0f), new Vector3(1.6f, 0.6f, 1.6f), m.Metal, collider: false);
+            BoxLocal("Rust", t, new Vector3(-3.01f, 1.6f, 0f), new Vector3(0.02f, 2f, 2.4f), m.Rust, collider: false);
+        }
+
+        static void CrystalVein(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T4_CrystalVein_{index:00}", pos, index * 47f);
+            BoxLocal("Rock", t, new Vector3(0f, 0.8f, 0f), new Vector3(3f, 1.6f, 2.4f), m.CaveRock);
+            var rng = new System.Random(index * 13);
+            for (int i = 0; i < 6; i++)
+            {
+                var c = BoxLocal("Crystal", t, new Vector3((float)rng.NextDouble() * 2f - 1f, 1.6f + (float)rng.NextDouble(), (float)rng.NextDouble() * 1.6f - 0.8f),
+                    new Vector3(0.35f, 1.2f + (float)rng.NextDouble(), 0.35f), m.Crystal, collider: false);
+                c.transform.localRotation = Quaternion.Euler((float)rng.NextDouble() * 40f - 20f, (float)rng.NextDouble() * 90f, (float)rng.NextDouble() * 40f - 20f);
+            }
+        }
+
+        static void MineCart(Transform parent, Vector3 pos, int index)
+        {
+            var t = Prop(parent, $"T3_MineCart_{index:00}", pos, 90f);
+            BoxLocal("Tub", t, new Vector3(0f, 1f, 0f), new Vector3(1.6f, 1.1f, 2.4f), m.Rust);
+            BoxLocal("Ore", t, new Vector3(0f, 1.6f, 0f), new Vector3(1.4f, 0.3f, 2.2f), m.CaveRock, collider: false);
+            Wheels(t, 0.7f, 0.8f, 0.3f);
+            BoxLocal("Rail", t, new Vector3(-0.6f, 0.05f, 0f), new Vector3(0.1f, 0.1f, 6f), m.Metal, collider: false);
+            BoxLocal("Rail", t, new Vector3(0.6f, 0.05f, 0f), new Vector3(0.1f, 0.1f, 6f), m.Metal, collider: false);
+        }
+
+        static void BuildAutomation()
+        {
+            var root = new GameObject("Automation").transform;
+            var warehouse = GameObject.Find("Warehouse Drop-off").GetComponent<ScrapStorage>();
+
+            // Recycling Factory south of the base, drawing from the warehouse.
+            var fpos = new Vector3(-30f, 0f, -66f);
+            var factoryGo = new GameObject("Recycling Factory");
+            factoryGo.transform.SetParent(root, true);
+            factoryGo.transform.position = fpos;
+            var model = new GameObject("Model");
+            model.transform.SetParent(factoryGo.transform, false);
+            Part(PrimitiveType.Cube, "Hall", model.transform, new Vector3(0f, 3f, 0f), new Vector3(22f, 6f, 9f), m.BaseWhite);
+            Part(PrimitiveType.Cube, "Stripe", model.transform, new Vector3(0f, 4.3f, 4.52f), new Vector3(22f, 0.6f, 0.05f), m.TrimTeal);
+            Part(PrimitiveType.Cylinder, "Stack", model.transform, new Vector3(8f, 8f, -1f), new Vector3(1.4f, 4f, 1.4f), m.LockedGrey);
+            var lightTip = Part(PrimitiveType.Sphere, "Stack Light", model.transform, new Vector3(8f, 12.4f, -1f), Vector3.one * 0.5f, m.BotEye).transform;
+            Part(PrimitiveType.Cube, "Intake", model.transform, new Vector3(-8f, 1.5f, 5f), new Vector3(3f, 3f, 1.5f), m.Hazard);
+            var shell = Box("Factory Foundation", factoryGo.transform, fpos + new Vector3(0f, 0.15f, 0f), new Vector3(23f, 0.3f, 10f), m.MetalDark);
+            MarkStatic(shell);
+            var hall = model.transform.Find("Hall").gameObject;
+            hall.AddComponent<BoxCollider>();
+            Sign(factoryGo.transform, "RECYCLING FACTORY", fpos + new Vector3(0f, 6.9f, 4.6f), 180f, 0.8f);
+            var factory = factoryGo.AddComponent<RecyclingFactory>();
+            factory.Setup(warehouse, lightTip);
+            var fso = new SerializedObject(factory);
+            fso.FindProperty("machineId").stringValue = "factory";
+            fso.FindProperty("displayName").stringValue = "Recycling Factory";
+            fso.FindProperty("price").intValue = 6000;
+            fso.FindProperty("runningCostPerMinute").floatValue = 40f;
+            fso.FindProperty("model").objectReferenceValue = model;
+            fso.ApplyModifiedPropertiesWithoutUndo();
+            var panel = Box("Factory Control Panel", factoryGo.transform, fpos + new Vector3(-4f, 0.8f, 5.6f), new Vector3(1.2f, 1.6f, 0.6f), m.MetalDark);
+            BoxLocal("Screen", panel.transform, new Vector3(0f, 0.15f, 0.51f), new Vector3(0.7f, 0.35f, 0.05f), m.Screen, collider: false);
+            panel.AddComponent<MachineControl>().Setup(factory);
+
+            // Robot dock beside the warehouse.
+            var dockGo = new GameObject("Robot Dock");
+            dockGo.transform.SetParent(root, true);
+            dockGo.transform.position = new Vector3(100f, 0f, -38f);
+            MarkStatic(Primitive(PrimitiveType.Cylinder, "Dock Pad", dockGo.transform, new Vector3(100f, 0.05f, -38f), new Vector3(7f, 0.05f, 7f), m.TrimTeal, collider: false));
+            Sign(dockGo.transform, "ROBOT DOCK", new Vector3(100f, 2.4f, -34f), 180f, 0.6f);
+            var drop = new GameObject("Robot Drop Point").transform;
+            drop.SetParent(dockGo.transform, true);
+            drop.position = warehouse.transform.position + Vector3.up * 1f;
+            var dock = dockGo.AddComponent<RobotDock>();
+            dock.Setup(warehouse, drop);
+            SetRef(dock, "bodyMaterial", m.BotYellow);
+            SetRef(dock, "accentMaterial", m.TrimTeal);
+            SetRef(dock, "eyeMaterial", m.BotEye);
+            SetRef(dock, "darkMaterial", m.MetalDark);
+
+            // Conveyor links from each collector pad to the warehouse.
+            foreach (var pad in Object.FindObjectsByType<CollectorPad>(FindObjectsSortMode.InstanceID))
+            {
+                var link = new GameObject("Conveyor " + pad.PadId);
+                link.transform.SetParent(root, true);
+                Vector3 a = pad.transform.position + Vector3.right * 2f;
+                Vector3 b = warehouse.transform.position + Vector3.left * 3f;
+                var belt = new GameObject("Belt");
+                belt.transform.SetParent(link.transform, false);
+                Vector3 mid = (a + b) * 0.5f;
+                float yaw = Mathf.Atan2(b.x - a.x, b.z - a.z) * Mathf.Rad2Deg;
+                float len = Vector3.Distance(a, b);
+                var beltBox = Box("Belt Surface", belt.transform, mid + Vector3.up * 0.55f, new Vector3(1.1f, 0.12f, len), m.Rubber, yaw, collider: false);
+                Box("Belt Frame", belt.transform, mid + Vector3.up * 0.4f, new Vector3(1.3f, 0.2f, len), m.Hazard, yaw, collider: false);
+                int legs = Mathf.CeilToInt(len / 6f);
+                for (int i = 0; i <= legs; i++)
+                    Box("Leg", belt.transform, Vector3.Lerp(a, b, i / (float)legs) + Vector3.up * 0.2f, new Vector3(0.15f, 0.4f, 0.15f), m.Metal, yaw, collider: false);
+                var crates = new Transform[8];
+                for (int i = 0; i < crates.Length; i++)
+                {
+                    var c = Box("Crate", belt.transform, a, new Vector3(0.6f, 0.4f, 0.6f), i % 2 == 0 ? m.Rust : m.Metal, yaw, collider: false);
+                    crates[i] = c.transform;
+                }
+                var conveyor = link.AddComponent<ConveyorLink>();
+                string nice = pad.PadId.Replace("collector_", "");
+                conveyor.Setup("conveyor_" + nice, $"Conveyor ({char.ToUpper(nice[0]) + nice.Substring(1)})", pad, warehouse, a, b, crates);
+                var cso = new SerializedObject(conveyor);
+                cso.FindProperty("price").intValue = 1500;
+                cso.FindProperty("runningCostPerMinute").floatValue = 10f;
+                cso.FindProperty("model").objectReferenceValue = belt;
+                cso.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+
         // ───────────────────────────── Gameplay wiring ─────────────────────────────
 
         /// <summary>Turns every T1_/T2_/T3_ prop into a dismantlable object with a stable save id.</summary>
@@ -1076,7 +1374,9 @@ namespace PlanetScrappers.EditorTools
             {
                 ("OilDrum", "oil_drum"), ("VendingBot", "vending_bot"), ("HoverScooter", "hover_scooter"),
                 ("CargoContainer", "cargo_container"), ("Mule7Truck", "mule7_truck"), ("GeneratorUnit", "generator_unit"),
-                ("RobotArm", "robot_arm"), ("HydraulicPress", "hydraulic_press"), ("AssemblyLine", "assembly_line"), ("FactoryCrane", "factory_crane")
+                ("RobotArm", "robot_arm"), ("HydraulicPress", "hydraulic_press"), ("AssemblyLine", "assembly_line"), ("FactoryCrane", "factory_crane"),
+                ("CargoPod", "cargo_pod"), ("ShipNose", "ship_nose"), ("ShipWing", "ship_wing"), ("ShipHull", "ship_hull"), ("ShipEngine", "ship_engine"),
+                ("ShuttleCabin", "shuttle_cabin"), ("MineCart", "mine_cart"), ("CrystalVein", "crystal_vein"), ("OreCrusher", "ore_crusher"), ("DrillingRig", "drilling_rig")
             };
             int count = 0;
             foreach (var t in SalvageRoot().GetComponentsInChildren<Transform>(true))
@@ -1322,6 +1622,8 @@ namespace PlanetScrappers.EditorTools
                 Halcyon = Lit("Halcyon", Color.white, 0.3f, tex: halcyonTex, emission: Hex("#0A1830")),
                 BotYellow = Lit("BotYellow", Hex("#F5B41C"), 0.45f),
                 BotWhite = Lit("BotWhite", Hex("#F2F2EC"), 0.6f),
+                Crystal = Lit("Crystal", Hex("#9B7BFF"), 0.9f, emission: Hex("#7A5BFF") * 1.6f),
+                CaveRock = Lit("CaveRock", Hex("#5E6066"), 0.05f, tex: regolithTex, tiling: new Vector2(6f, 6f)),
                 SuitOrange = Lit("SuitOrange", Hex("#EC6E24"), 0.35f),
                 SuitOrangeDark = Lit("SuitOrangeDark", Hex("#C9561A"), 0.3f),
                 SuitGrey = Lit("SuitGrey", Hex("#9AA3AB"), 0.5f, metallic: 0.3f),

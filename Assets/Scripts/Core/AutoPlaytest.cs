@@ -138,7 +138,7 @@ namespace PlanetScrappers.Core
             Check(Trading.BuyTool(db.Tool("electric_dismantler")) == PurchaseResult.Ok, "bought Electric Dismantler");
             Check(mm.Index == 8, "mission 8 complete, first shift done");
             yield return new WaitForSecondsRealtime(3f);
-            var gate = FindAnyObjectByType<MachineRowGate>();
+            var gate = FindObjectsByType<MachineRowGate>(FindObjectsSortMode.None).First(g => g.name == "Locked Gate");
             Check(gate.GetComponent<Collider>() == null || !gate.GetComponent<Collider>().enabled, "Machine Row gate opened");
             yield return Dismantle("generator_unit", "08_generator");
 
@@ -158,6 +158,7 @@ namespace PlanetScrappers.Core
             {
                 eq.Equip(db.Tool("electric_dismantler"));
                 while (!mule.IsDismantled) mule.Hit(eq.Equipped, mule.Center, Vector3.up);
+                EnsurePlaying();
                 rig.Place(mule.Center + Vector3.back * 1f, 0f);
                 yield return new WaitForSecondsRealtime(4f);
             }
@@ -174,21 +175,16 @@ namespace PlanetScrappers.Core
 
             // Mission 11: scrap collector
             TopUp(wallet, 800);
-            var pad = CollectorPad.Pads[0];
+            var pad = CollectorPad.Pads.FirstOrDefault(pd => DestructibleObject.All.Any(o => !o.IsDismantled && o.Definition.tier <= 3 && (o.Center - pd.transform.position).sqrMagnitude < 13f * 13f)) ?? CollectorPad.Pads[0];
             yield return GoTo(pad.transform.position, 2f);
             pad.Interact();
             Check(pad.Built, "built a scrap collector");
             Check(mm.Index == 11, "mission 11 complete (collector)");
-            var drum = DestructibleObject.All.Where(o => !o.IsDismantled && (o.Center - pad.transform.position).sqrMagnitude < 18f * 18f)
-                .OrderBy(o => (o.Center - pad.transform.position).sqrMagnitude).FirstOrDefault();
-            if (drum != null)
-            {
-                player.Teleport(pad.transform.position + Vector3.back * 40f, Quaternion.identity); // walk away so only the collector can grab it
-                while (!drum.IsDismantled) drum.Hit(eq.Equipped, drum.Center, Vector3.up);
-                yield return new WaitForSecondsRealtime(4f);
-                Check(pad.Hopper.TotalUnits > 0, $"collector pulled in scrap on its own ({pad.Hopper.TotalUnits} units)");
-            }
-            else Check(false, "found an object near the collector");
+            // Drop fresh scrap beside the collector while the player is far away: only the collector can grab it.
+            player.Teleport(pad.transform.position + Vector3.back * 40f, Quaternion.identity);
+            ScrapSpawner.Instance.SpawnYield(db.Dismantlable("vending_bot"), 0f, pad.transform.position + new Vector3(4f, 0.5f, 3f));
+            yield return new WaitForSecondsRealtime(4f);
+            Check(pad.Hopper.TotalUnits > 0, $"collector pulled in scrap on its own ({pad.Hopper.TotalUnits} units)");
             yield return GoTo(pad.transform.position, 2f);
             yield return Shot("13_collector");
 
@@ -212,13 +208,69 @@ namespace PlanetScrappers.Core
             Check(Trading.BuyTool(db.Tool("plasma_cutter")) == PurchaseResult.Ok, "bought the Plasma Cutter");
             Check(mm.Index == 13, "mission 13 complete (Plasma Cutter)");
             yield return Dismantle("assembly_line", "15_assembly_line");
-            Check(mm.AllComplete, "mission 14 complete, all contracts done");
+            Check(mm.Index == 14, "mission 14 complete, Phase 2 contracts done");
+
+            // ── Phase 3 ──
+            // Mission 15: Recycling Factory
+            var factory = Machine.Find("factory");
+            TopUp(wallet, factory.Price);
+            Check(Trading.BuyMachine(factory) == PurchaseResult.Ok && factory.Built && factory.Powered, "built the Recycling Factory");
+            Check(mm.Index == 15, "mission 15 complete (factory)");
+            warehouse.Add(db.Resource("iron"), 30);
+            EnsurePlaying();
+            int credBefore = wallet.Credits;
+            yield return new WaitForSecondsRealtime(9f);
+            Check(warehouse.TotalUnits < 30 && wallet.Credits > credBefore, $"factory refined warehouse scrap ({30 - warehouse.TotalUnits} units, +{wallet.Credits - credBefore} cr net)");
+
+            // Mission 16: salvage robot
+            TopUp(wallet, RobotDock.Instance.Price);
+            Check(Trading.BuyRobot() == PurchaseResult.Ok && RobotDock.Instance.Count == 1, "bought a salvage robot");
+            Check(mm.Index == 16, "mission 16 complete (robot)");
+            var robot = RobotDock.Instance.Robots[0];
+            EnsurePlaying();
+            float robotWait = 0f;
+            while (robot.Hits == 0 && robotWait < 40f) { robotWait += 1f; yield return new WaitForSecondsRealtime(1f); }
+            Check(robot.Hits > 0, $"robot found and worked on salvage by itself ({robot.Hits} hits, {robotWait:0}s)");
+
+            // Conveyor link
+            var conveyor = Machine.All.OfType<ConveyorLink>().FirstOrDefault(c => c.CanBuild);
+            if (conveyor != null)
+            {
+                TopUp(wallet, conveyor.Price);
+                Check(Trading.BuyMachine(conveyor) == PurchaseResult.Ok, "built a conveyor link");
+                conveyor.Source.Hopper.Add(db.Resource("iron"), 10);
+                int hopBefore = conveyor.Source.Hopper.TotalUnits;
+                yield return new WaitForSecondsRealtime(3f);
+                Check(conveyor.Source.Hopper.TotalUnits < hopBefore, "conveyor moved scrap to the warehouse");
+            }
+            else Check(false, "found a buildable conveyor");
+            yield return Shot("16_factory_robot");
+
+            // Mission 17: Spaceport Graveyard (Plasma Cutter is tier 4)
+            eq.Equip(db.Tool("plasma_cutter"));
+            yield return Dismantle("ship_nose", "17_ship_nose");
+            Check(mm.Index == 17, "mission 17 complete (freighter nose)");
+            var hull = Nearest("ship_hull");
+            Check(hull != null && hull.Hit(eq.Equipped, hull.Center, Vector3.up) == HitResult.TooWeak, "plasma cutter bounces off a tier 5 hull");
+
+            // Mission 18 + 19: crusher, engine
+            TopUp(wallet, db.Tool("industrial_crusher").price);
+            Check(Trading.BuyTool(db.Tool("industrial_crusher")) == PurchaseResult.Ok, "bought the Industrial Crusher");
+            Check(mm.Index == 18, "mission 18 complete (crusher)");
+            yield return Dismantle("ship_engine", "18_engine");
+            Check(mm.Index == 19, "mission 19 complete (engine)");
+
+            // Mission 20: Deep Core
+            float oxyBefore = SuitSystems.Instance.Oxygen;
+            yield return Dismantle("drilling_rig", "19_deep_core");
+            Check(SuitSystems.Instance.InDeepCore || player.transform.position.x < -120f, "reached the Deep Core");
+            Check(mm.AllComplete, "mission 20 complete, all contracts done");
 
             // Save and reload check
             int credits = wallet.Credits;
             gm.SaveGame(true);
             var data = SaveManager.Read();
-            Check(data != null && data.credits == credits && data.missionIndex == mm.Index && data.ownedTools.Count == 4 && data.builtCollectors.Count == 1 && data.truckPosition != null, "save file written and readable");
+            Check(data != null && data.credits == credits && data.missionIndex == mm.Index && data.ownedTools.Count == 5 && data.builtCollectors.Count == 1 && data.truckPosition != null && data.robots == 1 && data.machines.Exists(x => x.id == "factory" && x.built), "save file written and readable");
             Check(File.Exists(SaveManager.SavePath), "save.json exists");
 
             yield return OpenShot(GameScreen.Pause, "09_pause");
@@ -248,8 +300,19 @@ namespace PlanetScrappers.Core
             DestructibleObject.All.Where(o => !o.IsDismantled && o.Definition.id == id)
                 .OrderBy(o => (o.Center - player.transform.position).sqrMagnitude).FirstOrDefault();
 
+        /// <summary>Closes any screen left open (e.g. by a stray key press) so game time runs.</summary>
+        static void EnsurePlaying()
+        {
+            if (UIManager.Instance.Current != GameScreen.None && UIManager.Instance.Current != GameScreen.MainMenu)
+            {
+                Debug.Log($"[Autotest] closing stray screen {UIManager.Instance.Current}");
+                UIManager.Instance.ShowHud();
+            }
+        }
+
         IEnumerator GoTo(Vector3 target, float distance)
         {
+            EnsurePlaying();
             Vector3 from = target + Vector3.back * distance;
             from.y = 0.1f;
             Vector3 look = target - from;
@@ -263,6 +326,7 @@ namespace PlanetScrappers.Core
             var o = Nearest(id);
             if (o == null) { Check(false, "found a " + id); yield break; }
             Vector3 c = o.Center;
+            EnsurePlaying();
             Debug.Log($"[Autotest] -> {o.UniqueId} at {c} timeScale={Time.timeScale} screen={UIManager.Instance.Current} backpack={PlayerInventory.Instance.TotalUnits}/{PlayerInventory.Instance.Capacity}");
             Vector3 stand = c + (player.transform.position - c).normalized * 2.2f;
             yield return GoTo(c, Mathf.Max(1.6f, Vector3.Distance(new Vector3(stand.x, 0, stand.z), new Vector3(c.x, 0, c.z))));

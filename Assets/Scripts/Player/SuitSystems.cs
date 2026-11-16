@@ -22,7 +22,10 @@ namespace PlanetScrappers.Player
         public bool NearBase { get; private set; }
         public event Action SuitFailed;
 
-        bool warnedLow, warnedEmpty;
+        bool warnedLow, warnedEmpty, wasDeep;
+
+        /// <summary>True inside the Deep Core mine, where oxygen drains faster.</summary>
+        public bool InDeepCore => transform.position.x < -120f;
 
         void Awake() => Instance = this;
 
@@ -47,7 +50,10 @@ namespace PlanetScrappers.Player
             }
             else
             {
-                Oxygen = Mathf.Max(0f, Oxygen - 100f / db.oxygenSeconds * dt);
+                float drain = InDeepCore ? 2.5f : 1f;
+                Oxygen = Mathf.Max(0f, Oxygen - 100f / db.oxygenSeconds * drain * dt);
+                if (InDeepCore && !wasDeep) GameEvents.Say("Deep Core. Thin air down here: your oxygen drains more than twice as fast. Watch the meter.", 7f);
+                wasDeep = InDeepCore;
             }
 
             if (Oxygen > 0f) Health = Mathf.Min(100f, Health + 2f * dt);

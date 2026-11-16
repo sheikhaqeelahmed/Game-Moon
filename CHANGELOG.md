@@ -2,6 +2,29 @@
 
 All notable changes to Planet Scrappers. Versions follow `MAJOR.MINOR.PATCH`; the first client QA build is `0.1.0`.
 
+## [0.3.0] — Phase 3: automation and new zones
+
+### Added
+- **Machines with running costs:** a shared machine framework (built at Nova's, switched on/off at the machine,
+  charged credits per minute only while working; switches itself off if you can't pay).
+- **Recycling Factory** (6,000 cr, 40 cr/min): refines warehouse scrap at 3 units/s and pays 30% more than the depot.
+- **Conveyor links** (1,500 cr each, 10 cr/min): carry a collector's scrap to the warehouse; crates ride the belt.
+- **Salvage Robots** (6,000 cr, up to 3): hovering drones that find tier 1-3 junk in Rust Valley and the Iron District,
+  take it apart, vacuum up the scrap and unload it at the warehouse.
+- **Spaceport Graveyard** (east gate, tier 4): a crashed freighter cut apart section by section (nose, wings,
+  two hull sections, engine), a shuttle and cargo pods.
+- **Deep Core** (west gate, tier 5): an underground mine under a rock roof, lit by work lamps, with drilling rigs,
+  ore crushers, rare-alloy crystal veins and mine carts. Oxygen drains 2.5× faster underground.
+- **Industrial Crusher** (tier 5, 12,000 cr).
+- **Missions 15–20:** Power Up, Robot Crew, Spaceport Graveyard, Heavy Metal, Engine Room, Deep Core.
+- 28 new dismantlable objects (78 in total); tool bar and hotkeys now cover tools 1–5.
+- Upgrade Station redesigned into Tools and Automation columns.
+- Save data now includes machines (built and on/off) and robot count.
+- Automated playtest covers all 20 missions (65 checks) and ignores stray key presses while running.
+
+### Changed
+- Impact sounds fade with distance, so robots working far away stay quiet.
+
 ## [0.2.0] — Phase 2 start: salvage truck, Iron District, first automation
 
 ### Added

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Equipment.ToolDefinition
   id: industrial_crusher
   displayName: Industrial Crusher
-  description: Vehicles and heavy structures.
+  description: Ship hulls, engines and mining rigs.
   level: 5
   tier: 5
   damage: 260
   hitsPerSecond: 0.5
-  range: 3.2
+  range: 3.4
   recoveryBonus: 0.4
   price: 12000
-  availableInPrototype: 0
-  lockedReason: Phase 3
+  availableInPrototype: 1
+  lockedReason: Not available yet

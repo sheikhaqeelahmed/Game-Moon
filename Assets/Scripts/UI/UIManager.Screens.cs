@@ -1,3 +1,4 @@
+using PlanetScrappers.Automation;
 using PlanetScrappers.Core;
 using PlanetScrappers.Economy;
 using PlanetScrappers.Equipment;
@@ -173,7 +174,7 @@ namespace PlanetScrappers.UI
             }
             if (!any) UIKit.Label(right, "No tools yet. The rusty wrench is on the crate west of the base road.", 17, UIKit.Muted);
             Spacer(right, 12);
-            UIKit.Label(right, "Tab or Esc to close. Number keys 1–3 switch tools while playing.", 15, UIKit.Muted);
+            UIKit.Label(right, "Tab or Esc to close. Number keys 1–5 switch tools while playing.", 15, UIKit.Muted);
         }
 
         // ───────────────────────── Recycling Depot ─────────────────────────
@@ -265,24 +266,20 @@ namespace PlanetScrappers.UI
             var wallet = Wallet.Instance;
             var eq = PlayerEquipment.Instance;
             var inv = PlayerInventory.Instance;
-            var card = Card(1300, 820, "Nova's workshop", "Upgrade Station", UIKit.Teal);
+            var card = Card(1640, 900, "Nova's workshop", "Upgrade Station", UIKit.Teal);
 
             var nova = UIKit.Row(card, 12f);
-            UIKit.Label(nova, "<b>ENGINEER NOVA:</b>  Bring me credits, I'll bring you tools that respect you.", 19, UIKit.Teal).Flex();
+            UIKit.Label(nova, "<b>ENGINEER NOVA:</b>  Bring me credits, I'll bring you tools that respect you. And robots. And factories.", 19, UIKit.Teal).Flex();
             UIKit.Label(nova, $"Balance  {wallet.Credits:N0} cr", 26, UIKit.Amber, FontStyle.Bold, TextAnchor.MiddleRight).Width(320);
 
-            UIKit.Label(card, "TOOLS", 15, UIKit.Muted, FontStyle.Bold);
+            var cols = Columns(card, 24f);
+            var left = Column(cols, 1.15f, 8f);
+            var right = Column(cols, 1f, 8f);
+
+            UIKit.Label(left, "TOOLS", 15, UIKit.Muted, FontStyle.Bold);
             foreach (var t in GameDatabase.Instance.tools)
             {
                 if (t == null) continue;
-                var tile = UIKit.Panel(card, t.displayName, eq.Equipped == t ? new Color(1f, 0.9f, 0.82f, 0.9f) : new Color(1, 1, 1, 0.7f));
-                UIKit.Outline(tile, UIKit.Line);
-                UIKit.HLayout(tile.gameObject, 16f, 12);
-                UIKit.Label(tile.transform, t.level.ToString(), 26, UIKit.Muted, FontStyle.Bold, TextAnchor.MiddleCenter).Width(34);
-                var text = Column(tile.transform, 1f, 2f);
-                UIKit.Label(text, t.displayName, 21, eq.Owns(t) || t.availableInPrototype ? UIKit.Ink : UIKit.Muted, FontStyle.Bold);
-                UIKit.Label(text, $"Tier {t.tier}   ·   {t.DamagePerSecond:0} damage per second   ·   reach {t.range:0.0} m   ·   +{t.recoveryBonus * 100f:0}% scrap   ·   {t.description}", 15, UIKit.Muted);
-
                 string label;
                 bool primary = false, enabled = false;
                 var tool = t;
@@ -297,30 +294,72 @@ namespace PlanetScrappers.UI
                     primary = enabled;
                     action = () => { if (Trading.BuyTool(tool) == PurchaseResult.Ok) GameEvents.Say(ShopLine(tool), 6f); Refresh(); };
                 }
-                var b = UIKit.Button(tile.transform, label, action, primary, 17, 46, enabled);
-                UIKit.Size(b.gameObject, 230, 46, 230, 46, 0f);
+                ShopTile(left, $"{t.level}  {t.displayName}",
+                    $"Tier {t.tier}  ·  {t.DamagePerSecond:0} dps  ·  reach {t.range:0.0} m  ·  +{t.recoveryBonus * 100f:0}% scrap  ·  {t.description}",
+                    label, action, primary, enabled, eq.Equipped == t);
             }
 
-            UIKit.Label(card, "BACKPACK", 15, UIKit.Muted, FontStyle.Bold);
-            var pack = UIKit.Panel(card, "Backpack", new Color(1, 1, 1, 0.7f));
-            UIKit.Outline(pack, UIKit.Line);
-            UIKit.HLayout(pack.gameObject, 16f, 12);
-            var ptext = Column(pack.transform, 1f, 2f);
-            UIKit.Label(ptext, inv.CanUpgrade ? $"Bigger backpack: {inv.Capacity} → {inv.NextCapacity} units" : $"Backpack: {inv.Capacity} units (largest available)", 21, UIKit.Ink, FontStyle.Bold);
-            UIKit.Label(ptext, "More pockets, fewer trips to the depot.", 15, UIKit.Muted);
+            UIKit.Label(right, "BACKPACK", 15, UIKit.Muted, FontStyle.Bold);
             bool canPack = inv.CanUpgrade && wallet.CanAfford(inv.NextUpgradePrice);
-            var pb = UIKit.Button(pack.transform, inv.CanUpgrade ? $"Buy  {inv.NextUpgradePrice:N0} cr" : "Max size", () =>
+            ShopTile(right, inv.CanUpgrade ? $"Bigger backpack: {inv.Capacity} → {inv.NextCapacity}" : $"Backpack: {inv.Capacity} units (largest)",
+                "More pockets, fewer trips to the depot.",
+                inv.CanUpgrade ? $"Buy  {inv.NextUpgradePrice:N0} cr" : "Max size",
+                () => { if (Trading.BuyBackpack() == PurchaseResult.Ok) GameEvents.Say("More pockets. Same posture.", 4f); Refresh(); },
+                canPack, canPack, false);
+
+            UIKit.Label(right, "AUTOMATION", 15, UIKit.Muted, FontStyle.Bold);
+            var factory = Machine.Find("factory");
+            if (factory != null)
             {
-                if (Trading.BuyBackpack() == PurchaseResult.Ok) GameEvents.Say("More pockets. Same posture.", 4f);
-                Refresh();
-            }, canPack, 17, 46, canPack);
-            UIKit.Size(pb.gameObject, 230, 46, 230, 46, 0f);
+                bool can = !factory.Built && wallet.CanAfford(factory.Price);
+                ShopTile(right, "Recycling Factory",
+                    factory.Built ? $"{factory.Status}  ·  switch it on or off at its control panel  ·  {factory.RunningCostPerMinute:0} cr/min while working"
+                                  : $"Refines warehouse scrap for 30% more than the depot pays  ·  {factory.RunningCostPerMinute:0} cr/min while working",
+                    factory.Built ? "Built" : $"Build  {factory.Price:N0} cr",
+                    () => { if (Trading.BuyMachine(factory) == PurchaseResult.Ok) GameEvents.Say("Factory built south of the base. It's already switched on.", 6f); Refresh(); },
+                    can, can, false);
+            }
+
+            var dock = PlanetScrappers.Automation.RobotDock.Instance;
+            if (dock != null)
+            {
+                bool can = dock.Count < dock.MaxRobots && wallet.CanAfford(dock.Price);
+                ShopTile(right, $"Salvage Robot  ({dock.Count}/{dock.MaxRobots})",
+                    "Flies out, takes apart tier 1-3 junk and brings the scrap to the warehouse. No running cost.",
+                    dock.Count >= dock.MaxRobots ? "Crew full" : $"Buy  {dock.Price:N0} cr",
+                    () => { if (Trading.BuyRobot() == PurchaseResult.Ok) GameEvents.Say("Robot deployed from the dock by the warehouse.", 5f); Refresh(); },
+                    can, can, false);
+            }
+
+            foreach (var mach in Machine.All)
+            {
+                if (!(mach is ConveyorLink link)) continue;
+                bool can = !link.Built && link.CanBuild && wallet.CanAfford(link.Price);
+                string state = link.Built ? "Built" : !link.CanBuild ? link.CannotBuildReason : $"Build  {link.Price:N0} cr";
+                ShopTile(right, link.DisplayName,
+                    link.Built ? $"{link.Status}  ·  carries collector scrap to the warehouse" : "Carries this collector's scrap to the warehouse on its own  ·  10 cr/min while moving",
+                    state, () => { Trading.BuyMachine(link); Refresh(); }, can, can, false);
+            }
+        }
+
+        void ShopTile(Transform parent, string title, string detail, string buttonLabel, UnityEngine.Events.UnityAction action, bool primary, bool enabled, bool highlight)
+        {
+            var tile = UIKit.Panel(parent, title, highlight ? new Color(1f, 0.9f, 0.82f, 0.9f) : new Color(1, 1, 1, 0.7f));
+            UIKit.Outline(tile, UIKit.Line);
+            UIKit.HLayout(tile.gameObject, 14f, 10);
+            var text = Column(tile.transform, 1f, 1f);
+            UIKit.Label(text, title, 19, enabled || highlight ? UIKit.Ink : UIKit.Muted, FontStyle.Bold);
+            UIKit.Label(text, detail, 14, UIKit.Muted);
+            var b = UIKit.Button(tile.transform, buttonLabel, action, primary, 16, 44, enabled);
+            UIKit.Size(b.gameObject, 190, 44, 190, 44, 0f);
         }
 
         static string ShopLine(ToolDefinition t) => t.id switch
         {
             "scrap_hammer" => "Finally, a tool with self-esteem. Tier 2 means trucks and containers now.",
             "electric_dismantler" => "The Dismantler cuts in half the time. And Machine Row's gate just opened.",
+            "plasma_cutter" => "Plasma Cutter fitted. The Spaceport Graveyard gate in the east fence just unlocked.",
+            "industrial_crusher" => "The Crusher. Ship hulls, engines, mining rigs. The Deep Core gate in the west fence is open.",
             _ => "New tool fitted. Go break something expensive."
         };
 
@@ -332,7 +371,8 @@ namespace PlanetScrappers.UI
             var list = GameDatabase.Instance.missions;
             int chapterEnd = 8, chapterStart = 0;
             string chapterName = "First shift";
-            if (mm.Index >= 8) { chapterStart = 8; chapterEnd = list.Length; chapterName = "Phase 2 contracts"; }
+            if (mm.Index >= 8) { chapterStart = 8; chapterEnd = 14; chapterName = "Phase 2 contracts"; }
+            if (mm.Index >= 14) { chapterStart = 14; chapterEnd = list.Length; chapterName = "Phase 3 contracts"; }
             var card = Card(1240, 780, $"{chapterName} · {mm.CompletedCount} of {list.Length} missions done", "Missions", UIKit.AccentText);
             var cols = Columns(card);
             var left = Column(cols, 1f, 8f);
@@ -355,7 +395,7 @@ namespace PlanetScrappers.UI
             {
                 UIKit.Label(right, "ALL CONTRACTS COMPLETE", 15, UIKit.Green, FontStyle.Bold);
                 UIKit.Label(right, $"All {list.Length} missions done", 36, UIKit.Ink, FontStyle.Bold);
-                UIKit.Label(right, "Keep salvaging Rust Valley and the Iron District. Captain Bolt drops fresh junk every few minutes. The Spaceport Graveyard opens in the next phase.", 19, UIKit.Muted);
+                UIKit.Label(right, "Keep salvaging every zone. Captain Bolt drops fresh junk every few minutes, your robots and factory keep earning, and the Mega-Factory opens in the final phase.", 19, UIKit.Muted);
                 return;
             }
             UIKit.Label(right, $"MISSION {cur.number} · ACTIVE", 15, UIKit.Muted, FontStyle.Bold);

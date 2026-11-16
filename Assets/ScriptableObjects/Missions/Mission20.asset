@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission20
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 20
+  title: Deep Core
+  description: 'West of the valley, the Deep Core mine: drilling rigs and crystal
+    veins. Oxygen drains fast underground.'
+  objectiveText: Dismantle a drilling rig in the Deep Core
+  type: 1
+  targetId: drilling_rig
+  count: 1
+  rewardCredits: 2000
+  botIntro: The Deep Core gate in the west fence opens for tier 5 tools. Fill your
+    oxygen at base first. It drains twice as fast down there.
+  botComplete: Every contract done. Only the Mega-Factory is left, and Bolt says
+    it isn't ready for us. Yet.

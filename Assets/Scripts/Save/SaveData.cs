@@ -41,6 +41,18 @@ namespace PlanetScrappers.Save
         public float truckYaw;
         public List<StorageState> storages = new List<StorageState>();
         public List<string> builtCollectors = new List<string>();
+
+        // Phase 3
+        public List<MachineState> machines = new List<MachineState>();
+        public int robots;
+    }
+
+    [Serializable]
+    public struct MachineState
+    {
+        public string id;
+        public bool built;
+        public bool powered;
     }
 
     [Serializable]

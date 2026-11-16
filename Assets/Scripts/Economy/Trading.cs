@@ -1,3 +1,4 @@
+using PlanetScrappers.Automation;
 using PlanetScrappers.Core;
 using PlanetScrappers.Equipment;
 using PlanetScrappers.Inventory;
@@ -72,6 +73,29 @@ namespace PlanetScrappers.Economy
             PlayerEquipment.Instance.Grant(tool, true);
             AudioManager.Play("purchase", 0.9f);
             GameEvents.RaiseToolPurchased(tool);
+            return PurchaseResult.Ok;
+        }
+
+        public static PurchaseResult BuyMachine(Machine m)
+        {
+            if (m == null) return PurchaseResult.Locked;
+            if (m.Built) return PurchaseResult.AlreadyOwned;
+            if (!m.CanBuild) return PurchaseResult.Locked;
+            if (!Wallet.Instance.TrySpend(m.Price, "Built " + m.DisplayName)) return PurchaseResult.CannotAfford;
+            m.SetBuilt(true, true);
+            AudioManager.Play("purchase", 0.9f);
+            GameEvents.RaiseInteracted("build_" + m.MachineId);
+            return PurchaseResult.Ok;
+        }
+
+        public static PurchaseResult BuyRobot()
+        {
+            var dock = RobotDock.Instance;
+            if (dock == null || dock.Count >= dock.MaxRobots) return PurchaseResult.MaxLevel;
+            if (!Wallet.Instance.TrySpend(dock.Price, "Bought Salvage Robot")) return PurchaseResult.CannotAfford;
+            dock.Spawn();
+            AudioManager.Play("purchase", 0.9f);
+            GameEvents.RaiseInteracted("buy_robot");
             return PurchaseResult.Ok;
         }
 

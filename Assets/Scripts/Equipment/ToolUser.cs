@@ -17,7 +17,8 @@ namespace PlanetScrappers.Equipment
         [SerializeField] PlayerEquipment equipment;
         [SerializeField] float aimDistance = 30f;
 
-        InputAction attack, scan, tool1, tool2, tool3;
+        InputAction attack, scan;
+        readonly InputAction[] toolKeys = new InputAction[5];
         readonly RaycastHit[] hits = new RaycastHit[16];
         float cooldown;
         float noToolHintCooldown;
@@ -31,14 +32,13 @@ namespace PlanetScrappers.Equipment
             attack.AddBinding("<Gamepad>/rightTrigger");
             scan = new InputAction("Scan", InputActionType.Button, "<Keyboard>/f");
             scan.AddBinding("<Gamepad>/buttonNorth");
-            tool1 = new InputAction("Tool1", InputActionType.Button, "<Keyboard>/1");
-            tool2 = new InputAction("Tool2", InputActionType.Button, "<Keyboard>/2");
-            tool3 = new InputAction("Tool3", InputActionType.Button, "<Keyboard>/3");
+            for (int i = 0; i < toolKeys.Length; i++)
+                toolKeys[i] = new InputAction("Tool" + (i + 1), InputActionType.Button, "<Keyboard>/" + (i + 1));
         }
 
-        void OnEnable() { attack.Enable(); scan.Enable(); tool1.Enable(); tool2.Enable(); tool3.Enable(); }
-        void OnDisable() { attack.Disable(); scan.Disable(); tool1.Disable(); tool2.Disable(); tool3.Disable(); }
-        void OnDestroy() { attack.Dispose(); scan.Dispose(); tool1.Dispose(); tool2.Dispose(); tool3.Dispose(); }
+        void OnEnable() { attack.Enable(); scan.Enable(); foreach (var k in toolKeys) k.Enable(); }
+        void OnDisable() { attack.Disable(); scan.Disable(); foreach (var k in toolKeys) k.Disable(); }
+        void OnDestroy() { attack.Dispose(); scan.Dispose(); foreach (var k in toolKeys) k.Dispose(); }
 
         void Update()
         {
@@ -54,9 +54,8 @@ namespace PlanetScrappers.Equipment
 
             FindTarget(out Vector3 point, out Vector3 normal);
 
-            if (tool1.WasPressedThisFrame()) SwitchTo(1);
-            if (tool2.WasPressedThisFrame()) SwitchTo(2);
-            if (tool3.WasPressedThisFrame()) SwitchTo(3);
+            for (int i = 0; i < toolKeys.Length; i++)
+                if (toolKeys[i].WasPressedThisFrame()) SwitchTo(i + 1);
 
             if (scan.WasPressedThisFrame())
             {

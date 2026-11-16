@@ -6,8 +6,8 @@ namespace PlanetScrappers.Core
     /// </summary>
     public static class GameVersion
     {
-        public const string Version = "0.2.0";
-        public const string Milestone = "Phase 2: Iron District";
+        public const string Version = "0.3.0";
+        public const string Milestone = "Phase 3: automation and new zones";
         public const string ProductName = "Planet Scrappers";
 
         public static string Label => $"{ProductName} v{Version} · {Milestone}";

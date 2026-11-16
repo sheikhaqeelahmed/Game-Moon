@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission15
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 15
+  title: Power Up
+  description: The Recycling Factory refines warehouse scrap and pays 30% more than
+    the depot. It costs credits to run.
+  objectiveText: Build the Recycling Factory (Nova's Automation tab)
+  type: 0
+  targetId: build_factory
+  count: 1
+  rewardCredits: 400
+  botIntro: Phase 3, Scrapper. Nova can build a Recycling Factory south of the base
+    for 6,000 credits. It turns your warehouse into income.
+  botComplete: Factory online. Feed the warehouse and watch the credits trickle in.
+    The running cost comes out of your wallet.

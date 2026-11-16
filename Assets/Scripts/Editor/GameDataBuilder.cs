@@ -38,8 +38,8 @@ namespace PlanetScrappers.EditorTools
                 Tool("scrap_hammer", "Scrap Hammer", 2, 2, 22f, 1.0f, 2.4f, 0.10f, 250, true, "Metal components, trucks and containers."),
                 Tool("electric_dismantler", "Electric Dismantler", 3, 3, 14f, 3.0f, 2.6f, 0.20f, 1200, true, "Fast pulses. Opens Machine Row."),
                 Tool("plasma_cutter", "Plasma Cutter", 4, 4, 25f, 3.0f, 3.0f, 0.30f, 4500, true, "Large machinery and assembly lines."),
-                Tool("industrial_crusher", "Industrial Crusher", 5, 5, 260f, 0.5f, 3.2f, 0.40f, 12000, false, "Vehicles and heavy structures.", "Phase 3"),
-                Tool("salvage_robot", "Automated Salvage Robot", 6, 5, 25f, 1.0f, 3.0f, 0f, 30000, false, "Collects on its own.", "Phase 3")
+                Tool("industrial_crusher", "Industrial Crusher", 5, 5, 260f, 0.5f, 3.4f, 0.40f, 12000, true, "Ship hulls, engines and mining rigs."),
+                Tool("salvage_robot", "Automated Salvage Robot", 6, 3, 27f, 1.0f, 3.0f, 0f, 6000, false, "Drones that salvage on their own.", "Buy in Automation →")
             };
 
             var objects = new[]
@@ -53,7 +53,17 @@ namespace PlanetScrappers.EditorTools
                 Obj("robot_arm", "Robot Arm", 3, 500f, 300f, Y(copper, 8), Y(elec, 8), Y(alloy, 1, 0.5f)),
                 Obj("hydraulic_press", "Hydraulic Press", 3, 800f, 360f, Y(iron, 25), Y(copper, 10), Y(elec, 4)),
                 Obj("assembly_line", "Assembly Line", 4, 1400f, 420f, Y(iron, 40), Y(copper, 16), Y(elec, 10), Y(alloy, 2)),
-                Obj("factory_crane", "Factory Crane", 4, 2000f, 480f, Y(iron, 70), Y(copper, 12), Y(alloy, 3))
+                Obj("factory_crane", "Factory Crane", 4, 2000f, 480f, Y(iron, 70), Y(copper, 12), Y(alloy, 3)),
+                Obj("cargo_pod", "Cargo Pod", 3, 450f, 300f, Y(iron, 8), Y(copper, 4), Y(elec, 6)),
+                Obj("ship_nose", "Freighter Nose", 4, 1500f, 600f, Y(iron, 30), Y(copper, 6), Y(elec, 10)),
+                Obj("ship_wing", "Freighter Wing", 4, 1200f, 600f, Y(iron, 35), Y(copper, 8), Y(alloy, 1)),
+                Obj("shuttle_cabin", "Shuttle Cabin", 4, 1000f, 540f, Y(iron, 15), Y(copper, 6), Y(elec, 12)),
+                Obj("ship_hull", "Freighter Hull Section", 5, 2600f, 720f, Y(iron, 70), Y(copper, 20), Y(alloy, 2)),
+                Obj("ship_engine", "Freighter Engine", 5, 3500f, 720f, Y(copper, 30), Y(elec, 16), Y(alloy, 6)),
+                Obj("mine_cart", "Mine Cart", 3, 400f, 300f, Y(iron, 20), Y(copper, 6)),
+                Obj("crystal_vein", "Crystal Vein", 4, 900f, 480f, Y(alloy, 5), Y(elec, 2)),
+                Obj("ore_crusher", "Ore Crusher", 5, 2400f, 600f, Y(iron, 60), Y(copper, 18), Y(elec, 6), Y(alloy, 2)),
+                Obj("drilling_rig", "Drilling Rig", 5, 2800f, 720f, Y(iron, 50), Y(copper, 24), Y(elec, 12), Y(alloy, 4))
             };
 
             var missions = new[]
@@ -113,7 +123,31 @@ namespace PlanetScrappers.EditorTools
                 Mission(14, "Line Break", "Take apart a full assembly line to prove the Iron District can be cleared.",
                     "Dismantle an assembly line", ObjectiveType.Dismantle, "assembly_line", 1, 600,
                     "Assembly lines run along the big factory halls. Bring the Plasma Cutter.",
-                    "That's the Iron District open for business. Spaceport Graveyard is next. Bolt's already counting.")
+                    "That's the Iron District open for business. Spaceport Graveyard is next. Bolt's already counting."),
+                Mission(15, "Power Up", "The Recycling Factory refines warehouse scrap and pays 30% more than the depot. It costs credits to run.",
+                    "Build the Recycling Factory (Nova's Automation tab)", ObjectiveType.Interact, "build_factory", 1, 400,
+                    "Phase 3, Scrapper. Nova can build a Recycling Factory south of the base for 6,000 credits. It turns your warehouse into income.",
+                    "Factory online. Feed the warehouse and watch the credits trickle in. The running cost comes out of your wallet."),
+                Mission(16, "Robot Crew", "Salvage robots fly out, take apart tier 1-3 junk and bring the scrap to the warehouse.",
+                    "Buy a Salvage Robot (Nova's Automation tab)", ObjectiveType.Interact, "buy_robot", 1, 500,
+                    "Bolt wants a robot crew. Nova sells salvage drones for 6,000 credits each, up to three.",
+                    "A robot that works without complaining. I'm not jealous. I'm not."),
+                Mission(17, "Spaceport Graveyard", "East of the valley, past the gate, crashed freighters wait to be cut apart section by section.",
+                    "Cut the nose off the crashed freighter", ObjectiveType.Dismantle, "ship_nose", 1, 600,
+                    "The Spaceport Graveyard gate opens for tier 4 tools. Take the road east from the crossroads. Start with the freighter's nose.",
+                    "One nose down. The rest of the ship is tier 5. You'll need something bigger."),
+                Mission(18, "Heavy Metal", "Hull sections, engines and mining rigs are tier 5. Only the Industrial Crusher can handle them.",
+                    "Buy the Industrial Crusher from Nova", ObjectiveType.BuyTool, "industrial_crusher", 1, 800,
+                    "The Industrial Crusher costs 12,000 credits. Robots and the factory help you get there faster.",
+                    "Now that is a tool. Try not to crush anything we need."),
+                Mission(19, "Engine Room", "The freighter's engine is full of copper, electronics and rare alloy.",
+                    "Dismantle the freighter's engine", ObjectiveType.Dismantle, "ship_engine", 1, 1200,
+                    "The engine sits at the freighter's tail end. Big payout, lots of rare alloy.",
+                    "Rare alloy everywhere. Bolt is smiling. It's unsettling."),
+                Mission(20, "Deep Core", "West of the valley, the Deep Core mine: drilling rigs and crystal veins. Oxygen drains fast underground.",
+                    "Dismantle a drilling rig in the Deep Core", ObjectiveType.Dismantle, "drilling_rig", 1, 2000,
+                    "The Deep Core gate in the west fence opens for tier 5 tools. Fill your oxygen at base first. It drains twice as fast down there.",
+                    "Every contract done. Only the Mega-Factory is left, and Bolt says it isn't ready for us. Yet.")
             };
 
             var db = Load<GameDatabase>("Assets/Resources/GameDatabase.asset");

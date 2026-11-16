@@ -86,7 +86,7 @@ namespace PlanetScrappers.Destruction
             if (IsDismantled || tool == null) return HitResult.TooWeak;
             if (tool.tier < definition.tier)
             {
-                AudioManager.PlayVaried("hit_bonk", 0.9f);
+                AudioManager.PlayVaried("hit_bonk", 0.9f * Audible());
                 DestructionFx.Instance?.Sparks(point, normal, 3);
                 shakeTime = 0.08f;
                 return HitResult.TooWeak;
@@ -94,7 +94,7 @@ namespace PlanetScrappers.Destruction
 
             durability -= tool.damage;
             shakeTime = 0.15f;
-            AudioManager.PlayVaried("hit_metal", 0.75f, 0.12f);
+            AudioManager.PlayVaried("hit_metal", 0.75f * Audible(), 0.12f);
             DestructionFx.Instance?.Sparks(point, normal, 10);
             UpdateStage(point);
 
@@ -104,6 +104,15 @@ namespace PlanetScrappers.Destruction
                 return HitResult.Broken;
             }
             return HitResult.Damaged;
+        }
+
+        /// <summary>Volume factor by distance from the player: full within 10 m, silent beyond 45 m.</summary>
+        float Audible()
+        {
+            var p = PlayerInventory.Instance;
+            if (p == null) return 1f;
+            float d = Vector3.Distance(p.transform.position, Center);
+            return Mathf.Clamp01(1f - (d - 10f) / 35f);
         }
 
         void UpdateStage(Vector3 hitPoint)
@@ -144,7 +153,7 @@ namespace PlanetScrappers.Destruction
             durability = 0f;
             respawnTimer = definition.respawnSeconds;
             SetPresent(false);
-            AudioManager.PlayVaried("break_crunch", 1f, 0.06f);
+            AudioManager.PlayVaried("break_crunch", Audible(), 0.06f);
             DestructionFx.Instance?.BreakBurst(Center, parts.Length > 0 ? baseColors[0] : Color.grey);
             ScrapSpawner.Instance?.SpawnYield(definition, tool.recoveryBonus, Center);
             GameEvents.RaiseObjectDismantled(this);

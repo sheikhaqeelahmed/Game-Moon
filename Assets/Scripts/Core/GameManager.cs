@@ -142,6 +142,8 @@ namespace PlanetScrappers.Core
             var truck = SalvageTruck.Instance;
             if (truck != null && data.truckPosition != null && data.truckPosition.Length == 3)
                 truck.Place(new Vector3(data.truckPosition[0], data.truckPosition[1], data.truckPosition[2]), data.truckYaw);
+            RobotDock.Instance?.SetCount(data.robots);
+            foreach (var ms in data.machines) Machine.Find(ms.id)?.SetBuilt(ms.built, ms.powered);
             foreach (var st in data.storages)
             {
                 var store = ScrapStorage.Find(st.id);
@@ -210,6 +212,8 @@ namespace PlanetScrappers.Core
                 data.storages.Add(st);
             }
             foreach (var pad in CollectorPad.Pads) if (pad.Built) data.builtCollectors.Add(pad.PadId);
+            foreach (var mach in Machine.All) data.machines.Add(new MachineState { id = mach.MachineId, built = mach.Built, powered = mach.Powered });
+            data.robots = RobotDock.Instance != null ? RobotDock.Instance.Count : 0;
 
             if (SaveManager.Write(data))
             {

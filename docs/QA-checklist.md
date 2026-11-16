@@ -1,4 +1,4 @@
-PLANET SCRAPPERS - QA CHECKLIST (v0.2.0)
+PLANET SCRAPPERS - QA CHECKLIST (v0.3.0)
 ========================================
 
 How to test
@@ -48,6 +48,14 @@ QA-029  Enter the Iron District                Only reachable through Machine Ro
 QA-030  Dismantle a robot arm, then an         Robot arm needs tier 3; assembly line needs the Plasma Cutter (tier 4).
         assembly line
 QA-031  Complete missions 9-14                 Each pays its reward; the last one ends all current contracts.
+QA-032  Build the Recycling Factory (Nova's)   Factory appears south of the base; with scrap in the warehouse it pays credits.
+QA-033  Switch the factory off (E at panel)    It stops working and stops charging.
+QA-034  Buy a Salvage Robot                    A drone leaves the dock, dismantles junk and unloads at the warehouse.
+QA-035  Build a conveyor link                  Crates move along the belt; the collector empties into the warehouse.
+QA-036  Spaceport Graveyard gate               Opens once you own the Plasma Cutter (tier 4).
+QA-037  Cut the freighter apart                Nose and wings with tier 4; hull and engine need the Crusher (tier 5).
+QA-038  Deep Core gate and oxygen              Opens with the Crusher; oxygen drains much faster underground.
+QA-039  Complete missions 15-20                Each pays its reward; the last says only the Mega-Factory remains.
 QA-023  General feel                               Note anything too slow, too fast, too hard, confusing or not fun.
 
 Also record

@@ -39,8 +39,9 @@ namespace PlanetScrappers.UI
         Text targetName, targetInfo, promptText, botText, backpackText, backpackCounts, toastText;
         GameObject targetPanel, promptPanel, botPanel, toastPanel, gainPanel, missionPanel, truckPanel;
         Text truckText;
-        readonly Image[] slotBg = new Image[3];
-        readonly Text[] slotText = new Text[3];
+        const int SlotCount = 5;
+        readonly Image[] slotBg = new Image[SlotCount];
+        readonly Text[] slotText = new Text[SlotCount];
         float botTimer, toastTimer, gainTimer;
 
         public GameScreen Current => current;
@@ -182,6 +183,8 @@ namespace PlanetScrappers.UI
         {
             bool inGame = GameManager.Instance != null && GameManager.Instance.InGame;
 
+            if (AutoPlaytest.Running) { if (hudRoot.gameObject.activeSelf) UpdateHud(); return; } // automated test drives the UI itself
+
             if (escape.WasPressedThisFrame())
             {
                 if (current == GameScreen.None && inGame) Open(GameScreen.Pause);
@@ -279,9 +282,9 @@ namespace PlanetScrappers.UI
 
             // Tool slots
             var slots = UIKit.Node("Tool Slots", hudRoot);
-            slots.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(420, 84));
+            slots.Anchor(new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(700, 84));
             UIKit.HLayout(slots.gameObject, 10, 0, TextAnchor.MiddleCenter);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < SlotCount; i++)
             {
                 slotBg[i] = UIKit.Panel(slots, "Slot " + (i + 1), UIKit.PanelColor);
                 UIKit.Outline(slotBg[i], UIKit.Line);
@@ -373,7 +376,7 @@ namespace PlanetScrappers.UI
 
             // Tool slots
             var eq = PlayerEquipment.Instance;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < SlotCount; i++)
             {
                 var def = ToolAtLevel(i + 1);
                 bool owned = eq != null && def != null && eq.Owns(def);

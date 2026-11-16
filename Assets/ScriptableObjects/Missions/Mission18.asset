@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission18
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 18
+  title: Heavy Metal
+  description: Hull sections, engines and mining rigs are tier 5. Only the Industrial
+    Crusher can handle them.
+  objectiveText: Buy the Industrial Crusher from Nova
+  type: 4
+  targetId: industrial_crusher
+  count: 1
+  rewardCredits: 800
+  botIntro: The Industrial Crusher costs 12,000 credits. Robots and the factory help
+    you get there faster.
+  botComplete: Now that is a tool. Try not to crush anything we need.

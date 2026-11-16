@@ -84,6 +84,17 @@ namespace PlanetScrappers.Equipment
                     Part(PrimitiveType.Cylinder, new Vector3(0f, 0f, 0.5f), new Vector3(0.05f, 0.12f, 0.05f), metalMaterial, new Vector3(90f, 0f, 0f));
                     Part(PrimitiveType.Sphere, new Vector3(0f, 0f, 0.64f), Vector3.one * 0.08f, glowMaterial);
                     break;
+                case "plasma_cutter":
+                    Part(PrimitiveType.Cube, new Vector3(0f, 0f, 0.25f), new Vector3(0.16f, 0.16f, 0.42f), darkMaterial);
+                    Part(PrimitiveType.Cylinder, new Vector3(0f, 0f, 0.56f), new Vector3(0.07f, 0.12f, 0.07f), metalMaterial, new Vector3(90f, 0f, 0f));
+                    Part(PrimitiveType.Sphere, new Vector3(0f, 0f, 0.72f), Vector3.one * 0.12f, glowMaterial);
+                    break;
+                case "industrial_crusher":
+                    Part(PrimitiveType.Cube, new Vector3(0f, 0f, 0.3f), new Vector3(0.2f, 0.2f, 0.5f), darkMaterial);
+                    Part(PrimitiveType.Cube, new Vector3(-0.12f, 0f, 0.68f), new Vector3(0.1f, 0.34f, 0.34f), metalMaterial);
+                    Part(PrimitiveType.Cube, new Vector3(0.12f, 0f, 0.68f), new Vector3(0.1f, 0.34f, 0.34f), metalMaterial);
+                    Part(PrimitiveType.Cube, new Vector3(0f, 0.12f, 0.45f), new Vector3(0.26f, 0.08f, 0.2f), rustMaterial);
+                    break;
                 default:
                     Part(PrimitiveType.Cube, new Vector3(0f, 0f, 0.3f), new Vector3(0.12f, 0.12f, 0.5f), metalMaterial);
                     break;

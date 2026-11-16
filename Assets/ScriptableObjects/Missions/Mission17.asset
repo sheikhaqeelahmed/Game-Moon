@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc3360a723326d48a4032b95a5b8a1c, type: 3}
+  m_Name: Mission17
+  m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Missions.MissionDefinition
+  number: 17
+  title: Spaceport Graveyard
+  description: East of the valley, past the gate, crashed freighters wait to be cut
+    apart section by section.
+  objectiveText: Cut the nose off the crashed freighter
+  type: 1
+  targetId: ship_nose
+  count: 1
+  rewardCredits: 600
+  botIntro: The Spaceport Graveyard gate opens for tier 4 tools. Take the road east
+    from the crossroads. Start with the freighter's nose.
+  botComplete: One nose down. The rest of the ship is tier 5. You'll need something
+    bigger.

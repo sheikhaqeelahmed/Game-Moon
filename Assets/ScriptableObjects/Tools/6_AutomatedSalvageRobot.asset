@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: PlanetScrappers::PlanetScrappers.Equipment.ToolDefinition
   id: salvage_robot
   displayName: Automated Salvage Robot
-  description: Collects on its own.
+  description: Drones that salvage on their own.
   level: 6
-  tier: 5
-  damage: 25
+  tier: 3
+  damage: 27
   hitsPerSecond: 1
   range: 3
   recoveryBonus: 0
-  price: 30000
+  price: 6000
   availableInPrototype: 0
-  lockedReason: Phase 3
+  lockedReason: "Buy in Automation \u2192"
